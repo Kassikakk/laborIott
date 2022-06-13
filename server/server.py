@@ -1,3 +1,7 @@
+import zmq
+import pickle
+from laborIott.adapter import DummyAdapter
+
 '''
 Kuidas selle käivitamine siis hakkab käima?
 import server
@@ -11,7 +15,7 @@ svr.run()
 
 
 class LabServer(object):
-	def __init__(self, devdict, inlist, outport):
+	def __init__(self, devdict: dict, inlist: tuple, outport: int) -> object:
 		# actual server
 		# it could be beneficial to make a base class + specifics
 		# but let's see
@@ -19,13 +23,14 @@ class LabServer(object):
 		# None can fytify that the device is not present
 
 		self.devdict = devdict
+		self.timeout = 0.1
 
 		# list of listened channels
 		self.ch_list = []
 		for inn in inlist:
 			# siin tuleb uurida, mispidi töötab
 			self.ch_list += [[zmq.Context().socket(zmq.SUB), zmq.Poller()]]
-			sock,poll = self.ch_list[-1]
+			sock, poll = self.ch_list[-1]
 			sock.connect("tcp://%s:%d" % inn)
 			sock.setsockopt(zmq.SUBSCRIBE, b'')
 			poll.register(sock, zmq.POLLIN)
@@ -41,14 +46,24 @@ class LabServer(object):
 			# cycle over some channels that we are listening
 			for ch in self.ch_list:
 				# check if something arrived:
-				if ch[1].poll(0.1):
-					topic, record = ch[0].recv_serialized(unpickle()
+				if ch[1].poll(self.timeout):
+					topic, record = ch[0].recv_serialized(
+						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 					# some special topics? Like to stop or sth. Though who sends it?
 					dev_id, op = topic.split('.')
 					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
 						if op == "write":
 							self.devdict[dev_id].write(record)
 						elif op == "read":
-							self.socket.send_serialized(self.devdict[dev_id].read())
+							self.socket.send_serialized(self.devdict[dev_id].read(),
+														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 						elif op == "values":
-							self.socket.send_serialized(self.devdict[dev_id].values(record))
+							self.socket.send_serialized(self.devdict[dev_id].values(record),
+														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+
+# Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
+if __name__ == '__main__':
+	devdict = {"dummy": DummyAdapter()}
+	inlist = (("127.0.0.0", 5555))
+	svr = LabServer(devdict, inlist, 5555)
+	svr.run()

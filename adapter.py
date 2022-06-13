@@ -89,3 +89,17 @@ class Adapter(object):
 		raise NameError("Adapter (sub)class has not implemented the "
 						"binary_values method")
 '''
+
+class DummyAdapter(object):
+	def __init__(self, **kwargs):
+		super().__init__()
+		self.written = "None"
+
+	def write(self, command):
+		self.written = command
+
+	def read(self):
+		return self.written
+
+	def values(self, command):
+		return command
