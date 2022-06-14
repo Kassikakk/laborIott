@@ -14,7 +14,7 @@ svr.run()
 '''
 
 
-class LabServer(object):
+class ZMQServer(object):
 	def __init__(self, devdict: dict, inlist: tuple, outport: int) -> object:
 		# actual server
 		# it could be beneficial to make a base class + specifics
@@ -51,19 +51,29 @@ class LabServer(object):
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 					# some special topics? Like to stop or sth. Though who sends it?
 					dev_id, op = topic.split('.')
+					print(dev_id,op)
 					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
 						if op == "write":
+							print("write" + record)
 							self.devdict[dev_id].write(record)
 						elif op == "read":
-							self.socket.send_serialized(self.devdict[dev_id].read(),
+							record = self.devdict[dev_id].read()
+							self.socket.send_serialized(record,
 														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+							print("read" + record)
 						elif op == "values":
-							self.socket.send_serialized(self.devdict[dev_id].values(record),
+							print("values_in" + record)
+							record = self.devdict[dev_id].values(record)
+							self.socket.send_serialized(record,
+														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+							print("values_out" + record)
+						elif op == "echo":
+							self.socket.send_serialized(record,
 														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 
 # Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
 if __name__ == '__main__':
 	devdict = {"dummy": DummyAdapter()}
-	inlist = (("127.0.0.0", 5555))
-	svr = LabServer(devdict, inlist, 5555)
+	inlist = (("127.0.0.0", 5555),)
+	svr = ZMQServer(devdict, inlist, 5556)
 	svr.run()
