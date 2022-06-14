@@ -52,9 +52,7 @@ class ZMQAdapter(Adapter):
 		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 		# wait for reply here
 		for i in range(self.repeat):
-			#print(i)
 			if self.poller.poll(self.timeout):
-				print(i)
 				topic1, record = self.insock.recv_serialized(
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 				if (topic1 == topic):

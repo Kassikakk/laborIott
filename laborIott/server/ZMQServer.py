@@ -23,7 +23,7 @@ class ZMQServer(object):
 		# None can fytify that the device is not present
 
 		self.devdict = devdict
-		self.timeout = 0.1
+		self.timeout = 10
 
 		# list of listened channels
 		self.ch_list = []
@@ -51,22 +51,17 @@ class ZMQServer(object):
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 					# some special topics? Like to stop or sth. Though who sends it?
 					dev_id, op = topic.split('.')
-					print(dev_id,op)
 					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
 						if op == "write":
-							print("write" + record)
 							self.devdict[dev_id].write(record)
 						elif op == "read":
 							record = self.devdict[dev_id].read()
 							self.socket.send_serialized(record,
 														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-							print("read" + record)
 						elif op == "values":
-							print("values_in" + record)
 							record = self.devdict[dev_id].values(record)
 							self.socket.send_serialized(record,
 														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-							print("values_out" + record)
 						elif op == "echo":
 							self.socket.send_serialized(record,
 														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
