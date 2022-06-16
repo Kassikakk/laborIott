@@ -33,7 +33,7 @@ class Chira_VI(QMainWindow, Ui_MainWindow):
 			# default port is 5555
 			inp = 5555 if inport is None else inport
 			outp = inp if outport is None else outport
-			self.idus = ChiraScan(ZMQAdapter("chira", address, inp, outp))
+			self.chira = ChiraScan(ZMQAdapter("chira", address, inp, outp))
 		
 		self.WLreached = Event()
 		self.WLreached.set()
@@ -129,11 +129,11 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication.instance()
 	app.aboutToQuit.connect(ExitHandler)
 	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[:3]
+	args = sys.argv[1:4]
 	# port values, if provided, should be integers
 	# this errors if they are not
 	for i in (1,2):
-		if len(args > i):
+		if len(args) > i:
 			args[i] = int(args[i])
 	window = Chira_VI(*args)
 	window.show()

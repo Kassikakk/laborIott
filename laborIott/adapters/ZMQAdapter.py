@@ -41,6 +41,8 @@ class ZMQAdapter(Adapter):
 		for i in range(5):
 			if self.exchange("",".echo") is not None:
 				break
+			if i==4:
+				print("Server is not responding")
 
 	def write(self, command):
 		topic = self.id + ".write"

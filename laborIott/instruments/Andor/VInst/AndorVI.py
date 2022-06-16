@@ -270,7 +270,7 @@ if __name__ == '__main__':
 	# port values, if provided, should be integers
 	# this errors if they are not
 	for i in (1,2):
-		if len(args > i):
+		if len(args) > i:
 			args[i] = int(args[i])
 
 	window = Andor_VI(*args)
