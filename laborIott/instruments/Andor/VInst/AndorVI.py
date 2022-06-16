@@ -266,7 +266,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication.instance()
 	app.aboutToQuit.connect(AndorExitHandler)
 	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[:3]
+	args = sys.argv[1:4]
 	# port values, if provided, should be integers
 	# this errors if they are not
 	for i in (1,2):
