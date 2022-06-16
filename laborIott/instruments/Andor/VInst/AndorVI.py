@@ -5,6 +5,7 @@ import pyqtgraph as pg
 import pandas as pd
 
 from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.Andor.Inst.andor import IDus 
 import os
 
@@ -25,12 +26,12 @@ from math import log10
 
 class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 
-	def __init__(self):
+	def __init__(self, address= None, inport= None, outport = None):
 		super(Andor_VI, self).__init__()
 		self.setupUi(self)
 
 		#connect instrument
-		self.connectInstr()
+		self.connectInstr(address, inport, outport)
 		
 		#parameetrid
 		self.data = []
@@ -68,10 +69,18 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 		self.timer.start(200)
 		
 
-	def connectInstr(self):
+	def connectInstr(self, address, inport, outport):
 		#instrumendi tekitamine
-		self.idus = IDus(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
-		#siin peaks kuidagi adapterivahetust organiseerima vajadusel
+		if address is None:
+			# local instrument
+			self.idus = IDus(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
+		else:
+			# connect to remote instrument
+			# default port is 5555
+			inp = 5555 if inport is None else inport
+			outp = inp if outport is None else outport
+			self.idus = IDus(ZMQAdapter("iDus", address, inp, outp))
+
 		
 		
 		
@@ -256,6 +265,14 @@ if __name__ == '__main__':
 	else:
 		app = QtWidgets.QApplication.instance()
 	app.aboutToQuit.connect(AndorExitHandler)
-	window = Andor_VI()
+	# handle possible command line parameters: address, inport, outport
+	args = sys.argv[:3]
+	# port values, if provided, should be integers
+	# this errors if they are not
+	for i in (1,2):
+		if len(args > i):
+			args[i] = int(args[i])
+
+	window = Andor_VI(*args)
 	window.show()
 	sys.exit(app.exec_())
