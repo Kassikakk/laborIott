@@ -1,4 +1,5 @@
 from laborIott.server.ZMQServer import ZMQServer
+from laborIott.adapters.SDKAdapter import SDKAdapter
 import os
 
 def localPath(filename):

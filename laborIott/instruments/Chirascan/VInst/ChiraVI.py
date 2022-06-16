@@ -6,6 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 
 from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.Chirascan.Inst.Chirascan import ChiraScan
 import os
 
