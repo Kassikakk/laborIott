@@ -18,15 +18,22 @@ Ui_MainWindow, QMainWindow = uic.loadUiType(localPath('ChiraScan.ui'))
 
 class Chira_VI(QMainWindow, Ui_MainWindow):
 
-	def __init__(self):
+	def __init__(self,address= None, inport= None, outport = None):
 		super(Chira_VI, self).__init__()
 		self.setupUi(self)
 
 		#instrumendi tekitamine
 		#if remoteaddress is None:
-		self.chira = ChiraScan(SDKAdapter(localPath("../Inst/FOPCIUSB"),False)) 
-		#TODO: else kasuta serveradaptrit
-						 
+		if address is None:
+			# local instrument
+			self.chira = ChiraScan(SDKAdapter(localPath("../Inst/FOPCIUSB"),False)) 
+		else:
+			# connect to remote instrument
+			# default port is 5555
+			inp = 5555 if inport is None else inport
+			outp = inp if outport is None else outport
+			self.idus = ChiraScan(ZMQAdapter("chira", address, inp, outp))
+		
 		self.WLreached = Event()
 		self.WLreached.set()
 		
@@ -120,6 +127,13 @@ if __name__ == '__main__':
 	else:
 		app = QtWidgets.QApplication.instance()
 	app.aboutToQuit.connect(ExitHandler)
-	window = Chira_VI()
+	# handle possible command line parameters: address, inport, outport
+	args = sys.argv[:3]
+	# port values, if provided, should be integers
+	# this errors if they are not
+	for i in (1,2):
+		if len(args > i):
+			args[i] = int(args[i])
+	window = Chira_VI(*args)
 	window.show()
 	sys.exit(app.exec_())
