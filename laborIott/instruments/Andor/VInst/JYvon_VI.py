@@ -1,7 +1,8 @@
-from .AndorVI import Andor_VI
+from laborIott.instruments.Andor.VInst.AndorVI import Andor_VI
 from PyQt5 import QtWidgets
 import pyqtgraph as pg
-from .LambdaDlg import Ui_LambdaDialog  # pyuic5 generated dialog
+import numpy as np
+from laborIott.instruments.Andor.VInst.LambdaDlg import Ui_LambdaDialog  # pyuic5 generated dialog
 import os, sys
 
 
@@ -33,10 +34,11 @@ class JYvon_VI(Andor_VI):
 		self.nelns = []
 		# we'll try to make them appear and disappear with the dialog?
 		for i in range(3):
-			self.nelns += [pg.InfiniteLine(self.xarr[self.neSpins[i].value()], pen = self.necolors[i])]
+			self.nelns += [pg.InfiniteLine(self.xarr[self.neSpins[i].value()])]
 			self.graphicsView.addItem(self.nelns[i])
+			self.nelns[i].setPen(None)
 		self.onCalcLambda()
-		self.lambdaButt.clicked.connect(self.dlg.show)
+		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
 			self.neSpins[i].valueChanged.connect(lambda x, a=i: self.nelns[a].setPos(self.xarr[x]))
 			self.neChecks[i].clicked.connect(
@@ -69,14 +71,21 @@ class JYvon_VI(Andor_VI):
 			start = (Ey - step * Ex) / N + step
 			# r=Sxy/sqrt(fabs(Sxx*Syy))
 			self.xarr = np.arange(len(self.xarr)) * step + start  # we could also separate this action
-			self.startEdit.setText("{:.5f}".format(start))
-			self.stepEdit.setText("{:.5f}".format(step))
+			self.lamDlg.startEdit.setText("{:.5f}".format(start))
+			self.lamDlg.stepEdit.setText("{:.5f}".format(step))
 			# readjust line positions
 			for i in range(3):
 				self.nelns[i].setPos(self.xarr[self.neSpins[i].value()])
 
+	def setLambdaDlg(self):
+		self.dlg.show()
+		for i in range(3):
+			self.nelns[i].setPen(self.necolors[i] if self.neChecks[i].isChecked() else None)
+		
+	
 	def removeLines(self, event):
-		print("X is clicked")
+		for i in range(3):
+			self.nelns[i].setPen(None)
 
 
 if __name__ == '__main__':
@@ -84,7 +93,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(AndorExitHandler)
+	
 	# handle possible command line parameters: address, inport, outport
 	args = sys.argv[1:4]
 	# port values, if provided, should be integers
