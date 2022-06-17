@@ -423,6 +423,25 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QPushButton" name="lambdaButt">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>560</x>
+           <y>130</y>
+           <width>111</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>λ - scale...</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -435,7 +454,7 @@
      <x>0</x>
      <y>0</y>
      <width>704</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
