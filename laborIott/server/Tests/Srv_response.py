@@ -17,7 +17,7 @@ repeat = int(1000 / timeout)  # global timeout / single shot timeout
 
 outsock = zmq.Context().socket(zmq.PUB)
 outsock.bind("tcp://*:%d" % outport)
-topic = "idus.echo"
+topic = "iDus.echo"
 for i in range(5):
 	command = "calling {}".format(i)
 	outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
