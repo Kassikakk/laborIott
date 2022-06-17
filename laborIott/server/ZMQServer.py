@@ -44,6 +44,7 @@ class ZMQServer(object):
 		while True:
 
 			# cycle over some channels that we are listening
+			#how can something go cross here?
 			for ch in self.ch_list:
 				# check if something arrived:
 				if ch[1].poll(self.timeout):
