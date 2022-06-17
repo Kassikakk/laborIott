@@ -1,14 +1,17 @@
-import logging
 import pickle
 import zmq
-
-
-import numpy as np
-
 from laborIott.adapter import Adapter
+import logging
 
+#set up logging if needed
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger(__name__)
-log.addHandler(logging.NullHandler())
+log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+ch.setLevel(logging.DEBUG)
+log.addHandler(ch)
+
 
 
 class ZMQAdapter(Adapter):
@@ -51,6 +54,7 @@ class ZMQAdapter(Adapter):
 	def exchange(self, command, comm_id):
 		# common routine for two-way communication
 		topic = self.id + comm_id
+		log.debug(topic + " : " + command)
 		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 		# wait for reply here
 		for i in range(self.repeat):
@@ -58,7 +62,9 @@ class ZMQAdapter(Adapter):
 				topic1, record = self.insock.recv_serialized(
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 				if (topic1 == topic):
+					log.debug(record)
 					return record
+		log.debug("No result")
 		return None
 
 	def read(self):
