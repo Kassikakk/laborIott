@@ -36,6 +36,8 @@ class ZMQAdapter(Adapter):
 		self.poller.register(self.insock, zmq.POLLIN)
 		self.timeout = 100 # milliseconds
 		self.repeat = int(1000 / self.timeout) #global timeout / single shot timeout
+
+		self.counter = 0
 		
 		#outward 
 		self.outsock = zmq.Context().socket(zmq.PUB)
@@ -53,7 +55,8 @@ class ZMQAdapter(Adapter):
 
 	def exchange(self, command, comm_id):
 		# common routine for two-way communication
-		topic = self.id + comm_id
+		topic = self.id + comm_id + ".{}".format(self.counter)
+		self.counter += 1
 		log.debug(topic + " : " + command)
 		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 		# wait for reply here
@@ -64,6 +67,8 @@ class ZMQAdapter(Adapter):
 				if (topic1 == topic):
 					log.debug(record)
 					return record
+				else:
+					log.debug("Mistopicd: " + topic1)
 		log.debug("No result")
 		return None
 

@@ -51,7 +51,7 @@ class ZMQServer(object):
 					topic, record = ch[0].recv_serialized(
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 					# some special topics? Like to stop or sth. Though who sends it?
-					dev_id, op = topic.split('.')
+					dev_id, op = topic.split('.')[:2]
 					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
 						if op == "write":
 							self.devdict[dev_id].write(record)
