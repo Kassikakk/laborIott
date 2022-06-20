@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 log.addHandler(ch)
 
 
@@ -29,25 +29,31 @@ class ZMQAdapter(Adapter):
 		if outport is None:
 			outport = inport
 		self.id = id
+
 		# inward
 		self.insock, self.poller = zmq.Context().socket(zmq.SUB), zmq.Poller()
 		self.insock.connect("tcp://%s:%d" % (address, inport))
 		self.insock.setsockopt(zmq.SUBSCRIBE, b'')
 		self.poller.register(self.insock, zmq.POLLIN)
-		self.timeout = 100 # milliseconds
-		self.repeat = int(1000 / self.timeout) #global timeout / single shot timeout
-
+		self.timeout = 200 # milliseconds for single poll
+		self.globtimeout = 5000 #global timeout to wait for response
+		
+		#count the messages and add this as an ID to match the return
 		self.counter = 0
 		
 		#outward 
 		self.outsock = zmq.Context().socket(zmq.PUB)
 		self.outsock.bind("tcp://*:%d" % outport)
-		# establish connection
-		for i in range(5):
-			if self.exchange("",".echo") is not None:
-				break
-			if i==4:
-				print("Server is not responding")
+
+		# establish connection, deal with "slow start" effect
+		self.repeat = 2 #low number to speed up starting
+		while self.exchange("",".echo") is None:
+			log.info("Attempting connection {}".format(self.counter))
+			#we could cut here according to self.counter value if no one comes online
+
+		#set a longer global timeout
+		self.repeat = int(self.globtimeout / self.timeout) #global timeout / single shot timeout
+
 
 	def write(self, command):
 		topic = self.id + ".write"
@@ -68,8 +74,8 @@ class ZMQAdapter(Adapter):
 					log.debug(record)
 					return record
 				else:
-					log.debug("Mistopicd: " + topic1)
-		log.debug("No result")
+					log.info("Mistopicd: " + topic1 + " in rsp to " + topic)
+		log.info("Timeout: " + topic)
 		return None
 
 	def read(self):
