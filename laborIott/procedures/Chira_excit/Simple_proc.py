@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from threading import Thread, Event
 from time import sleep, strftime, time
+from scipy.interpolate import interp1d
 import numpy as np
 import pandas as pd
 
