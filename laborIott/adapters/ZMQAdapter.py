@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.DEBUG)
 log.addHandler(ch)
 
 
@@ -57,6 +57,7 @@ class ZMQAdapter(Adapter):
 
 	def write(self, command):
 		topic = self.id + ".write"
+		log.debug(topic + " : " + command)
 		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 
 	def exchange(self, command, comm_id):

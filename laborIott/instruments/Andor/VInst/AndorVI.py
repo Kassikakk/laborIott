@@ -32,6 +32,7 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 
 		#connect instrument
 		self.connectInstr(address, inport, outport)
+		print("instrument xonnected")
 		
 		#parameetrid
 		self.data = []

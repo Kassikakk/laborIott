@@ -18,8 +18,13 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	
 	setpowerWL = QtCore.pyqtSignal(float)
 
-    def __init__(self):
+	def __init__(self):
 		super(RubyProc, self).__init__()
 		self.setupUi(self) 
 
 		self.andor = JYvon_VI()
+
+		self.startIdus.connect(self.andor.run)
+
+		self.setExternalMode.connect(self.andor.setExternal)
+
