@@ -28,3 +28,23 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		self.setExternalMode.connect(self.andor.setExternal)
 
+		self.andor.show()
+
+	def onStart(self):
+		if self.scanning.isSet():
+			# end scanning
+			self.cleanScan()
+			self.scanThread.join()
+
+		else:
+
+
+
+if __name__ == '__main__':
+	if not QtWidgets.QApplication.instance():
+		app = QtWidgets.QApplication(sys.argv)
+	else:
+		app = QtWidgets.QApplication.instance()
+	window = RubyProc()
+	window.show()
+	sys.exit(app.exec_())
