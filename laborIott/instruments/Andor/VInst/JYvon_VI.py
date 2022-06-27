@@ -46,6 +46,15 @@ class JYvon_VI(Andor_VI):
 
 		self.lamDlg.calcLmbdButt.clicked.connect(self.onCalcLambda)
 
+		#create some overlays
+		self.noOverlays = 3
+		self.overlays = []
+		for i in range(self.noOverlays):
+			self.overlays += [pg.plot()]
+			self.graphicsView.addItem(self.overlays[i])
+			self.overlays[i].setPen(None)
+
+
 	def onCalcLambda(self):
 		points = []
 		vals = []
@@ -86,6 +95,13 @@ class JYvon_VI(Andor_VI):
 	def removeLines(self, event):
 		for i in range(3):
 			self.nelns[i].setPen(None)
+
+	def setOverlay(self, index, x, y, color):
+		if index > self.noOverlays or index < 0:
+			return
+		self.overlays[index].setData(x,y)
+		self.overlays[index].setPen(color)
+		self.overlays[index].setPen(color)
 
 
 if __name__ == '__main__':
