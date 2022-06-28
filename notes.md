@@ -14,3 +14,14 @@ Well, mida me õieti peame tegema siin, on kätte saama spektri iDusest, siis se
 ## 220627
 (nimetame selle pigem runninguks) läheb siis external moodi. Ja hakkab tsükliliselt pärima spektrit (ja x skaalat ka) ja fittima ning vastavaid tulemusi interpreteerima. Jseenesest võiks ju küll proovida, et Andori JY versiooni all on (võib-olla lükkame ka hiljem ülespoole) mingi slott, mis lisajoont graafikule tekitab. Võib-olla ruubiprocis võiks mingi history versioon olla perspektiivis, ano vaatame.  
 Kuidagi see ajab nüüd ka ikka keeruliseks, et kas ei saaks näiteks timeriga teha, et otseselt UI elemente addressida, tegelikult timerit on vist ju nagunii vaja, sest kes muidu uuendab uid. Või noh ok, saab ka signaaliga ja võib-olla ongi loogilisem. Võimalikud
+
+## 220628
+Ruubiproc sai üldiselt käima ja käib ka isegi kaugmoel. Jooksvad mõtted, mis siin vaja teha veel oleks:
+* ~~chkboxide changed ühendada~~
+* r välja tuua
+* fitijoone värvus
+* ja hakata vaatama, mis juhul teda mõtet on
+* siis edasi, et fitipiirkonda täpsustada (seda võiks isegi jooksvalt saada?)
+* ja kas saaks kaks paralleelset teha?
+* miks seal VI-s mõned asjad enabled-disabled vilguvad?
+* Andori tagasitoomise nupp ja ta võiks fitiaknaga koos ära kaduda.

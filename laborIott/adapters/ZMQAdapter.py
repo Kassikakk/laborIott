@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setFormatter(formatter)
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 log.addHandler(ch)
 
 

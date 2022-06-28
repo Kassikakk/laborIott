@@ -41,6 +41,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		'''
 
 		self.startIdus.connect(self.andor.run)
+		self.slopeCheck.stateChanged.connect(self.loadQueue)
+		self.cyclicCheck.stateChanged.connect(self.loadQueue)
 		self.setExternalMode.connect(self.andor.setExternal)
 		self.updateFitShape.connect(self.andor.setOverlay)
 		self.updateData.connect(self.update)
@@ -59,7 +61,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.paramQueue.put(paramtuple)
 
 	def update(self, params):
-		p = (params[0] - float(self.zeroValEdit.text()))/float(self.coefEdit.text())
+		p = (params[6] - float(self.zeroValEdit.text()))/float(self.coefEdit.text())
 		self.pLabel.setText("{:.2f}".format(p))
 
 	def onStart(self):
@@ -109,11 +111,11 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			else:
 				if paramlist is not None and len(paramlist) == 8:
 					paramlist = paramlist[:7]
-				fitted, params = fit_DLorentz(np.array(self.data), self.xarr, delim, paramlist)
+				fitted, params = fit_DLorentz(np.array(spcData), xData, delim, paramlist)
 				paramlist = [params[0][i * 2] for i in range(7)]
 			# TODO: decide somehow if the line is meaningful, otherwise no point in doing the next part
 			self.updateData.emit(tuple(params[0]))
-			self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'b')
+			self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'w')
 
 
 
