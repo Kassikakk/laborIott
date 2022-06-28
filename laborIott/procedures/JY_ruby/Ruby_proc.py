@@ -21,7 +21,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	setExternalMode = QtCore.pyqtSignal(bool)
 	startIdus = QtCore.pyqtSignal(bool)
 	updateData = QtCore.pyqtSignal(tuple)
-	updateFitShape = QtCore.pyqtSignal(tuple)
+	updateFitShape = QtCore.pyqtSignal(int, tuple, tuple, str)
 
 
 	def __init__(self):
@@ -42,6 +42,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		self.startIdus.connect(self.andor.run)
 		self.setExternalMode.connect(self.andor.setExternal)
+		self.updateFitShape.connect(self.andor.setOverlay)
+		self.updateData.connect(self.update)
 		self.runButt.clicked.connect(self.onStart)
 		# also connect all changes to paramqueue set
 
@@ -55,6 +57,10 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		while not self.paramQueue.empty():
 			self.paramQueue.get(False)
 		self.paramQueue.put(paramtuple)
+
+	def update(self, params):
+		p = (params[0] - float(self.zeroValEdit.text()))/float(self.coefEdit.text())
+		self.pLabel.setText("{:.2f}".format(p))
 
 	def onStart(self):
 		if self.running.is_set():
@@ -105,13 +111,11 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 					paramlist = paramlist[:7]
 				fitted, params = fit_DLorentz(np.array(self.data), self.xarr, delim, paramlist)
 				paramlist = [params[0][i * 2] for i in range(7)]
-			self.updateData.emit(tuple(params[0]))
-			self.updateFitShape.emit(tuple(fitted[0]))
+			# TODO: decide somehow if the line is meaningful, otherwise no point in doing the next part
+			self.updateData.emit(params[0])
+			self.updateFitShape.emit(0, xData, fitted[0], 'b')
 
-			#emit the numerical results to main thread
-			#emit the fitted spectrum to andor
-			#check if running is still set, else break
-			#that should be it
+
 
 
 

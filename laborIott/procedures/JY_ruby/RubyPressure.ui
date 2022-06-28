@@ -48,7 +48,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QPushButton" name="runFitButt">
+      <widget class="QPushButton" name="runButt">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -118,7 +118,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lvlMinEdit">
+      <widget class="QLineEdit" name="zeroValEdit">
        <property name="geometry">
         <rect>
          <x>530</x>
@@ -127,8 +127,11 @@
          <height>20</height>
         </rect>
        </property>
+       <property name="text">
+        <string>694.28</string>
+       </property>
       </widget>
-      <widget class="QLineEdit" name="lvlMaxEdit">
+      <widget class="QLineEdit" name="coefEdit">
        <property name="geometry">
         <rect>
          <x>530</x>
@@ -136,6 +139,9 @@
          <width>71</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>0.0368</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="stopEdit">

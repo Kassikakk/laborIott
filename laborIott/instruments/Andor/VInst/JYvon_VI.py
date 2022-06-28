@@ -101,7 +101,7 @@ class JYvon_VI(Andor_VI):
 			return
 		self.overlays[index].setData(x,y)
 		self.overlays[index].setPen(color)
-		self.overlays[index].setPen(color)
+
 
 
 if __name__ == '__main__':
