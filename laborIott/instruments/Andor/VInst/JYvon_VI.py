@@ -50,9 +50,9 @@ class JYvon_VI(Andor_VI):
 		self.noOverlays = 3
 		self.overlays = []
 		for i in range(self.noOverlays):
-			self.overlays += [pg.plot()]
-			self.graphicsView.addItem(self.overlays[i])
-			self.overlays[i].setPen(None)
+			self.overlays += [self.graphicsView.plot(pen = None)]
+			#self.graphicsView.addItem(self.overlays[i])
+			#self.overlays[i].setPen(None)
 
 
 	def onCalcLambda(self):

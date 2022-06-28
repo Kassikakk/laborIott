@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from threading import Thread, Event
 from queue import Queue
-from fittings import  fit_DLorentz, fit_DLorentz_slope
+from fittings.fittings import  fit_DLorentz, fit_DLorentz_slope
 from time import sleep, strftime, time
 from scipy.interpolate import interp1d
 import numpy as np
@@ -24,11 +24,11 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	updateFitShape = QtCore.pyqtSignal(int, tuple, tuple, str)
 
 
-	def __init__(self):
+	def __init__(self, address= None, inport= None, outport = None):
 		super(RubyProc, self).__init__()
 		self.setupUi(self) 
 
-		self.andor = JYvon_VI()
+		self.andor = JYvon_VI(address, inport, outport)
 
 		self.running = Event()
 		self.runThread = None
@@ -112,8 +112,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 				fitted, params = fit_DLorentz(np.array(self.data), self.xarr, delim, paramlist)
 				paramlist = [params[0][i * 2] for i in range(7)]
 			# TODO: decide somehow if the line is meaningful, otherwise no point in doing the next part
-			self.updateData.emit(params[0])
-			self.updateFitShape.emit(0, xData, fitted[0], 'b')
+			self.updateData.emit(tuple(params[0]))
+			self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'b')
 
 
 
@@ -126,6 +126,14 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	window = RubyProc()
+
+	# handle possible command line parameters: address, inport, outport
+	args = sys.argv[1:4]
+	# port values, if provided, should be integers
+	# this errors if they are not
+	for i in (1,2):
+		if len(args) > i:
+			args[i] = int(args[i])
+	window = RubyProc(*args)
 	window.show()
 	sys.exit(app.exec_())
