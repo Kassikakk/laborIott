@@ -18,9 +18,9 @@ Kuidagi see ajab nüüd ka ikka keeruliseks, et kas ei saaks näiteks timeriga t
 ## 220628
 Ruubiproc sai üldiselt käima ja käib ka isegi kaugmoel. Jooksvad mõtted, mis siin vaja teha veel oleks:
 * ~~chkboxide changed ühendada~~
-* r välja tuua
+* r välja tuua (võib-olla ka S/N?)
 * fitijoone värvus
-* ja hakata vaatama, mis juhul teda mõtet on
+* ja hakata vaatama, mis juhul teda mõtet on (ja mille järgi seda vaadata)
 * siis edasi, et fitipiirkonda täpsustada (seda võiks isegi jooksvalt saada?)
 * ja kas saaks kaks paralleelset teha?
 * miks seal VI-s mõned asjad enabled-disabled vilguvad?
