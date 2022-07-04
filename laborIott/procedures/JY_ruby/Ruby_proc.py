@@ -39,7 +39,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.ploty = [[0, 0]]
 		self.spectraX = self.andor.getX()  # get the current x scale
 		'''
-
+		self.closeEvent = lambda a: self.andor.hide()
 		self.startIdus.connect(self.andor.run)
 		self.slopeCheck.stateChanged.connect(self.loadQueue)
 		self.cyclicCheck.stateChanged.connect(self.loadQueue)
@@ -51,6 +51,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		self.andor.show()
 
+		
+	
 	def loadQueue(self):
 		# load parameters to paramQueue to pass to thread
 		# match it with thread params: add more params if needed
@@ -63,6 +65,9 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	def update(self, params):
 		p = (params[6] - float(self.zeroValEdit.text()))/float(self.coefEdit.text())
 		self.pLabel.setText("{:.2f}".format(p))
+		self.pLabel.setText("{:.2f}".format(params[6]))
+		self.RLabel.setText("{:.4f}".format(params[7]))
+		self.SNLabel.setText("{:.1f}".format(params[-1]))
 
 	def onStart(self):
 		if self.running.is_set():
@@ -118,7 +123,10 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'w')
 
 
-
+def ExitHandler():
+	#QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
+	#anything needed before checkout
+	pass
 
 
 
@@ -128,7 +136,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-
+	app.aboutToQuit.connect(ExitHandler)
 	# handle possible command line parameters: address, inport, outport
 	args = sys.argv[1:4]
 	# port values, if provided, should be integers

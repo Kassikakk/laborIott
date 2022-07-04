@@ -18,10 +18,10 @@ Kuidagi see ajab nüüd ka ikka keeruliseks, et kas ei saaks näiteks timeriga t
 ## 220628
 Ruubiproc sai üldiselt käima ja käib ka isegi kaugmoel. Jooksvad mõtted, mis siin vaja teha veel oleks:
 * ~~chkboxide changed ühendada~~
-* r välja tuua
+* r välja tuua (kuidas seda üldse leida?)
 * fitijoone värvus
-* ja hakata vaatama, mis juhul teda mõtet on
+* ja hakata vaatama, mis juhul teda mõtet on  (vahemik?)
 * siis edasi, et fitipiirkonda täpsustada (seda võiks isegi jooksvalt saada?)
 * ja kas saaks kaks paralleelset teha?
-* miks seal VI-s mõned asjad enabled-disabled vilguvad?
+* miks seal VI-s mõned asjad enabled-disabled vilguvad? (veider jah.)
 * Andori tagasitoomise nupp ja ta võiks fitiaknaga koos ära kaduda.
