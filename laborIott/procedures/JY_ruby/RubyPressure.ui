@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Ruby pressure</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>ruby.png</normaloff>ruby.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -271,7 +275,7 @@
      <x>0</x>
      <y>0</y>
      <width>804</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
