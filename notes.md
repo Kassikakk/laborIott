@@ -24,4 +24,15 @@ Ruubiproc sai üldiselt käima ja käib ka isegi kaugmoel. Jooksvad mõtted, mis
 * siis edasi, et fitipiirkonda täpsustada (seda võiks isegi jooksvalt saada?)
 * ja kas saaks kaks paralleelset teha?
 * miks seal VI-s mõned asjad enabled-disabled vilguvad? (veider jah.)
-* Andori tagasitoomise nupp ja ta võiks fitiaknaga koos ära kaduda.
+* Andori tagasitoomise nupp ja ta võiks fitiaknaga koos ära kaduda.  
+
+## 220707
+Threadingu probleemid on ikka jube keerulised. Soovitatakse üldiselt pigem QThreadi kasutada, aga see eeldab threadi jaoks eraldi klassi moodustamist. Mis oleks võib-olla kasulik niikuinii, aga seal see andmete paigutus sel juhul oleks nigu on. Noh näiteks, kus siis sel juhul Andori... ei pagan, see võiks ikka olla main osas. No muidugi, sealsed signaalid võib ka threadiga ühendada, eriti threadist välja, aga siis peaks threadist saama ka jälgida, millal andmed tekivad. Üldiselt võiks threadi töö olla:
+* Saadab välja stardi
+* Ootab andmeid ja kinnitust, et eelmised andmed on töödeldud
+* Saadab andmed edasi  
+
+Üldiselt kaks viimast võivad aja kokkuhoiu mõttes olla ka vahetuses ja tegelikult pole tal vaja ka andmeid vahetada, vaid ainult teadet, et andmed on olemas, lugeda neid võib põhimõtteliselt ka põhiprogramm. Kuigi siis vist seal seda mingit andmete aegnihke trikki oleks keerulisem teha. (Milliseid andmemanipulatsioone oleks ergastuse puhul vaja teha?) Kule äkki prooviks esialgu siiski endise pythoni stiiliga, aga lihtsustatud threadiga asja käima saada, siis vaataks edasi.
+
+
+

@@ -1,19 +1,20 @@
 	def runProc(self):
+		spcData = None
 		while(True):
 			#get andor spectral data
 			self.startIdus.emit(True)
+			#process previous data while acquiring
+			if spcData is not None:
+				self.updateData.emit(spcData)
 			# wait for data arrival
 			while self.andor.dataQ.empty():
 				if not self.running.is_set():
 					return
-			#set an event here
-			self.processing.set()
-			self.updateData.emit(self.andor.dataQ.get(False))
-			#now wait until the event is cleared 
-			while self.processing.is_set():
-				if not self.running.is_set():
-					self.processing.clear() #make sure it is cleared
-					return
+			spcData = self.andor.dataQ.get(False)
+			#check once more
+			if not self.running.is_set():
+				return
+
 
 
 	def update(self, spcData):
