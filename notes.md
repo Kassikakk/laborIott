@@ -32,7 +32,8 @@ Threadingu probleemid on ikka jube keerulised. Soovitatakse üldiselt pigem QThr
 * Ootab andmeid ja kinnitust, et eelmised andmed on töödeldud
 * Saadab andmed edasi  
 
-Üldiselt kaks viimast võivad aja kokkuhoiu mõttes olla ka vahetuses ja tegelikult pole tal vaja ka andmeid vahetada, vaid ainult teadet, et andmed on olemas, lugeda neid võib põhimõtteliselt ka põhiprogramm. Kuigi siis vist seal seda mingit andmete aegnihke trikki oleks keerulisem teha. (Milliseid andmemanipulatsioone oleks ergastuse puhul vaja teha?) Kule äkki prooviks esialgu siiski endise pythoni stiiliga, aga lihtsustatud threadiga asja käima saada, siis vaataks edasi.
+Üldiselt kaks viimast võivad aja kokkuhoiu mõttes olla ka vahetuses ja tegelikult pole tal vaja ka andmeid vahetada, vaid ainult teadet, et andmed on olemas, lugeda neid võib põhimõtteliselt ka põhiprogramm. Kuigi siis vist seal seda mingit andmete aegnihke trikki oleks keerulisem teha. (Milliseid andmemanipulatsioone oleks ergastuse puhul vaja teha?) Kule äkki prooviks esialgu siiski endise pythoni stiiliga, aga lihtsustatud threadiga asja käima saada, siis vaataks edasi.  
+Häh. Tundub, et äkki siiski fittimise jätmine threadi polekski nii paha mõte, sest teatud tingimustel võib see võtta päris kaua aega (nõrga või puuduva signaali korral näiteks) ja  siis on kogu see aeg UI blokitud või vähemalt uimane. Iseenesest halb, eriti kui on palju interaktsiooni mingite UI elementidega (tahta näiteks 2 fitterit teha või mis iganes.) Kui õnnestuks kiiresti kindlaks teha, kas signaal on või pole, no siis isegi poleks hullu, olemasolevat signaali ta vast fitib mõistlikult
 
 
 

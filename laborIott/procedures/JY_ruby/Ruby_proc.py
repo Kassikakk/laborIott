@@ -20,7 +20,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	
 	setExternalMode = QtCore.pyqtSignal(bool)
 	startIdus = QtCore.pyqtSignal(bool)
-	updateData = QtCore.pyqtSignal(tuple)
+	updateData = QtCore.pyqtSignal(list)
 	updateFitShape = QtCore.pyqtSignal(int, tuple, tuple, str)
 
 
@@ -34,7 +34,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.processing = Event()
 		self.processing.clear()
 		self.runThread = None
-		self.paramQueue = Queue()
+		self.paramlist = None
 		'''
 		#self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
 		self.plotx = [[0, 1]]
@@ -43,8 +43,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		'''
 		self.closeEvent = lambda a: self.andor.hide()
 		self.startIdus.connect(self.andor.run)
-		self.slopeCheck.stateChanged.connect(self.loadQueue)
-		self.cyclicCheck.stateChanged.connect(self.loadQueue)
+
 		self.setExternalMode.connect(self.andor.setExternal)
 		self.updateFitShape.connect(self.andor.setOverlay)
 		self.updateData.connect(self.update)
@@ -55,16 +54,9 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		
 	
-	def loadQueue(self):
-		# load parameters to paramQueue to pass to thread
-		# match it with thread params: add more params if needed
-		paramtuple = (self.slopeCheck.isChecked(), self.cyclicCheck.isChecked() )
-		# make sure the queue is empty
-		while not self.paramQueue.empty():
-			self.paramQueue.get(False)
-		self.paramQueue.put(paramtuple)
+	
 
-	def update(self, params):
+	def update(self, spcData):
 		xData = self.andor.xarr
 
 		if self.paramlist is not None and self.cyclicCheck.isChecked():  # go cyclic if possible
@@ -86,11 +78,11 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			self.paramlist = [params[0][i * 2] for i in range(7)]
 		self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'w')
 
-		p = (params[6] - float(self.zeroValEdit.text())) / float(self.coefEdit.text())
+		p = (params[0][6] - float(self.zeroValEdit.text())) / float(self.coefEdit.text())
 		# self.pLabel.setText("{:.2f}".format(p))
-		self.pLabel.setText("{:.2f}".format(params[6]))
-		self.RLabel.setText("{:.4f}".format(params[7]))
-		self.SNLabel.setText("{:.1f}".format(params[-1]))
+		self.pLabel.setText("{:.2f}".format(params[0][6]))
+		self.RLabel.setText("{:.4f}".format(params[0][7]))
+		self.SNLabel.setText("{:.1f}".format(params[0][-1]))
 		self.processing.clear()
 
 		'''
@@ -110,7 +102,6 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		else:
 			self.runThread = Thread(target=self.runProc) #args passed by queue
 			self.setExternalMode.emit(True)
-			self.loadQueue()
 			self.running.set()
 			self.runThread.start()
 
