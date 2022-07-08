@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>804</width>
-    <height>301</height>
+    <height>344</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,28 +30,6 @@
       <property name="title">
        <string>Fitting</string>
       </property>
-      <widget class="QLabel" name="pLabel">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>40</y>
-         <width>121</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Arial</family>
-         <pointsize>20</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>P</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
       <widget class="QPushButton" name="runButt">
        <property name="geometry">
         <rect>
@@ -68,79 +46,12 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="wlLabel_2">
-       <property name="geometry">
-        <rect>
-         <x>350</x>
-         <y>40</y>
-         <width>81</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Arial</family>
-         <pointsize>20</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>kbar</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pwrWlButt">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>490</x>
-         <y>110</y>
-         <width>75</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set 0</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="slopeCheck">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>120</y>
-         <width>121</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Bkg slope</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="zeroValEdit">
-       <property name="geometry">
-        <rect>
-         <x>530</x>
-         <y>20</y>
-         <width>71</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>694.28</string>
-       </property>
-      </widget>
       <widget class="QLineEdit" name="coefEdit">
        <property name="geometry">
         <rect>
-         <x>530</x>
-         <y>50</y>
-         <width>71</width>
+         <x>40</x>
+         <y>180</y>
+         <width>51</width>
          <height>20</height>
         </rect>
        </property>
@@ -148,36 +59,23 @@
         <string>0.0368</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="stopEdit">
+      <widget class="QLineEdit" name="discrEdit">
        <property name="geometry">
         <rect>
-         <x>530</x>
-         <y>80</y>
-         <width>71</width>
+         <x>50</x>
+         <y>210</y>
+         <width>41</width>
          <height>20</height>
         </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>480</x>
-         <y>20</y>
-         <width>47</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Zeroval:</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
-         <x>490</x>
-         <y>50</y>
-         <width>47</width>
-         <height>13</height>
+         <x>10</x>
+         <y>180</y>
+         <width>31</width>
+         <height>16</height>
         </rect>
        </property>
        <property name="text">
@@ -187,83 +85,266 @@
       <widget class="QLabel" name="label_6">
        <property name="geometry">
         <rect>
-         <x>460</x>
-         <y>80</y>
-         <width>61</width>
+         <x>10</x>
+         <y>210</y>
+         <width>31</width>
          <height>20</height>
         </rect>
        </property>
        <property name="text">
-        <string>Discr.level</string>
+        <string>Discr</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="cyclicCheck">
+      <widget class="QGroupBox" name="fitBox1">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>140</y>
-         <width>121</width>
-         <height>17</height>
+         <x>130</x>
+         <y>30</y>
+         <width>241</width>
+         <height>251</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Cyclic init</string>
+       <property name="title">
+        <string>Fitter 1</string>
        </property>
-       <property name="checked">
+       <property name="checkable">
         <bool>true</bool>
        </property>
-      </widget>
-      <widget class="QLabel" name="RLabel">
-       <property name="geometry">
-        <rect>
-         <x>300</x>
-         <y>100</y>
-         <width>61</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>R</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>100</y>
-         <width>41</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>R = </string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>130</y>
-         <width>41</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>S/N = </string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="SNLabel">
-       <property name="geometry">
-        <rect>
-         <x>320</x>
-         <y>130</y>
-         <width>61</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>S/N</string>
-       </property>
+       <widget class="QLabel" name="wlLabel_2">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>60</y>
+          <width>81</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>kbar</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="pLabel">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>60</y>
+          <width>121</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>P</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cyclicCheck">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>160</y>
+          <width>121</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Cyclic init</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="slopeCheck">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>140</y>
+          <width>121</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Bkg slope</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="zeroValEdit">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>210</y>
+          <width>71</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>694.28</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>140</y>
+          <width>41</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>R = </string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="RLabel">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>140</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="SNLabel">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>160</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>S/N</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>160</y>
+          <width>41</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>S/N = </string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="zeroValEdit_2">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>110</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="zeroValEdit_3">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>110</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>1024</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pwrWlButt">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>210</y>
+          <width>41</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set 0</string>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>212</y>
+          <width>31</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>λ₀ = </string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>30</y>
+          <width>92</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Wavelength</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_2">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>30</y>
+          <width>92</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Pressure</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>110</y>
+          <width>61</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Range (px):</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
