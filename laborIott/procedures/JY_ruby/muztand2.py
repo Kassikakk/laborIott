@@ -1,6 +1,8 @@
+from fittingfns import Lorentz_fit, DLorentz_fit
+
 class Wrkr(QThread): #või tavathread
 
-	def def __init__(self):
+	def __init__(self):
 		self.running = Event()
 		pass
 		
@@ -8,6 +10,7 @@ class Wrkr(QThread): #või tavathread
 		paramlist = None
 		delim = None
 		sloped, cyclic = True, True
+		fitter = [Fitter(DLorentz_fit), Fitter(Lorentz_fit)]
 		while(True):
 			self.startIdus.emit(True)  # reserve false for abort?
 			# wait for data arrival
@@ -17,7 +20,7 @@ class Wrkr(QThread): #või tavathread
 			xData, spcData = data_queue.get(False)
 			#check param queue & set params
 			if not self.paramQueue.empty():
-				sloped, cyclic = self.paramQueue.get(False)
+				sloped, cyclic = settings_queue.get(False)
 				#we need to get more data here
 			# do the fitting(s)
 			
@@ -32,12 +35,14 @@ class Wrkr(QThread): #või tavathread
 
 
 class Fitter(object):
-	def def __init__(self, func):
-		self.paramlist = None #previous values
-		pass
+	def __init__(self, func):
+		self.paramlist = None #previous values or None if new guessing required
+		self.fitfunc = func
+
+
 		
-	def fit(self, data, xdata, paramlist=None, sloped, delim):
-		if paramlist is not None and cyclic:  # go cyclic if possible
+	def fit(self, data, xdata, cyclic, sloped, delim):
+		if self.paramlist is not None and cyclic:  # go cyclic if possible
 				delim = (paramlist[0] + paramlist[3]) / 2
 			else:
 				paramlist = None
@@ -46,12 +51,14 @@ class Fitter(object):
 			if sloped:
 				if paramlist is not None and len(paramlist) == 7:
 					paramlist += [0.0]
-				fitted, params = fit_DLorentz_slope(np.array(spcData), xData, paramlist													paramlist)  # eraldusx maksimumide vahel
+				fitted, params = fit_DLorentz_slope(np.array(spcData), xData, paramlist, delim)  # eraldusx maksimumide vahel
 				paramlist = [params[0][i * 2] for i in range(8)]
 			else:
 				if paramlist is not None and len(paramlist) == 8:
 					paramlist = paramlist[:7]
 				fitted, params = fit_DLorentz(np.array(spcData), xData, delim, paramlist)
 				paramlist = [params[0][i * 2] for i in range(7)]
-		return func(data, xdata, paramlist)
+			self.success = ??
+		return fitted, params
 	
+#kuidas peaksid olema struktureeritud fitifunktsioonid?
