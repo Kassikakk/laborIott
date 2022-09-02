@@ -1,5 +1,5 @@
 #from fittingfns import Lorentz_fit, DLorentz_fit
-from inspect import signature
+
 
 class Wrkr(QThread): #või tavathread
 
@@ -36,30 +36,18 @@ class Wrkr(QThread): #või tavathread
 
 
 
-class Fitter(object):
-	#now mul on idee, et fitfunc võiks saada olla mitme fn summa
-	#see oleks mitmes mõttes hea, double kühmud ja backgroundid.
-	#kuidas seda teha, kas listina? s.m.e. x ja y vektor oleks sama, aga paramlistid liituks
-	#sest curve_fitile tuleb üle anda siiski üks konkreetne fn koos paramlistiga
-	#ja kuidas täpselt käib algväärtustamine? Kaks võimalust, heuristiline ja tsükliline
-	#aga viimane on võimalik ainult siis, kui sama fn-ga on juba midagi tehtud
-	#nii et keegi peab heuristika üle ka alati hoolt kandma. Aga kas seda saab teha klassi seest?
-	#vist mitte, kuna see ei kavatse eriti konkreetsete funktsioonide tasemele laskuda.
-	def __init__(self, func):
-		self.paramlist = None #previous values or None if new guessing required
-		self.fitfunc = func
-		self.cyclic = True
-		self.funclist = []
-		self.parno = []
-
-	def setFuncList(self, funclist):
-		self.funclist = funclist
-		self.parno = [len(signature(f).parameters) - 1 for f in fnlist]
-		#also correct paramlist length
 
 
-		
-	def fit(self, data, xdata, cyclic, sloped, delim):
+
+
+
+
+
+
+
+
+
+		'''
 		if self.paramlist is not None and cyclic:  # go cyclic if possible
 				delim = (paramlist[0] + paramlist[3]) / 2
 			else:
@@ -78,6 +66,6 @@ class Fitter(object):
 				paramlist = [params[0][i * 2] for i in range(7)]
 			self.success = ??
 		return fitted, params
-	
+	'''
 #kuidas peaksid olema struktureeritud fitifunktsioonid?
 

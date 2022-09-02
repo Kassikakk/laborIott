@@ -43,7 +43,13 @@ Kuidas me händeldame slopitud backi? Võiks ju olla ka, et väljastpoolt (või 
 Cyclicut peaks ka kuidagi arutama, kuidas teha. Arvestada tuleb, et väljast vaadates on 2 erinevat fittingut.
 Tekkis selline idee, et fitfunc võiks saada olla mitme fn summa	see oleks mitmes mõttes hea, double kühmud ja backgroundid. kuidas seda teha, kas listina? s.m.e. x ja y vektor oleks sama, aga paramlistid liituks sest curve_fitile tuleb üle anda siiski üks konkreetne fn koos paramlistiga	ja kuidas täpselt käib algväärtustamine? Kaks võimalust, heuristiline ja tsükliline	aga viimane on võimalik ainult siis, kui sama fn-ga on juba midagi tehtud nii et keegi peab heuristika üle ka alati hoolt kandma. Aga kas seda saab teha klassi seest?	vist mitte, kuna see ei kavatse eriti konkreetsete funktsioonide tasemele laskuda.
 
-No siis peab vist uurima, et kuidas listi pandud funktsioonidest üks summafunktsioon tekitada ja sellele paramlist üle anda? Prooviks võib võtta näiteks 2 lorentzit ja lin a+bx. Nii curve_fiti jaoks me peame tegema fn, mis võtab x vektori esimeseks parameetriks ja siis järjest mingi hulga parameetreid. No paistab, et selle saame.
+No siis peab vist uurima, et kuidas listi pandud funktsioonidest üks summafunktsioon tekitada ja sellele paramlist üle anda? Prooviks võib võtta näiteks 2 lorentzit ja lin a+bx. Nii curve_fiti jaoks me peame tegema fn, mis võtab x vektori esimeseks parameetriks ja siis järjest mingi hulga parameetreid. No paistab, et selle saame. Kuskilt mingit testmaterjali ka oleks saada või? No üldiselt ka saime. Asi on enam/vähem, nüüd mõned juurutamise probleemid. Esiteks, kuidas toimub universaalne algväärtustamine.
+
+## 220902 
+
+Hei, nüüd on mingi Fitter object paika pandud, peaks talle mingi testi runnima. Võib-lla oleks seda kõige parem isegi teha Jupyterlabist, sest seal saaks ka (samust) pilti suht kergesti vaadata.
+
+
 
 
 
