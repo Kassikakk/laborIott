@@ -49,6 +49,17 @@ No siis peab vist uurima, et kuidas listi pandud funktsioonidest üks summafunkt
 
 Hei, nüüd on mingi Fitter object paika pandud, peaks talle mingi testi runnima. Võib-lla oleks seda kõige parem isegi teha Jupyterlabist, sest seal saaks ka (samust) pilti suht kergesti vaadata.
 
+## 220906 
+
+Jupyteris fitter naguvist e/v töötab, aga nüüd siis see thread võiks proovida paika ajada. Nüüd et kas eraldi klass või in-class worker on mõnevõrra küsimus, aga mis seal eraldi klassis küsimus on? Põhiliselt, et mingeid asju ei saa kätte nii lihtsalt, aga ilmselt saab alati kuidagi edasi ikka anda. Vaatame, mis vaja on: 
+* startsignal (instrumendile alustada mõõtmist) (klassis olemas)
+* stopevent (sulgeda thread) (klassis olemas) - selle tegelikult võiks lahendada ka nagu stoppablethreadis oli, et siseevent algul püsti, aga on olemas stop() funktsioon
+* data sisse queue - mul on siin küsimus, et kuidas x data sisse anda? Seda küsiti muidu threadis otse instrumendilt, aga see väga normaalne ei tundunud. Kuna see võib muutuda, siis peaks seda iga kord ikka lugema
+* tulemus välja, ilmselt signal (define klassis või välisklassis)
+* parameetrid sisse queue (ega sellega ka tegelikult oleks loogiline eraldi prots teha)
+
+Kuna need on kõik threadsafe asjad, siis tegelikult nende accessimine klassi sees ei tohiks iseenesest olla probleemiks
+
 
 
 

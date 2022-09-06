@@ -1,26 +1,53 @@
 #from fittingfns import Lorentz_fit, DLorentz_fit
+from fitter import Fitter
 
 
-class Wrkr(QThread): #või tavathread
+class Wrkr(QThread): #või Thread
+	#create a dataready signal here but this requires a qobject, right? So QThread it is, still.
 
-	def __init__(self):
+	class FitContainer(object):
+		active = True
+		range = [0,1024]
+		sloped = True
+		cyclic = True
+		fitter = Fitter()
+
+	def __init__(self, startsignal, data_queue, settings_queue):
 		self.running = Event()
+		self.startsignal = startsignal
+		self.data_queue = data_queue
+		self.settings_queue = settings_queue
+		self.fitter = [Fitter(), Fitter()]
+
+
+	def stop(self):
+		self.running.clear()
+
+
+	def parseSettings(self):
 		pass
+		#active
+		#range
+		#sloped
+		#cyclic
+		#model
+
 		
-	def run(self, data_queue, settings_queue):
+	def run(self):
 		paramlist = None
 		delim = None
 		sloped, cyclic = True, True #all of these - handle differently (2 copies needed)
+		#well we need a whole set of parameters here
 		fitter = [Fitter(DLorentz_fit), Fitter(Lorentz_fit)] #we praably need a different init here
 		while(True):
-			self.startIdus.emit(True)  # reserve false for abort?
+			self.startsignal.emit(True)  # well how can we do it from here?
 			# wait for data arrival
 			while data_queue.empty():
 				if not self.running.is_set():
 					return
 			xData, spcData = data_queue.get(False)
 			#check param queue & set params
-			if not self.paramQueue.empty():
+			if not self.settings_queue .empty():
 				sloped, cyclic = settings_queue.get(False)
 				#we need to get more data here
 				#所以 我們可能有一個 字典 (dictionary)
@@ -29,10 +56,12 @@ class Wrkr(QThread): #või tavathread
 			#how we'd like to proceed here? Something like
 			for n in range(2):
 				if fitter_active[n]:
-					fitted, params = fitter[n].run(np.array(spcData[begin[n]:end[n]]), xData[begin[n]:end[n]], paramlist, delim, sloped)
-					if fitter[n].success:
-						self.updateData.emit((n,params[0]))
-						self.updateFitShape.emit(n, tuple(xData), tuple(fitted[0]), colors[n]) #colorid võib ehk välja jätta
+					if (fitter[n].run(xData[begin[n]:end[n]],np.array(spcData[begin[n]:end[n]]), paramlist) == 0):
+						#additional evaluation that data is reasonable
+						self.dataready.emit((n, params[n],xData[n],fitted[n]))
+					else:
+						self.dataready.emit((n,None))
+
 
 
 
