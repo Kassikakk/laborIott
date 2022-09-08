@@ -33,7 +33,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.running = Event()
 		self.processing = Event()
 		self.processing.clear()
-		self.param_queue = Queue()
+		self.settings_queue = Queue()
 		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.param_queue)
 		self.colorlist = ['w', 'b'] #fitted overlay colors
 		'''
@@ -50,15 +50,45 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.updateFitShape.connect(self.andor.setOverlay)
 		self.updateData.connect(self.update)
 		self.runButt.clicked.connect(self.onStart)
-		# also connect all changes to paramqueue set
+		# also connect all changes to settingsqueue set
+		self.fitBox1.changed.connect(lambda a:  self.setSettingsQueue('active'))
+		self.fitBox2.changed.connect(lambda a: self.setSettingsQueue('active'))
+		self.rangeLowEdit1.changed.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeHighEdit1.changed.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeLowEdit2.changed.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeHighEdit2.changed.connect(lambda a: self.setSettingsQueue('range'))
+		self.slopeChk1.changed.connect(lambda a: self.setSettingsQueue('sloped'))
+		self.slopeChk2.changed.connect(lambda a: self.setSettingsQueue('sloped'))
+		self.cyclicChk1.changed.connect(lambda a: self.setSettingsQueue('cyclic'))
+		self.cyclicChk2.changed.connect(lambda a: self.setSettingsQueue('cyclic'))
+		self.modelCombo1.changed.connect(lambda a: self.setSettingsQueue('model'))
+		self.modelCombe2.changed.connect(lambda a: self.setSettingsQueue('model'))
+		self.showPRadio1.changed.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
+		self.showPRadio2.changed.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
 
 		self.andor.show()
 
 		
-	def setParamQueue(self, param = None): #handle the params queue
-		#well how this goes now?
+	def setSettingsQueue(self, setting = None): #handle the params queue
 		#if there is a dict in the queue already, grab it first
-		#Then hava look at the fitworker's
+		#Then the queue should be empty
+		p_dict = {} if self.settings_queue.empty() else self.settings_queue.get(False)
+		#['active', 'range', 'sloped','cyclic', 'model']
+		if setting is None or setting == 'active':
+			p_dict['active'] = [self.fitBox1.isChecked(),self.fitBox2.isChecked()]
+		if setting is None or setting == 'range':
+			p_dict['range'] = [[int(self.rangeLowEdit1.text()), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+			#TODO: try and range check should be performed here
+		if setting is None or setting == 'sloped':
+			p_dict['sloped'] = [self.slopeChk1.isChecked(), self.slopeChk2.isChecked()]
+		if setting is None or setting == 'cyclic':
+			p_dict['cyclic'] = [self.cyclicChk1.isChecked(), self.cyclicChk2.isChecked()]
+		if setting is None or setting == 'model':
+			p_dict['model'] = [self.modelCombo1.text(), self.modelCombo2.text()] #or was it getText?
+		self.settings_queue.put(p_dict)
+
+
+
 	
 
 	def update(self, dataTuple):
@@ -90,7 +120,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			self.setExternalMode.emit(False)
 		else:
 			#load up settings queue
-			self.setParamQueue() #load up all params
+			self.setSettingsQueue() #load up all params
 			self.setExternalMode.emit(True)
 			self.runThread.start()
 

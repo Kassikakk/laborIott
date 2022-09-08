@@ -110,7 +110,7 @@
        <property name="checkable">
         <bool>true</bool>
        </property>
-       <widget class="QLabel" name="PUnitLabel1">
+       <widget class="QLabel" name="pUnitLabel1">
         <property name="geometry">
          <rect>
           <x>140</x>
@@ -402,7 +402,7 @@
        <property name="checkable">
         <bool>true</bool>
        </property>
-       <widget class="QLabel" name="PUnitLabel2">
+       <widget class="QLabel" name="pUnitLabel2">
         <property name="geometry">
          <rect>
           <x>140</x>
