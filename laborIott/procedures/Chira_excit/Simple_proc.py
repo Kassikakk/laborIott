@@ -164,7 +164,7 @@ class SimpleProc(*uic.loadUiType(localPath('Excit.ui'))):
 					if not self.scanning.isSet():
 						return
 				#idus shutter close?
-				spcData = self.andor.dataQ.get(False)
+				xData, spcData = self.andor.dataQ.get(False)
 				#aga kuidas siin selle x-skaalaga on?
 			else:
 				spcData = None

@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from threading import Thread, Event
 from queue import Queue
-from fittings.fittings import  fit_DLorentz, fit_DLorentz_slope
+from fitworker import FitWorker
 from time import sleep, strftime, time
 from scipy.interpolate import interp1d
 import numpy as np
@@ -33,8 +33,9 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.running = Event()
 		self.processing = Event()
 		self.processing.clear()
-		self.runThread = None
-		self.paramlist = None
+		self.param_queue = Queue()
+		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.param_queue)
+		self.colorlist = ['w', 'b'] #fitted overlay colors
 		'''
 		#self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
 		self.plotx = [[0, 1]]
@@ -43,6 +44,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		'''
 		self.closeEvent = lambda a: self.andor.hide()
 		self.startIdus.connect(self.andor.run)
+		self.runThread.dataReady.connect(self.update)
 
 		self.setExternalMode.connect(self.andor.setExternal)
 		self.updateFitShape.connect(self.andor.setOverlay)
@@ -53,116 +55,48 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.andor.show()
 
 		
+	def setParamQueue(self, param = None): #handle the params queue
+		#well how this goes now?
+		#if there is a dict in the queue already, grab it first
+		#Then hava look at the fitworker's
 	
-	
 
-	def update(self, spcData):
-		xData = self.andor.xarr
+	def update(self, dataTuple):
 
-		if self.paramlist is not None and self.cyclicCheck.isChecked():  # go cyclic if possible
-			delim = (self.paramlist[0] + self.paramlist[3]) / 2
-		else:
-			self.paramlist = None
-			delim = None  # võetakse skaala keskpunkt
+		if dataTuple[1] is None: # rejected result
+			return #we could add some sign here, e.g. make some text red
 
-		if self.slopeCheck.isChecked():
-			if self.paramlist is not None and len(self.paramlist) == 7:
-				self.paramlist += [0.0]
-			fitted, params = fit_DLorentz_slope(np.array(spcData), xData, delim,
-												self.paramlist)  # eraldusx maksimumide vahel
-			self.paramlist = [params[0][i * 2] for i in range(8)]
-		else:
-			if self.paramlist is not None and len(self.paramlist) == 8:
-				self.paramlist = self.paramlist[:7]
-			fitted, params = fit_DLorentz(np.array(spcData), xData, delim, self.paramlist)
-			self.paramlist = [params[0][i * 2] for i in range(7)]
-		self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'w')
+		index, paramlist, xData, fitted, uncertlist, chi = dataTuple #we can add more here as reqd
+		self.updateFitShape.emit(index, tuple(xData), tuple(fitted), self.colorlist[index])
+		pRadio, plabel, RLabel, SNLabel = (self.showPRadio1,
+										   self.pLabel1, self.RLabel1, self.SNLabel1) if index == 0 else (self.showPRadio2,
+																										  self.pLabel2, self.RLabel2, self.SNLabel2)
 
-		p = (params[0][6] - float(self.zeroValEdit.text())) / float(self.coefEdit.text())
-		# self.pLabel.setText("{:.2f}".format(p))
-		self.pLabel.setText("{:.2f}".format(params[0][6]))
-		self.RLabel.setText("{:.4f}".format(params[0][7]))
-		self.SNLabel.setText("{:.1f}".format(params[0][-1]))
-		self.processing.clear()
+		if pRadio.isChecked(): #show pressure
+			p = (paramlist[0] - float(self.zeroValEdit.text())) / float(self.coefEdit.text())
+			pLabel.setText("{:.2f}".format(p))
+		else: #show wavelength
+			pLabel.setText("{:.2f}".format(paramlist[0]))
 
-		'''
-		p = (params[6] - float(self.zeroValEdit.text()))/float(self.coefEdit.text())
-		self.pLabel.setText("{:.2f}".format(p))
-		self.pLabel.setText("{:.2f}".format(params[6]))
-		self.RLabel.setText("{:.4f}".format(params[7]))
-		self.SNLabel.setText("{:.1f}".format(params[-1]))
-		'''
+		RLabel.setText("{:.4f}".format(chi))
+		SNLabel.setText("{:.1f}".format(uncertlist[0]))
+
 
 	def onStart(self):
-		if self.running.is_set():
+		if self.runThread.running.is_set():
 			# end running
-			self.running.clear()
+			self.runThread.stop()
 			self.runThread.join()
 			self.setExternalMode.emit(False)
 		else:
-			self.runThread = Thread(target=self.runProc) #args passed by queue
+			#load up settings queue
+			self.setParamQueue() #load up all params
 			self.setExternalMode.emit(True)
-			self.running.set()
 			self.runThread.start()
 
-	def runProc(self):
-		spcData = None
-		while (True):
-			# get andor spectral data
-			self.startIdus.emit(True)
-			# process previous data while acquiring
-			if spcData is not None:
-				self.processing.set()
-				self.updateData.emit(spcData)
-			# wait for data arrival
-			while self.andor.dataQ.empty() or self.processing.is_set():
-				if not self.running.is_set():
-					return
-			spcData = self.andor.dataQ.get(False)
-			# check once more
-			if not self.running.is_set():
-				return
 
-		'''#-------------------------------
-		paramlist = None
-		delim = None
-		sloped, cyclic = True, True
-		while(True):
-			#get andor x data
-			xData = self.andor.xarr # is this dangerous?
-			#get andor spectral data
-			self.startIdus.emit(True)  # reserve false for abort?
-			# wait for data arrival
-			while self.andor.dataQ.empty():
-				if not self.running.is_set():
-					return
-			spcData = self.andor.dataQ.get(False)
-			#check param queue & set params
-			if not self.paramQueue.empty():
-				sloped, cyclic = self.paramQueue.get(False)
-			# do the fitting(s)
-			# can this be put to a separate fn?
-			if paramlist is not None and cyclic:  # go cyclic if possible
-				delim = (paramlist[0] + paramlist[3]) / 2
-			else:
-				paramlist = None
-				delim = None  # võetakse skaala keskpunkt
 
-			if sloped:
-				if paramlist is not None and len(paramlist) == 7:
-					paramlist += [0.0]
-				fitted, params = fit_DLorentz_slope(np.array(spcData), xData, delim,
-													paramlist)  # eraldusx maksimumide vahel
-				paramlist = [params[0][i * 2] for i in range(8)]
-			else:
-				if paramlist is not None and len(paramlist) == 8:
-					paramlist = paramlist[:7]
-				fitted, params = fit_DLorentz(np.array(spcData), xData, delim, paramlist)
-				paramlist = [params[0][i * 2] for i in range(7)]
-			# TODO: decide somehow if the line is meaningful, otherwise no point in doing the next part
-			self.updateData.emit(tuple(params[0]))
-			self.updateFitShape.emit(0, tuple(xData), tuple(fitted[0]), 'w')
-			'''
+
 
 
 def ExitHandler():

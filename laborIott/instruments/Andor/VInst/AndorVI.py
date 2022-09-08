@@ -128,7 +128,7 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 					self.data = datalist
 				self.plot.setData(self.xarr,self.data)
 				if self.external:
-					self.dataQ.put(self.data)
+					self.dataQ.put(self.xarr,self.data)
 			
 
 			

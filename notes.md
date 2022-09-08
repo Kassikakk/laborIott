@@ -60,7 +60,9 @@ Jupyteris fitter naguvist e/v töötab, aga nüüd siis see thread võiks proovi
 
 Kuna need on kõik threadsafe asjad, siis tegelikult nende accessimine klassi sees ei tohiks iseenesest olla probleemiks
 
+## 220908
 
+Ok nüüd vaatame, kuidas saaks selle põhiprogrammiga ühendatud meie uue threadi. Küsimusi tekitab siin see, et kuidas mitme (2) hvitteri widgetid kõik parimini ühendada. 
 
 
 

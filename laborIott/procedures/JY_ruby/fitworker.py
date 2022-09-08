@@ -22,7 +22,7 @@ class FitContainer(object): # combines Fitter with a few variables relevant to t
 		self.cyclic = True
 		self.fitter = Fitter()
 
-class Wrkr(QtCore.QThread): #või Thread
+class FitWorker(QtCore.QThread): #või Thread
 	#create a dataready signal here but this requires a qobject, right? So QThread it is, still.
 	dataReady = QtCore.pyqtSignal(tuple)
 
@@ -110,39 +110,8 @@ class Wrkr(QtCore.QThread): #või Thread
 						#additional evaluation that data is reasonable
 						self.dataReady.emit((n, self.fitters[n].fitter.paramlist,
 											 xData[self.fitters[n].range[0]:self.fitters[n].range[1]],
-											 self.fitters[n].fitter.fitted))
+											 self.fitters[n].fitter.fitted), self.fitters[n].fitter.uncertlist, self.fitters[n].fitter.chi)
+						#also send other evaluative data. Uncertainty approximation and goodness of fit
 					else:
 						self.dataReady.emit((n,None)) # just to signal that fit wasnt successful
-
-
-
-
-
-
-
-
-
-
-
-		'''
-		if self.paramlist is not None and cyclic:  # go cyclic if possible
-				delim = (paramlist[0] + paramlist[3]) / 2
-			else:
-				paramlist = None
-				delim = None  # võetakse skaala keskpunkt
-
-			if sloped:
-				if paramlist is not None and len(paramlist) == 7:
-					paramlist += [0.0]
-				fitted, params = fit_DLorentz_slope(np.array(spcData), xData, paramlist, delim)  # eraldusx maksimumide vahel
-				paramlist = [params[0][i * 2] for i in range(8)]
-			else:
-				if paramlist is not None and len(paramlist) == 8:
-					paramlist = paramlist[:7]
-				fitted, params = fit_DLorentz(np.array(spcData), xData, delim, paramlist)
-				paramlist = [params[0][i * 2] for i in range(7)]
-			self.success = ??
-		return fitted, params
-	'''
-#kuidas peaksid olema struktureeritud fitifunktsioonid?
 
