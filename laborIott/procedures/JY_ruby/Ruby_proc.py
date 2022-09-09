@@ -34,8 +34,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.processing = Event()
 		self.processing.clear()
 		self.settings_queue = Queue()
-		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.param_queue)
-		self.colorlist = ['w', 'b'] #fitted overlay colors
+		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.settings_queue)
+		self.colorlist = ['w', 'r'] #fitted overlay colors
 		'''
 		#self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
 		self.plotx = [[0, 1]]
@@ -51,20 +51,20 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.updateData.connect(self.update)
 		self.runButt.clicked.connect(self.onStart)
 		# also connect all changes to settingsqueue set
-		self.fitBox1.changed.connect(lambda a:  self.setSettingsQueue('active'))
-		self.fitBox2.changed.connect(lambda a: self.setSettingsQueue('active'))
-		self.rangeLowEdit1.changed.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeHighEdit1.changed.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeLowEdit2.changed.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeHighEdit2.changed.connect(lambda a: self.setSettingsQueue('range'))
-		self.slopeChk1.changed.connect(lambda a: self.setSettingsQueue('sloped'))
-		self.slopeChk2.changed.connect(lambda a: self.setSettingsQueue('sloped'))
-		self.cyclicChk1.changed.connect(lambda a: self.setSettingsQueue('cyclic'))
-		self.cyclicChk2.changed.connect(lambda a: self.setSettingsQueue('cyclic'))
-		self.modelCombo1.changed.connect(lambda a: self.setSettingsQueue('model'))
-		self.modelCombe2.changed.connect(lambda a: self.setSettingsQueue('model'))
-		self.showPRadio1.changed.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
-		self.showPRadio2.changed.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
+		self.fitBox1.toggled.connect(lambda a:  self.setSettingsQueue('active'))
+		self.fitBox2.toggled.connect(lambda a: self.setSettingsQueue('active'))
+		self.rangeLowEdit1.textChanged.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeHighEdit1.textChanged.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeLowEdit2.textChanged.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeHighEdit2.textChanged.connect(lambda a: self.setSettingsQueue('range'))
+		self.slopeChk1.toggled.connect(lambda a: self.setSettingsQueue('sloped'))
+		self.slopeChk2.toggled.connect(lambda a: self.setSettingsQueue('sloped'))
+		self.cyclicChk1.toggled.connect(lambda a: self.setSettingsQueue('cyclic'))
+		self.cyclicChk2.toggled.connect(lambda a: self.setSettingsQueue('cyclic'))
+		self.modelCombo1.currentIndexChanged.connect(lambda a: self.setSettingsQueue('model'))
+		self.modelCombo2.currentIndexChanged.connect(lambda a: self.setSettingsQueue('model'))
+		self.showPRadio1.toggled.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
+		self.showPRadio2.toggled.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
 
 		self.andor.show()
 
@@ -77,14 +77,20 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		if setting is None or setting == 'active':
 			p_dict['active'] = [self.fitBox1.isChecked(),self.fitBox2.isChecked()]
 		if setting is None or setting == 'range':
-			p_dict['range'] = [[int(self.rangeLowEdit1.text()), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+			try:
+				#this requires a rather strict validation since during editing all kinds of values may appear transiently
+				#Maybe even a "set" button would be good, but anyway
+
+				p_dict['range'] = [[max(0,int(self.rangeLowEdit1.text())), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+			except ValueError: #just forget it
+				pass
 			#TODO: try and range check should be performed here
 		if setting is None or setting == 'sloped':
 			p_dict['sloped'] = [self.slopeChk1.isChecked(), self.slopeChk2.isChecked()]
 		if setting is None or setting == 'cyclic':
 			p_dict['cyclic'] = [self.cyclicChk1.isChecked(), self.cyclicChk2.isChecked()]
 		if setting is None or setting == 'model':
-			p_dict['model'] = [self.modelCombo1.text(), self.modelCombo2.text()] #or was it getText?
+			p_dict['model'] = [self.modelCombo1.currentText(), self.modelCombo2.currentText()] #or was it getText?
 		self.settings_queue.put(p_dict)
 
 
@@ -98,12 +104,14 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		index, paramlist, xData, fitted, uncertlist, chi = dataTuple #we can add more here as reqd
 		self.updateFitShape.emit(index, tuple(xData), tuple(fitted), self.colorlist[index])
-		pRadio, plabel, RLabel, SNLabel = (self.showPRadio1,
-										   self.pLabel1, self.RLabel1, self.SNLabel1) if index == 0 else (self.showPRadio2,
-																										  self.pLabel2, self.RLabel2, self.SNLabel2)
+		pRadio, pLabel, RLabel, SNLabel, zeroValEdit = \
+			(
+			self.showPRadio1, self.pLabel1, self.RLabel1, self.SNLabel1, self.zeroValEdit1
+		) if index == 0 else (
+			self.showPRadio2, self.pLabel2, self.RLabel2, self.SNLabel2, self.zeroValEdit2)
 
 		if pRadio.isChecked(): #show pressure
-			p = (paramlist[0] - float(self.zeroValEdit.text())) / float(self.coefEdit.text())
+			p = (paramlist[0] - float(zeroValEdit.text())) / float(self.coefEdit.text())
 			pLabel.setText("{:.2f}".format(p))
 		else: #show wavelength
 			pLabel.setText("{:.2f}".format(paramlist[0]))
@@ -116,7 +124,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		if self.runThread.running.is_set():
 			# end running
 			self.runThread.stop()
-			self.runThread.join()
+			#self.runThread.join() #looks like QThread doesnät have it
 			self.setExternalMode.emit(False)
 		else:
 			#load up settings queue
