@@ -37,7 +37,7 @@ class FitWorker(QtCore.QThread): #või Thread
 		self.fitters = []
 		for i in range(self.numFitters):
 			self.fitters += [FitContainer()] 
-		print ("meil on:", self.fitters)
+		
 
 
 
@@ -55,7 +55,7 @@ class FitWorker(QtCore.QThread): #või Thread
 					if val is not None:
 						command = "self.fitters[i].{} = val".format(key)
 						exec(command)
-						exec("print(self.fitters[i].{}, i, val)".format(key))
+						#exec("print(self.fitters[i].{}, i, val)".format(key))
 						#however, if sloped changes, we need to reassign the last function
 						#paramlist should be handled fine, though
 						#(I don't know about the double ->single transition)

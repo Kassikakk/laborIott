@@ -1,6 +1,7 @@
 from inspect import signature
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.stats import t as tdist
 from math import sqrt
 
 class Fitter(object):
@@ -24,7 +25,11 @@ class Fitter(object):
 		if old_parcount > new_parcount: #truncate from right
 			self.paramlist = self.paramlist[:new_parcount]
 		elif old_parcount < new_parcount: # pad to the right and init with zeroes
-			self.paramlist += [0.0] * (new_parcount - old_parcount)
+			print(type(self.paramlist))
+			print(new_parcount - old_parcount)
+			while len(self.paramlist) < new_parcount:
+				self.paramlist.append(0.0)
+			print(self.paramlist)
 
 	def fitfn(self, x, *args):
 		result = np.zeros(x.size)
@@ -46,14 +51,14 @@ class Fitter(object):
 		#first see what the covariance matrix looks like
 
 		try:
-			errcoef = 1 #this should be the Student coefficient, see it later
-			'''
-			from scipy.stats import t as tdist
+			#errcoef = 1 #this should be the Student coefficient, see it later
+			
+			
 			df = len(xdata) - len(self.paramlist) #vabadusastmete arv (äkki veel -1 ka?)
-			if errcoef is None: #Studenti koefitsient vastavalt  etteantud konfidentsile:
+			#if errcoef is None: #Studenti koefitsient vastavalt  etteantud konfidentsile:
 			conflevel = 0.99
 			errcoef = tdist.interval(conflevel, df, loc=0, scale=1)[1]
-			'''
+			
 			self.uncertlist = [errcoef * sqrt(pcov[n, n]) for n in range(len(popt))]
 		except TypeError:  # mingil juhul seal pcov = inf ja käitub floadina
 			return 2
@@ -64,5 +69,5 @@ class Fitter(object):
 		self.chi = sqrt(sum((ydata - self.fitted)**2)/len(xdata))
 		#we can now probably draw some conclusions based on the chi value
 		#and if ok, evaluate the paramlist
-		self.paramlist = popt
+		self.paramlist = list(popt)
 		return 0

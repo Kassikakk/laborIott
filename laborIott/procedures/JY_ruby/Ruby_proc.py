@@ -112,12 +112,13 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		if pRadio.isChecked(): #show pressure
 			p = (paramlist[0] - float(zeroValEdit.text())) / float(self.coefEdit.text())
-			pLabel.setText("{:.2f}".format(p))
+			pLabel.setText("{:.3f}".format(p))
 		else: #show wavelength
-			pLabel.setText("{:.2f}".format(paramlist[0]))
+			pLabel.setText("{:.3f}".format(paramlist[0]))
 
 		RLabel.setText("{:.4f}".format(chi))
-		SNLabel.setText("{:.1f}".format(uncertlist[0]))
+		SNLabel.setText("{:.3f}".format(uncertlist[0]))
+
 
 
 	def onStart(self):

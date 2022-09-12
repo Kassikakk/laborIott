@@ -70,9 +70,16 @@ Nii, sai nüüd masina peal veidi katsetama hakatud ja mingi hulk kolle ka välj
 
 * mingil hetkel, kui ma ei tea millise mudeli vahetuse juures tuleb, et fitter.py", line 33, in fitfn
     result += f(x, *args[offset:offset + self.parno[i]]) TypeError: linear() missing 1 required positional argument: 'B'. Ja seda fitfn-i kutsutakse curve_fitist.
+    * See on vist näiteks siis ka, kui sloped välja lülitada, ehk siis et toimub parameetrite vähendamine...
+    * Asi selles, et see paramlist on algul list, aga pärast curve_fitist läbi käimist muutub numpy arrayks. Ilmselt peaks ta siis algusest peale arrayks tegema äkki või kumbapidi? Võib ka listiks teda proovida jätta.
 * Siis oli veel nii ka, et kui ühel pool mudel näiteks single lorentzi peale viia, siis teisel pool on double lorentz ja selle näit muutub mingiks negatiivseks (teine kühm?)`
 * Nüüd cyclicu osas peab veel midagi mõtlema, sest kui ta praegu käest ära läheb, siis cyclicu väljavõtmine vist ei aita (kuigi võib aidata mudeli vahetus). Ma ei tea, kas mudeli vahetust peaks proovima nii teha, et ei uuendata mõlemat korraga.
 * Ma ei tea, kuidas limbi järgi saaks Jobinis skaalauuendust tegema hakata, kas seal neoonijoonte dialoogis võ?
+* Miks uncertlistis midagi ei tule? - ei ikka tuleb, aga väike oli lihtsalt
+* ikkagi see Andori pildis mingid asjad seal vilguvad? Runni ajal.
+* spektromeetri nupp proc dialoogis.
+
+
 
 
 
