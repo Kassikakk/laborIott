@@ -25,11 +25,8 @@ class Fitter(object):
 		if old_parcount > new_parcount: #truncate from right
 			self.paramlist = self.paramlist[:new_parcount]
 		elif old_parcount < new_parcount: # pad to the right and init with zeroes
-			print(type(self.paramlist))
-			print(new_parcount - old_parcount)
 			while len(self.paramlist) < new_parcount:
 				self.paramlist.append(0.0)
-			print(self.paramlist)
 
 	def fitfn(self, x, *args):
 		result = np.zeros(x.size)

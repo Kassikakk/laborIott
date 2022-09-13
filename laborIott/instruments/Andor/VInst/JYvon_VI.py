@@ -37,7 +37,8 @@ class JYvon_VI(Andor_VI):
 			self.nelns += [pg.InfiniteLine(self.xarr[self.neSpins[i].value()])]
 			self.graphicsView.addItem(self.nelns[i])
 			self.nelns[i].setPen(None)
-		self.onCalcLambda()
+		#self.onCalcLambda()
+		self.onCalcFromLimb(6256.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
 			self.neSpins[i].valueChanged.connect(lambda x, a=i: self.nelns[a].setPos(self.xarr[x]))
@@ -53,6 +54,27 @@ class JYvon_VI(Andor_VI):
 			self.overlays += [self.graphicsView.plot(pen = None)]
 			#self.graphicsView.addItem(self.overlays[i])
 			#self.overlays[i].setPen(None)
+
+
+	def onCalcFromLimb(self, limbval):
+		#set xarr from limb value
+		#use the approximations made previously, see Dyelaser excitation
+		#we should also check here that limbval is float(able)
+		an = 9.002
+		bn = 13.45
+		ap = -6.26E-5
+		bp = 0.108
+		self.xarr = np.array([(limbval - (bn + bp * (512.0 - p)))/(an + ap * (512.0 - p)) for p in range(1024)])
+		#ok but we should also adjust the Ne line markers here
+		step = (self.xarr[1023] - self.xarr[0]) / 1023
+		self.lamDlg.startEdit.setText("{:.5f}".format(self.xarr[0]))
+		self.lamDlg.stepEdit.setText("{:.5f}".format(step))
+
+		for i in range(3):
+			pos = int((self.neVals[i] -self.xarr[0]) / step )
+			if (pos > -1) and (pos < 1024):
+				self.neSpins[i].setValue(pos)
+				self.nelns[i].setPos(self.xarr[self.neSpins[i].value()])
 
 
 	def onCalcLambda(self):

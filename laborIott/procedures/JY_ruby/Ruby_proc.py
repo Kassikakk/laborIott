@@ -80,8 +80,13 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			try:
 				#this requires a rather strict validation since during editing all kinds of values may appear transiently
 				#Maybe even a "set" button would be good, but anyway
-
-				p_dict['range'] = [[max(0,int(self.rangeLowEdit1.text())), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+				trylist = [[int(self.rangeLowEdit1.text()), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+				listok = True
+				for i in range(2):
+					if trylist[i][0] < 0 or trylist[i][1] > 1023 or trylist[i][0] > trylist[i][1]:
+						listok = False 
+				if listok:
+					p_dict['range'] = trylist
 			except ValueError: #just forget it
 				pass
 			#TODO: try and range check should be performed here
