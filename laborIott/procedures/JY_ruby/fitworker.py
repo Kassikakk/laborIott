@@ -72,7 +72,7 @@ class FitWorker(QtCore.QThread): #või Thread
 						plist[0] = 695
 						plist[3] = 693
 						plist[1] = plist[4] = 1
-						print(self.fitters[i].fitter.paramlist)
+
 					elif val == 'Single Lorentz':
 						self.fitters[i].fitter.setFuncList(
 							[Lorentz, linear if self.fitters[i].sloped else lambda x, a: a])
@@ -115,13 +115,22 @@ class FitWorker(QtCore.QThread): #või Thread
 					#handling of cyclic case should go here
 					if not self.fitters[n].cyclic:
 						print(self.fitters[n].fitter.paramlist)
+						plist = self.fitters[n].fitter.paramlist
+						plist[0] = 695
+						plist[1] = plist[2] = 1
+						if len(plist) > 6:  #well if there are more parameters (like Voigt...)?
+							plist[3] = 693
+							plist[4] =plist[5] = 1
+						print(self.fitters[n].fitter.paramlist)
+
+
 
 					if (self.fitters[n].fitter.fit(xData[self.fitters[n].range[0]:self.fitters[n].range[1]],
 												   yData[self.fitters[n].range[0]:self.fitters[n].range[1]]) == 0):
 						#additional evaluation that data is reasonable
 						self.dataReady.emit((n, self.fitters[n].fitter.paramlist,
 											 xData[self.fitters[n].range[0]:self.fitters[n].range[1]],
-											 self.fitters[n].fitter.fitted, self.fitters[n].fitter.uncertlist, self.fitters[n].fitter.chi))
+											 self.fitters[n].fitter.fitted, self.fitters[n].fitter.uncertlist, self.fitters[n].fitter.rsqr))
 						#print(n,self.fitters[n].range[0],self.fitters[n].range[1])
 						#also send other evaluative data. Uncertainty approximation and goodness of fit
 					else:

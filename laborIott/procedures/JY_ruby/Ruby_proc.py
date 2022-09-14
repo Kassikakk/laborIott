@@ -77,8 +77,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		if setting is None or setting == 'range':
 			try:
 				#this requires a rather strict validation since during editing all kinds of values may appear transiently
-				#Maybe even a "set" button would be good, but anyway
-				trylist = [[int(self.rangeLowEdit1.text()), int(self.rangeHighEdit1.text())], [int(self.rangeLowEdit2.text()), int(self.rangeHighEdit2.text())]]
+				#convert from 1 - to 0 - based list
+				trylist = [[int(self.rangeLowEdit1.text()) - 1, int(self.rangeHighEdit1.text()) - 1], [int(self.rangeLowEdit2.text()) - 1, int(self.rangeHighEdit2.text()) - 1]]
 				listok = True
 				for i in range(2):
 					if trylist[i][0] < 0 or trylist[i][1] > 1023 or trylist[i][0] > trylist[i][1]:

@@ -64,6 +64,8 @@ class Fitter(object):
 		#now let's calculate the fitted shape:
 		self.fitted = self.fitfn(xdata, *popt)
 		self.chi = sqrt(sum((ydata - self.fitted)**2)/len(xdata))
+		ymean = np.mean(ydata)
+		self.rsqr = 1- sum((ydata - self.fitted)**2)/sum((ydata - ymean)**2)
 		#we can now probably draw some conclusions based on the chi value
 		#and if ok, evaluate the paramlist
 		self.paramlist = list(popt)
