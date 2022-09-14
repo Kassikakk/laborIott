@@ -264,7 +264,7 @@
        <widget class="QLineEdit" name="rangeHighEdit1">
         <property name="geometry">
          <rect>
-          <x>160</x>
+          <x>130</x>
           <y>110</y>
           <width>41</width>
           <height>20</height>
@@ -384,6 +384,19 @@
         </property>
         <property name="text">
          <string>Model:</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="rangeSetButt1">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>110</y>
+          <width>51</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set</string>
         </property>
        </widget>
       </widget>
@@ -556,7 +569,7 @@
        <widget class="QLineEdit" name="rangeHighEdit2">
         <property name="geometry">
          <rect>
-          <x>160</x>
+          <x>130</x>
           <y>110</y>
           <width>41</width>
           <height>20</height>
@@ -676,6 +689,19 @@
         </property>
         <property name="text">
          <string>Model:</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="rangeSetButt2">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>110</y>
+          <width>51</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set</string>
         </property>
        </widget>
       </widget>

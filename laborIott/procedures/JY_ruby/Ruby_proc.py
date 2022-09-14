@@ -53,10 +53,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		# also connect all changes to settingsqueue set
 		self.fitBox1.toggled.connect(lambda a:  self.setSettingsQueue('active'))
 		self.fitBox2.toggled.connect(lambda a: self.setSettingsQueue('active'))
-		self.rangeLowEdit1.textChanged.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeHighEdit1.textChanged.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeLowEdit2.textChanged.connect(lambda a: self.setSettingsQueue('range'))
-		self.rangeHighEdit2.textChanged.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeSetButt1.clicked.connect(lambda a: self.setSettingsQueue('range'))
+		self.rangeSetButt2.clicked.connect(lambda a: self.setSettingsQueue('range'))
 		self.slopeChk1.toggled.connect(lambda a: self.setSettingsQueue('sloped'))
 		self.slopeChk2.toggled.connect(lambda a: self.setSettingsQueue('sloped'))
 		self.cyclicChk1.toggled.connect(lambda a: self.setSettingsQueue('cyclic'))
