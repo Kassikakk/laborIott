@@ -78,6 +78,7 @@ Nii, sai nüüd masina peal veidi katsetama hakatud ja mingi hulk kolle ka välj
 * Miks uncertlistis midagi ei tule? - ei ikka tuleb, aga väike oli lihtsalt
 * ikkagi see Andori pildis mingid asjad seal vilguvad? Runni ajal.
 * spektromeetri nupp proc dialoogis.
+* Kas runni lõppedes peaks overlayd ära koristama?
 
 
 
