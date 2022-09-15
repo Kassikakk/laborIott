@@ -64,6 +64,8 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.showPRadio1.toggled.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
 		self.showPRadio2.toggled.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
 
+		self.setZeroFromT1.clicked.connect(lambda a: self.calcZeroWl(self.tempEdit.text(),self.deltaTempEdit.text(),0))
+
 		self.andor.show()
 
 		
@@ -135,6 +137,45 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			self.setSettingsQueue() #load up all params
 			self.setExternalMode.emit(True)
 			self.runThread.start()
+
+
+	def calcZeroWl(self, fitter):
+
+		zWL, dzWL =[[self.zeroValEdit1,self.dZeroValEdit1],[self.zeroValEdit2,self.dZeroValEdit2]][fitter]
+		try:
+			T = float(self.tempEdit.text())
+			dT = float(self.deltaTempEdit.text())
+		except ValueError:
+			return
+		#Let's believe Syassen values of the coefficients (for R1)
+		alphav = 76.6
+		dalphav = 6.9
+		theta = 482
+		dtheta = 20
+		nv0 = 14421.8
+		dnv0 = 0.4
+
+		#It shouldn't be too hard to calculate the wavelength now
+		expval = np.exp(theta / T) - 1
+
+		lambda0 = 1e7*expval / (nv0 * expval - alphav)
+
+		#now the uncert consists of 4 parts:
+		errbase = lambda0 / (nv0 * expval - alphav)
+		#due to alphav:
+		d1 = errbase * dalphav
+		#due to theta and T:
+		#common = 1e7 * alphav * (expval + 1) / ((nv0 * expval - alphav)**2)
+		# should be == errbase * alphav * (1 + 1/expval)
+		d2 = errbase * alphav * (1 + 1/expval) * dtheta / T
+		d3 = errbase * alphav * (1 + 1/expval) * theta * dT / (T**2)
+		# due to nv0
+		d4 = errbase * expval * dnv0
+		#combined uncert
+		dlambda0 = np.sqrt(d1**2 + d2**2 + d3**2 + d4**2)
+		# print(d1, d2 d3, d4, dlambda0)
+		zWL.setText("{:.4f}".format(lambda0))
+		dzWL.setText("{:.4f}".format(dlambda0))
 
 
 
