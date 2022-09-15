@@ -64,7 +64,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.showPRadio1.toggled.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
 		self.showPRadio2.toggled.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
 
-		self.setZeroFromT1.clicked.connect(lambda a: self.calcZeroWl(self.tempEdit.text(),self.deltaTempEdit.text(),0))
+		self.setZeroFromT1.clicked.connect(lambda a: self.calcZeroWl(0))
 
 		self.andor.show()
 
@@ -173,7 +173,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		d4 = errbase * expval * dnv0
 		#combined uncert
 		dlambda0 = np.sqrt(d1**2 + d2**2 + d3**2 + d4**2)
-		# print(d1, d2 d3, d4, dlambda0)
+		print(d1, d2, d3, d4, dlambda0)
 		zWL.setText("{:.4f}".format(lambda0))
 		dzWL.setText("{:.4f}".format(dlambda0))
 
