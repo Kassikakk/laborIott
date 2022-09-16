@@ -34,6 +34,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.colsum = [0,0]
 		self.colsum2 = [0,0]
 		self.collecting = False
+		self.saveLoc = './'
 		self.running = Event()
 		self.processing = Event()
 		self.processing.clear()
