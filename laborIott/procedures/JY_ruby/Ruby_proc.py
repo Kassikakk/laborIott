@@ -30,6 +30,10 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		self.andor = JYvon_VI(address, inport, outport)
 
+		self.values = [[],[]]
+		self.colsum = [0,0]
+		self.colsum2 = [0,0]
+		self.collecting = False
 		self.running = Event()
 		self.processing = Event()
 		self.processing.clear()
@@ -65,6 +69,11 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		self.showPRadio2.toggled.connect(lambda a: self.pUnitLabel2.setText('kbar' if self.showPRadio2.isChecked() else 'nm'))
 
 		self.setZeroFromT1.clicked.connect(lambda a: self.calcZeroWl(0))
+
+		self.startButt.clicked.connect(lambda: self.setCollect(not self.collecting))
+		self.resetButt.clicked.connect(self.resetSeries)
+		self.locButt.clicked.connect(self.onGetLoc)
+		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
 
 		self.andor.show()
 
@@ -109,11 +118,13 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		index, paramlist, xData, fitted, uncertlist, chi = dataTuple #we can add more here as reqd
 		self.updateFitShape.emit(index, tuple(xData), tuple(fitted), self.colorlist[index])
-		pRadio, pLabel, RLabel, SNLabel, zeroValEdit = \
+		pRadio, pLabel, RLabel, SNLabel, zeroValEdit, NLabel, meanLabel, stdevLabel = \
 			(
-			self.showPRadio1, self.pLabel1, self.RLabel1, self.SNLabel1, self.zeroValEdit1
+			self.showPRadio1, self.pLabel1, self.RLabel1, self.SNLabel1, self.zeroValEdit1,
+			self.NLabel1, self.meanLabel1, self.stdevLabel1
 		) if index == 0 else (
-			self.showPRadio2, self.pLabel2, self.RLabel2, self.SNLabel2, self.zeroValEdit2)
+			self.showPRadio2, self.pLabel2, self.RLabel2, self.SNLabel2, self.zeroValEdit2,
+			self.NLabel2, self.meanLabel2, self.stdevLabel2)
 
 		if pRadio.isChecked(): #show pressure
 			p = (paramlist[0] - float(zeroValEdit.text())) / float(self.coefEdit.text())
@@ -123,6 +134,18 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 
 		RLabel.setText("{:.4f}".format(chi))
 		SNLabel.setText("{:.3f}".format(uncertlist[0]))
+		if self.collecting:
+			colval = p if pRadio.isChecked() else paramlist[0]
+			self.values[index].append([int(time()*10 - 16e9), colval])  # collect power while acquiring
+			self.colsum[index] += colval
+			self.colsum2[index] += colval**2
+			N = len(self.values[index])
+			mean = self.colsum[index] / N
+			var = np.sqrt(self.colsum2[index] / N  - mean**2)
+			# update mean and stdev vals
+			NLabel.setText("{}".format(N))
+			meanLabel.setText("{}".format(mean))  # mida siia?
+			stdevLabel.setText('%s' % float('%.2g' % var))
 
 
 
@@ -177,6 +200,52 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		zWL.setText("{:.4f}".format(lambda0))
 		dzWL.setText("{:.4f}".format(dlambda0))
 
+	def setCollect(self, value, clearOnStart=False):
+
+		if (value and clearOnStart):
+			self.values = [[], []]
+			self.colsum = [0, 0]
+			self.colsum2 = [0, 0]
+		self.startButt.setText("Pause" if value else "Cont")
+		self.collecting = value
+
+	def resetSeries(self):
+		if not self.collecting:
+			self.startButt.setText("Start")
+		self.values = [[], []]
+		self.colsum = [0, 0]
+		self.colsum2 = [0, 0]
+
+
+
+	# saving
+
+	def onGetLoc(self):
+		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", "./",
+																  QtWidgets.QFileDialog.ShowDirsOnly
+																  | QtWidgets.QFileDialog.DontResolveSymlinks)
+		self.locLabel.setText(self.saveLoc)
+
+	def saveData(self, name):
+		# saves existing data under self.saveLoc + name
+		# however, name validity and existance should be checked first
+		# also if we have any data
+		if len(name) == 0:
+			return
+		index = 0 if self.saveRadio1.isChecked() else 1
+		if len(self.values[index]) == 0:
+			return
+
+		if self.formatCombo.currentText() == 'ASCII XY':
+			data = pd.DataFrame(list(self.values[index]))
+			# if zip, support it here
+			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+			# the rest will follow
+		elif self.formatCombo.currentText() == 'ASCII Y':
+			data = pd.DataFrame([self.values[index][i][1] for i in range(len(self.values[index]))])
+			# if zip, support it here
+			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+			# the rest will follow
 
 
 
