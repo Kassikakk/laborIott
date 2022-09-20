@@ -80,6 +80,14 @@ Nii, sai nüüd masina peal veidi katsetama hakatud ja mingi hulk kolle ka välj
 * spektromeetri nupp proc dialoogis.
 * Kas runni lõppedes peaks overlayd ära koristama?
 
+## 220920
+
+Vaata eelmised üle ja:
+
+* poolpiksli võimalus lambdas
+* set0 nupud ühendada
+* diskrimineerimine ja init!
+
 
 
 

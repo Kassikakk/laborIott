@@ -91,9 +91,9 @@ class JYvon_VI(Andor_VI):
 			pass  # figure out something here
 		else:
 			Ex = sum(points)
-			Ey = sum(vals);
-			Exx = sum([a * a for a in points]);
-			Eyy = sum([a * a for a in vals]);
+			Ey = sum(vals)
+			Exx = sum([a * a for a in points])
+			Eyy = sum([a * a for a in vals])
 			Exy = sum([points[a] * vals[a] for a in range(N)])
 			Sxx = Exx - Ex * Ex / N
 			Syy = Eyy - Ey * Ey / N
