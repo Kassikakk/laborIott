@@ -85,7 +85,13 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		p_dict = {} if self.settings_queue.empty() else self.settings_queue.get(False)
 		#['active', 'range', 'sloped','cyclic', 'model']
 		if setting is None or setting == 'active':
-			p_dict['active'] = [self.fitBox1.isChecked(),self.fitBox2.isChecked()]
+			clist = [self.fitBox1.isChecked(),self.fitBox2.isChecked()]
+			p_dict['active'] = clist
+			#also remove deactivated curves
+			for i,n  in enumerate(clist):
+				if not n:
+					self.andor.setOverlay(i, [],[],None)
+			
 		if setting is None or setting == 'range':
 			try:
 				#this requires a rather strict validation since during editing all kinds of values may appear transiently
@@ -136,7 +142,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		RLabel.setText("{:.4f}".format(chi))
 		SNLabel.setText("{:.3f}".format(uncertlist[0]))
 		if self.collecting:
-			colval = p if pRadio.isChecked() else paramlist[0]
+			colval = p if pRadio.isChecked() else paramlist[1]
 			self.values[index].append([int(time()*10 - 16e9), colval])  # collect power while acquiring
 			self.colsum[index] += colval
 			self.colsum2[index] += colval**2
@@ -155,6 +161,9 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 			# end running
 			self.runThread.stop()
 			#self.runThread.join() #looks like QThread doesnät have it
+			#remove fitting curves
+			for i in range(2):
+				self.andor.setOverlay(i, [],[],None)
 			self.setExternalMode.emit(False)
 		else:
 			#load up settings queue

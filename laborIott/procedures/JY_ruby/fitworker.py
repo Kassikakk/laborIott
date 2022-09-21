@@ -116,11 +116,13 @@ class FitWorker(QtCore.QThread): #või Thread
 					if not self.fitters[n].cyclic:
 						print(self.fitters[n].fitter.paramlist)
 						plist = self.fitters[n].fitter.paramlist
+						for p in plist:
+							p = 0
 						plist[0] = 695
-						plist[1] = plist[2] = 1
+						plist[1] = 1
 						if len(plist) > 6:  #well if there are more parameters (like Voigt...)?
 							plist[3] = 693
-							plist[4] =plist[5] = 1
+							plist[4] = 1
 						print(self.fitters[n].fitter.paramlist)
 
 
