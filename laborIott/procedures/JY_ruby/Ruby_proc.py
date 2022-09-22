@@ -142,7 +142,7 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 		RLabel.setText("{:.4f}".format(chi))
 		SNLabel.setText("{:.3f}".format(uncertlist[0]))
 		if self.collecting:
-			colval = p if pRadio.isChecked() else paramlist[1]
+			colval = p if pRadio.isChecked() else paramlist[0]
 			self.values[index].append([int(time()*10 - 16e9), colval])  # collect power while acquiring
 			self.colsum[index] += colval
 			self.colsum2[index] += colval**2
