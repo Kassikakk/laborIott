@@ -61,7 +61,7 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 			outp = inp if outport is None else outport
 			self.stage = MCL_MicroStage(ZMQAdapter("MCL_MicroStage", address, inp, outp))
 
-	def setSpeed(self, newSpeed)
+	def setSpeed(self, newSpeed):
 		if not self.posReached.is_set():
 			return
 		try:
@@ -96,7 +96,7 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 				print(e.pos())
 				e.accept()  # seems to be of no use here
 			elif e.type() == QtCore.QEvent.Wheel:
-				step = self.mousestep if e.angleDelta() > 0 else -self.mousestep # angleDelta needs some adjustment here
+				step = self.mousestep if e.angleDelta().y() > 0 else -self.mousestep # angleDelta needs some adjustment here
 				if self.mouseX:
 					self.gotoPos((step, None))
 				else:
