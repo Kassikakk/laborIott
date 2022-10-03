@@ -60,7 +60,7 @@ class Chira_VI(QMainWindow, Ui_MainWindow):
 		
 	def onTimer(self):
 		#handle goingtoWL
-		if not self.WLreached.isSet():
+		if not self.WLreached.is_set():
 			#check arrival
 			self.wlEdit.setStyleSheet("color: red")
 			if self.chira.stepsmissing[0] == 0:
