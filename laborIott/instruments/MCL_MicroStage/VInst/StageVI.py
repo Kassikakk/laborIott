@@ -31,7 +31,12 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 		self.setSpeedButt.clicked.connect(self.setSpeed)
 		self.gotoButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()], False))
 		self.goDeltaButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()]))
-
+		'''
+		self.addListButt.clicked.connect(...) # add position to self.posList (reference from self.refEdit.text()
+		self.posList.itemDoubleClicked.connect(...)
+		#ja veel ka Delete klahv
+		#ja väljast peaks juurde saama numbri ja refi järgi ja võib.olla oleks ka itemite arvu vaja
+'''
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.onTimer)
 		self.timer.start(200)
