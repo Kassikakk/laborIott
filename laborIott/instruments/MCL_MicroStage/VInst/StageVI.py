@@ -16,6 +16,7 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 	def __init__(self, address=None, inport=None, outport=None):
 		super(Stage_VI, self).__init__()
 		self.setupUi(self)
+		self.stage = None
 		self.connectInstr(address, inport, outport)
 
 		self.posReached = Event()  # there is currently no threading, so a bool would be ok as well
@@ -25,14 +26,16 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 		self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
 		self.mousestep = 0.1  # mm per step
 		self.mouseX = True  # mouse direction
+		self.posDict = {}
 
 		self.areaLabel.installEventFilter(self)
 
 		self.setSpeedButt.clicked.connect(self.setSpeed)
 		self.gotoButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()], False))
 		self.goDeltaButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()]))
+
+		self.addListButt.clicked.connect(self.addToList) # add position to self.posList (reference from self.refEdit.text()
 		'''
-		self.addListButt.clicked.connect(...) # add position to self.posList (reference from self.refEdit.text()
 		self.posList.itemDoubleClicked.connect(...)
 		#ja veel ka Delete klahv
 		#ja väljast peaks juurde saama numbri ja refi järgi ja võib.olla oleks ka itemite arvu vaja
@@ -120,6 +123,18 @@ class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 				#set the label here
 				self.mouseMoveLabel.setText("Dir: %s Step: %.4f" % ('X' if self.mouseX else 'Y', self.mousestep))
 		return super().eventFilter(o, e)
+
+	def addToList(self):
+		# read/generate refname, record position and put them on a list
+		refName = self.refEdit.text()
+		if len(refName) == 0:
+			refName = "pos"
+		while(True):
+			#cheki kas refName + "%d" % n on olemas; kui ei, siis breigi
+			# suurenda n
+
+
+		#update listwidget
 
 	def setEnable(self, state):
 		for wdg in self.dsbl:
