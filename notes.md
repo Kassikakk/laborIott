@@ -89,6 +89,14 @@ Vaata eelmised üle ja:
 * diskrimineerimine ja init!
 
 
+## 221013 
 
+Siin küsimusi on tekkinud nüüd Chira peal exciti tegemisega. Ja mõned nendest on:
 
+* salvestamise workflow, mis väärib vist pikemat diskussiooni
+* siis miks ergastuse esimene punkt kipub alati tulema väga suur (guess on, et getPWR annab millegipärast 1.0?)
+* Noh üldine suurem teema on veel masinate sisse-väljalülitatus ja selle arvestamine
+* Räägiti ka, et shutter lahti kinni nupp pole hästi nähtav, no see on win 11 peal veel hullem
 
+Salvestamine siis. Kuidagi peaks olema välditud ülekirjutamine. Siis, see ... Nimede genereerimine võiks kuidagi toimuda. Võib-olla võiks ka zip kirjutamise peale mõelda. Eniway, see võiks olla ka ikka mingis baasklassis lahendatud. Aga mõtleme. Kõigepealt, kuidas baasklass paika saada. 
+No holetame, et baasklassiks tuleb see My Docus ja seda võib edasi panna (võib ka automaatselt nt. kuupäeva foldri teha, kuigi tegelikult on seal järgmine tase ju üldiselt tegija nimi.) Nii, siis võiks seal olla võimalus, et hakatakse tegema kas nummerdatud või kellaajalisi foldereid ja siis sinna alla kas kaks foldrit või kaks zippi. ainult nummerdust on veits keeruline üldjuhul teha (või noh, mista ka niiväga), aga kellaajalised on veidi arusaamatud. 

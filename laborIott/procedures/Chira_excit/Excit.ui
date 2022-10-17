@@ -325,6 +325,19 @@
         <string>Chirascan</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="autoFolderChk">
+       <property name="geometry">
+        <rect>
+         <x>650</x>
+         <y>100</y>
+         <width>131</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>AutoCreate folders</string>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
@@ -464,7 +477,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -1,277 +1,368 @@
-#imports
-import sys
+import sys, os
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from queue import Queue
+
 from threading import Thread, Event
 from time import sleep, strftime, time
+from scipy.interpolate import interp1d
 import numpy as np
 import pandas as pd
+import userpaths
 
+# from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI as Newport_VI
+from laborIott.instruments.Newport1830.VInst.Newport1830VI import Newport1830_VI as Newport_VI
+from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI
 from laborIott.instruments.Chirascan.VInst.ChiraVI import Chira_VI
-from laborIott.instruments.Andor.VInst.AndorVI import Andor_VI
-from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI
 
 
+def localPath(filename):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
 
 
+class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
+	setpowerWL = QtCore.pyqtSignal(float)
+	setPwrCollection = QtCore.pyqtSignal(bool, bool)
+	getPwrData = QtCore.pyqtSignal(bool)
+	savePwrData = QtCore.pyqtSignal(str)
+	setExternalMode = QtCore.pyqtSignal(bool)
+	updateData = QtCore.pyqtSignal(tuple)
+	scanFinished = QtCore.pyqtSignal()
 
-Ui_MainWindow, QMainWindow = uic.loadUiType('Excit.ui')
+	startIdus = QtCore.pyqtSignal(bool)
+	saveSpcData = QtCore.pyqtSignal(str)
 
-class ChiraExcit(QMainWindow, Ui_MainWindow):
+	setChiraShutter = QtCore.pyqtSignal(bool)
+	setChiraWL = QtCore.pyqtSignal(float)
+
+	# start scanmode signal
+	# send data to main signal
+	# what we need for Chira? setChiraShutter, setChiraWL, vist cõik?
 
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
-		self.setupUi(self) 
-		
-		#nüüd peaks vist VI-d sisse tõmbama ja äkki showma ka või?
+		self.setupUi(self)
+		self.powerm = Newport_VI(False)
+		self.andor = AndorKymera_VI()
 		self.chira = Chira_VI()
-		self.andor = Andor_VI()
-		self.powerm = Newport842_VI()
-		#siis peaks küll ka vaatama, et kas ikka avanesid ja serverlahenduse puhul lisanduvad ka parameetrid
-		#no objektid ehk küll avanevad, aga kas ka instrumendid taga on?
-		
+
 		self.scanning = Event()
-		self.plot = self.graphicsView.plot([0,1],[0,0], pen = (255,131,0)) #fanta
-		
-		self.disbl = [] #vist e/v kõik peale start nupu (kui mingi view selector just jääb veel
-		
-		#võibolla neid ei lähe kõiki vaja
-		self.scanqueue = Queue() #Parameters to scanthread + signal data arrival
-		self.scancommq = Queue() #commands from scanthread
-		self.curWLqueue = Queue()#current wl from thread
-		self.startTimequeue = Queue()
-		self.scanThread  = None
-		self.startTime = None
-		
+		self.scanThread = None
+		self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
+		self.plotx = [[0, 1]]
+		self.ploty = [[0, 0]]
+		self.spectraX = self.andor.getX()  # get the current x scale
+		self.extPwrData = None  # external powerdata
+		self.setSaveLoc(userpaths.get_my_documents())
+
+		# widget status
+		self.dsbl = [self.startEdit, self.stepEdit, self.stopEdit, self.spcChk, self.pwrChk, self.sxminEdit,
+					 self.sxmaxEdit, self.pwrRadioBox,
+					 self.locButt, self.nameEdit, self.saveButt,
+					 self.formatCombo]  # vist e/v kõik peale start nupu (kui mingi view selector just jääb veel
+		self.setWidgetState(False)  # no scanning
 		self.startButt.clicked.connect(self.onStart)
-		self.axminEdit.textChanged.connect(self.updPlot)
-		self.axmaxEdit.textChanged.connect(self.updPlot)
-		self.powerRefFile.clicked.connect(self.getPowerData)
-		#we need to connect signals to all slots we want to control
-		self.chira.show()
-		self.andor.show()
+		self.showPwrmButt.clicked.connect(lambda: self.powerm.show())
+		self.showSpctrmButt.clicked.connect(lambda: self.andor.show())
+		self.showChiraButt.clicked.connect(lambda: self.chira.show())
+
+		self.spcChk.clicked.connect(lambda: self.setWidgetState(False))
+		self.pwrChk.clicked.connect(lambda: self.setWidgetState(False))
+		self.locButt.clicked.connect(self.onGetLoc)
+		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
+
+		# outer connections
+		self.setpowerWL.connect(self.powerm.setPwrWL)
+		self.setPwrCollection.connect(self.powerm.setCollect)
+		self.getPwrData.connect(self.powerm.getData)
+		self.savePwrData.connect(self.powerm.saveData)
+
+		self.startIdus.connect(self.andor.run)
+		self.saveSpcData.connect(self.andor.saveData)
+
+		self.setChiraShutter.connect(self.chira.setShutter)
+		self.setChiraWL.connect(self.chira.gotoWL)
+
+		self.setExternalMode.connect(self.powerm.setExternal)
+		self.setExternalMode.connect(self.andor.setExternal)
+		self.setExternalMode.connect(self.chira.setExternal)
+		self.updateData.connect(self.update)
+		self.scanFinished.connect(self.cleanScan)
+
+		# show everything
 		self.powerm.show()
-		
-	
-	def updPlot(self):
-		minx = float(self.axminEdit.text())
-		maxx = float(self.axmaxEdit.text())
-		if maxx > minx:
-			#we need to set self.plotx[1] min and max but keep the length
-			#can len somehow be 1 here?
-			self.plotx[1] = np.arange(minx, maxx, (maxx - minx) / (len(self.plotx[1])))
-		plotType = 1 if self.viewSpc.isChecked() else 2 if self.viewPwr.isChecked() else 3 if self.viewTrans.isChecked() else 0
-		self.plot.setData(self.plotx[plotType],self.ploty[plotType])
-		
-	def getSum(self):
-		minind = 0
-		maxind = len(self.plotx[1])
-		min1 = float(self.sxminEdit.text())
-		max1 = float(self.sxmaxEdit.text())
-		#both need to be between limits and min < max
-		#TODO: check this for +-1's here or there
-		if (min1 > self.plotx[1][0]) and (max1 < self.plotx[1][-1]) and (min1 < max1):
-			step = (self.plotx[1][-1] - self.plotx[1][0]) / (len(self.plotx[1]) - 1)
-			minind = int((min1 - self.plotx[1][0]) / step)
-			maxind = int((max1 - self.plotx[1][0]) / step)
-		return sum(self.ploty[1][minind:maxind])
-	
-	def getPwr(self):
-		if self.powerRefFile.isChecked(): #there may be no power data
-			try:
-				pwr = interp1d(self.pwrData[0], self.pwrData[1])(float(self.wlLabel.text()))
-			except: #out of limits
-				pwr = 1.0
-			return pwr
-		elif self.powerRefCur.isChecked():
-			if self.measMode == 1 and self.pwrrefmean is not None:
-				return self.pwrrefmean
-			elif self.measMode == 2 and self.pwrmean is not None:
-				return self.pwrmean
-		else:
-			return 1.0
-		return pwr
-		
-	def getPowerData(self):
-		if self.powerRefFile.isChecked():
-			allok = True
-			fname = QtGui.QFileDialog.getOpenFileName(self, 'Power data file')[0]
-			#try:
-			data = pd.read_csv(fname, sep='\t', header = None)
-			if len(data.columns) == 2:
-				self.pwrData = data
-			else:
-				allok = False
-			#except:
-			#	allok = False
-			
-			if not allok:
+		self.andor.show()
+		self.chira.show()
+
+	def setWidgetState(self, scanstate):
+		for b in self.dsbl:
+			b.setEnabled(not scanstate)
+		if not scanstate:
+			self.pwrTimeEdit.setEnabled(self.pwrChk.isChecked() and not self.spcChk.isChecked())
+			self.powerRefCur.setEnabled(self.pwrChk.isChecked())
+			if (self.pwrChk.isChecked() and self.powerRefNone.isChecked()):
+				self.powerRefCur.setChecked(True)
+			if (not self.pwrChk.isChecked() and self.powerRefCur.isChecked()):
 				self.powerRefNone.setChecked(True)
-				
+
 	def onStart(self):
-		if self.scanning.isSet():
-			#end scanning
+		if self.scanning.is_set():
+			# end scanning
 			self.cleanScan()
 			self.scanThread.join()
-			
+
 		else:
-			#we need to do some initializing
-			startwl = float(self.startEdit.text())
-			stopwl = float(self.stopEdit.text())
-			stepwl =  float(self.stepEdit.text())
-			nopoints = int((stopwl-startwl)/stepwl + 1)
-			
-			if nopoints < 1:
-				QtWidgets.QMessageBox.information(self, "NB!","The scan has just one point")
-				#kuigi tegelikult on ju üks punkt alati?
+			# emit signal to subwindows
+			# we need to do some initializing
+			# well there will be problems if not filled or filled wrongly, so...
+			try:
+				startwl = float(self.startEdit.text())
+				stopwl = float(self.stopEdit.text())
+				stepwl = float(self.stepEdit.text())
+			except ValueError:
+				QtWidgets.QMessageBox.information(self, "NB!", "Check start-stop-step fields")
 				return
-			#we could also show some checklist here
-			self.plotx[0] = np.array([startwl + i*stepwl for i in range(nopoints)])
+			nopoints = int((stopwl - startwl) / stepwl + 1)
+			pwrTime = float(self.pwrTimeEdit.text())
+			usePwr = self.pwrChk.isChecked()
+			useSpc = self.spcChk.isChecked()
+			self.spectraX = self.andor.getX()  # update
+
+			if nopoints < 1:
+				QtWidgets.QMessageBox.information(self, "NB!", "The scan has just one point")
+				# kuigi tegelikult on ju üks punkt alati?
+				return
+
+			#folder creation goes here
+			if self.autoFolderChk.isChecked():
+				#the current folder will serve as base
+				#find a previously non-existing folder
+				n = 0
+				while(True):
+					baseFolder = os.path.join(self.saveLoc, 'scan_%d' % n)
+					if not os.path.isdir(baseFolder):
+						break
+					n += 1
+				#now create three folders and set them as new bases
+				os.mkdir(baseFolder)
+				self.setSaveLoc(baseFolder)
+				if useSpc:
+					spcFolder = os.path.join(baseFolder, 'spc')
+					os.mkdir(spcFolder)
+					#ToDO: turn this to setSaveLoc later
+					self.andor.saveLoc = spcFolder
+					self.andor.locLabel.setText(spcFolder)
+				if usePwr:
+					pwrFolder = os.path.join(baseFolder, 'pwr')
+					os.mkdir(pwrFolder)
+					#ToDO: turn this to setSaveLoc later
+					self.powerm.saveLoc = pwrFolder
+					self.powerm.locLabel.setText(pwrFolder)
+
+
+			# we could also show some checklist here
+			self.plotx[0] = np.array([startwl + i * stepwl for i in range(nopoints)])
 			self.ploty[0] = np.zeros(nopoints)
-			self.plotx[3] = np.array([startwl + i*stepwl for i in range(nopoints)])
-			self.ploty[3] = np.zeros(nopoints)
-			#open shutter
-			self.emit("Chira_Shutter/todev", 'open')
-			for b in self.scandim:
-				b.setEnabled(False)
-			self.scanThread  = Thread(target = self.scanProc)
+			# open Chira shutter
+			self.setChiraShutter.emit(True)
+
+			self.setWidgetState(True)
+			self.scanThread = Thread(target=self.scanProc, args=(startwl, stopwl, stepwl, pwrTime, useSpc, usePwr))
 			self.startButt.setText("Stop")
-			self.startTime = int(time())
+			self.setExternalMode.emit(True)
+			self.startTime = time()
 			self.scanning.set()
 			self.scanThread.start()
 
+	def scanProc(self, startwl, stopwl, stepwl, pwrTime, useSpc, usePwr):
 
-	def scanProc(self):
-		#tegelikult ikka on vist, et tuleb väljastada signaleid ja siis (Eventi vaadata?)
-		#ja threadi käigus mingeid muid gui asju ikka cäppida ei või
-		#need peaks siis tegelikult parameetritena ette andma
-		#let's copy to locals as much as possible
-		startwl = float(self.startEdit.text())
-		stopwl = float(self.stopEdit.text())
-		stepwl =  float(self.stepEdit.text())
 		curwl = startwl
-		#self.curWLqueue.put(curwl)
-		#wl change
+		ind = 0
+		while np.sign(stepwl) * curwl <= np.sign(stepwl) * stopwl:  # enable negative step
 
-		#scan type
-		powerSeries =self.pwrChk.isChecked()
-		spcMeasure = self.iDusChk.isChecked()
-		keepShutOpen = self.andor.shutButt.isChecked() #way to keep it open if it behaves badly
-		#position change:
-		refpos = self.refPos #not sure if it makes any sense to double those
-		sigpos = self.sigPos
-		takeref = self.refCheck.isChecked()
-		#level monitor / OD adjust: Not implemented
+			self.setChiraWL.emit(curwl)
+			# self.chira.WLreached.wait() #vat'uvitav, kas see töötab?
 
+			if usePwr:
+				# adjust powermeter wl
+				self.setpowerWL.emit(curwl)
+				# start powermeter series + reset previous
+				self.setPwrCollection.emit(True, True)
 
-		while np.sign(stepwl)*curwl <= np.sign(stepwl)*stopwl: #enable negative step
+			# wait a while
+			if useSpc:  # Spectrometer determines the time
+				# idus shutter open?
+				self.startIdus.emit(True)  # reserve false for abort?
+				# wait for data arrival
+				while self.andor.dataQ.empty():
+					if not self.scanning.is_set():
+						return
+				# idus shutter close?
+				xData, spcData = self.andor.dataQ.get(False)
+			# aga kuidas siin selle x-skaalaga on?
+			else:
+				spcData = None
+				startTime = time()
+				while (time() < startTime + pwrTime):
+					if not self.scanning.is_set():
+						return
 
-			#adjust powermeter wl
-			if powerSeries:
-				self.scancommq.put(("PwrWL/todev", curwl))
-				
-			#goto wl
-			self.scancommq.put(("Chira_WL/todev", curwl))
-			self.goingtoWL.set()
-			
-			while self.goingtoWL.isSet():
-				if not self.scanning.isSet():
-					return
-			
-			for i,pos in enumerate([refpos, sigpos]):
-				#do refpos first, then sigpos can be used to level-check
-				if takeref: #kas on vaja võtta ka ref?
-					self.scancommq.put(("Cuvette_angle/todev", pos)) #what if position already?
-					self.goingtoPos.set()
-					while self.goingtoPos.isSet():
-						if not self.scanning.isSet():
-							return
+			if usePwr:
+				# stop powermeter series, wait for data
+				self.setPwrCollection.emit(False, False)
+				self.getPwrData.emit(True)  # mean and dev only
+				while self.powerm.dataQ.empty():
+					if not self.scanning.is_set():
+						return
+				pwrData = self.powerm.dataQ.get(False)  # list
+				# order powerdata saving as needed (construct name)
+				self.savePwrData.emit("{:}nm.txt".format(curwl))
+			else:
+				pwrData = None
+
+			if useSpc:  # save the spectral data
+				if usePwr:
+					spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
 				else:
-					if i == 0: #muidu ainult signal point (ja ei mingit käsku liigutamiseks)
-						continue
-				#shutters
-				if spcMeasure and not keepShutOpen:
-					self.scancommq.put(("IdusShutter/todev", 'open'))
-				#if there are any more shutters, open them, too
-				self.curWLqueue.put((curwl, i if takeref else 2)) #set next wl for UI
-				#we should also signal if this is sig or ref but also if there is any separate S/R 
+					spcfilename = "{:}nm.txt".format(curwl)
+				self.saveSpcData.emit(spcfilename)
 
-				#start acquisition
-				if spcMeasure:
-					self.scancommq.put(("IdusStatus/todev", 'start'))
-					#print("Start given")
-				else:
-					self.startTimequeue.put(time())
-
-				self.acquiring.set()
-				while self.acquiring.isSet():
-					if not self.scanning.isSet():
-						return 
-
-				#close shutters
-				if spcMeasure and not keepShutOpen:
-					self.scancommq.put(("IdusShutter/todev", 'closed'))
-				
+			# calculate and emit (or Queue) results to main thread
+			self.updateData.emit((ind,) + (spcData,) + (pwrData,))
+			# note that saving could in principle be invoked from main thread as well
 			curwl += stepwl
+			ind += 1
+		self.scanFinished.emit()
 
 	def cleanScan(self):
-		#non-blocking cleanup after scan
 		self.scanning.clear()
-		while not self.scancommq.empty():
-			self.scancommq.get(False)
-		for b in self.scandim:
-			b.setEnabled(True)
-		if self.iDusChk.isChecked():
-			self.onIdusShutter() #set the shutter according to button state
-		self.onChiraShutter()
+		self.setWidgetState(False)
 		self.startButt.setText("Start")
+		self.setChiraShutter.emit(False)
 		self.scanProgBar.setValue(0)
 		self.scanProgBar.setFormat("0%%")
-		#save the scan preview
-		self.spc.addSpc(self.ploty[0].tolist(), start = self.plotx[0][0],step = self.plotx[0][1]- self.plotx[0][0],  comment = "Scan preview")
-		self.spc.writeSpc(self.resultfile)
-		
-	def setProgress(self):
-		start = float(self.startEdit.text())
-		stop = float(self.stopEdit.text())
-		step =  float(self.stepEdit.text())
-		curwl = float(self.wlLabel.text())
-		#ok, this is very approximate, but
-		if self.iDusChk.isChecked():
-			timestep = float(self.expEdit.text()) * int(self.noAccEdit.text())
-		else:
-			timestep = float(self.pwrtimeEdit.text()) + float(self.stepEdit.text())*0.2 #very approximately
-		
-		#fractional progress
-		prg = (curwl - start)/(stop - start)
-		#current scan result index
-		ind = int((curwl - start)/step)
-		#percent
-		progress = int(prg*100)
-		#remmin = int((stop - curwl) * timestep/ (step*60))
-		#estimation by time spent
-		remmin = int((stop - curwl) * (int(time())-self.startTime) / ((curwl-start + step)*60))
+		self.setExternalMode.emit(False)
+		self.saveData(self.nameEdit.text())
+		if self.autoFolderChk.isChecked():
+			#go back to parent folder
+			self.setSaveLoc(os.path.dirname(self.saveLoc))
+
+	def update(self, data):
+		# supposedly called while scanning only
+		index, spcData, pwrData = data
+
+		if spcData is not None:
+			spsum = self.getSum(self.spectraX, spcData)
+			# figure out power
+			power = self.getPwr(pwrData[0])
+			# see what's power & calc excit
+			# put into plot
+			self.ploty[0][index] = spsum / power
+		elif pwrData is not None:
+			self.ploty[0][index] = pwrData[0]
+		self.plot.setData(self.plotx[0], self.ploty[0])
+		self.saveData(self.nameEdit.text())
+
+		# progress
+		# fractional progress
+		prg = (index + 1) / len(self.plotx[0])
+		progress = int(prg * 100)
+		# estimation by time spent
+		remmin = int((1 / prg - 1.0) * (time() - self.startTime) / 60)
 		self.scanProgBar.setValue(progress)
 		self.scanProgBar.setFormat("%d%% (%d min)" % (progress, remmin))
-		return ind
-		
+
+	def getSum(self, x, y):
+		# sum y-s from the x values given by fields
+		minind = 0
+		maxind = len(x)
+		min1 = float(self.sxminEdit.text())
+		max1 = float(self.sxmaxEdit.text())
+		# both need to be between limits and min < max
+		# TODO: check this for +-1's here or there
+		if (min1 > x[0]) and (max1 < x[-1]) and (min1 < max1):
+			step = (x[-1] - x[0]) / (len(x) - 1)
+			minind = int((min1 - x[0]) / step)
+			maxind = int((max1 - x[0]) / step)
+		return sum(y[minind:maxind])
+
+	def getPwr(self, defaultval):
+		if self.powerRefFile.isChecked():  # there may be no power data
+			try:
+				pwr = interp1d(self.extPwrData[0], self.extPwrData[1])(float(self.wlLabel.text()))
+			except:  # out of limits
+				pwr = 1.0
+			return pwr
+		elif self.powerRefCur.isChecked() and defaultval is not None:
+			return defaultval
+		else:
+			return 1.0
+		return pwr
+
+	def getPowerData(self):
+		# read external power data file into self.extPwrData
+		if self.powerRefFile.isChecked():
+			allok = True
+			fname = QtGui.QFileDialog.getOpenFileName(self, 'Power data file')[0]
+			# try:
+			data = pd.read_csv(fname, sep='\t', header=None)
+			if len(data.columns) == 2:
+				self.extPwrData = data
+			else:
+				allok = False
+			# except:
+			#	allok = False
+
+			if not allok:
+				self.powerRefNone.setChecked(True)
+
+	def setSaveLoc(self, loc):
+		self.saveLoc = loc
+		self.locLabel.setText(self.saveLoc)
+
+	def onGetLoc(self):
+		self.setSaveLoc(QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+																  QtWidgets.QFileDialog.ShowDirsOnly
+																  | QtWidgets.QFileDialog.DontResolveSymlinks))
 
 
+	def saveData(self, name):
+		# saves existing data under self.saveLoc + name
+		# however, name validity and existance should be checked first
+		# also if we have any data
+		if len(name) == 0:
+			return
+
+		if self.formatCombo.currentText() == 'ASCII XY':
+			data = pd.DataFrame(list(zip(self.plotx[0], self.ploty[0])))
+			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+		elif self.formatCombo.currentText() == 'ASCII Y':
+			data = pd.DataFrame(list(self.ploty[0]))
+			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+
+	def closeEvent(self, event):
+		# close subwins and see that no threads are running
+		if self.scanning.is_set():
+			self.scanning.clear()
+			self.scanThread.join(timeout=10)
+		self.powerm.can_close = True
+		self.powerm.close()
+		self.andor.close()
+		self.chira.close()
+		event.accept()
 
 
-
-def myExitHandler():
-	#QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
-	#stopime threadid?
+def ExitHandler():
+	# QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
+	# seems like we need to close the thread here as destructor is never called
+	# note that this is only called if it is a main window
 	pass
 
 
-#needed for running from within Spyder etc.
-if not QtWidgets.QApplication.instance():
-	app = QtWidgets.QApplication(sys.argv)
-else:
-	app = QtWidgets.QApplication.instance()
-app.aboutToQuit.connect(myExitHandler)
-window = ChiraExcit()
-window.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+	if not QtWidgets.QApplication.instance():
+		app = QtWidgets.QApplication(sys.argv)
+	else:
+		app = QtWidgets.QApplication.instance()
+	app.aboutToQuit.connect(ExitHandler)
+	window = ChiraExcit()
+	window.show()
+	sys.exit(app.exec_())
