@@ -319,9 +319,12 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		self.locLabel.setText(self.saveLoc)
 
 	def onGetLoc(self):
-		self.setSaveLoc(QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+		fname = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
 																  QtWidgets.QFileDialog.ShowDirsOnly
-																  | QtWidgets.QFileDialog.DontResolveSymlinks))
+																  | QtWidgets.QFileDialog.DontResolveSymlinks)
+		if fname:
+			self.setSaveLoc(fname)
+																  
 
 
 	def saveData(self, name):

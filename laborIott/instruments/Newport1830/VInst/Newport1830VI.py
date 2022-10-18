@@ -8,6 +8,7 @@ from laborIott.instruments.Newport1830.Inst.Newport1830 import Newport1830
 import numpy as np
 from threading import Thread, Event
 from queue import Queue
+import userpaths
 
 '''
 autoscale
@@ -41,7 +42,7 @@ class Newport1830_VI(*uic.loadUiType(localPath('Powermeter.ui'))):
 		#external stuff
 		self.external = False
 		self.dsbl = [self.pwrWlButt, self.startButt, self.resetButt, self.attnChk]
-		self.saveLoc = './'
+		self.setSaveLoc(userpaths.get_my_documents())
 		self.can_close = can_close
 		
 		self.measuring = Event()
@@ -156,11 +157,16 @@ class Newport1830_VI(*uic.loadUiType(localPath('Powermeter.ui'))):
 		
 	#saving
 	
-	def onGetLoc(self):
-		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", "./",
-							QtWidgets.QFileDialog.ShowDirsOnly
-							| QtWidgets.QFileDialog.DontResolveSymlinks)
+	def setSaveLoc(self, loc):
+		self.saveLoc = loc
 		self.locLabel.setText(self.saveLoc)
+
+	def onGetLoc(self):
+		fname = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+																  QtWidgets.QFileDialog.ShowDirsOnly
+																  | QtWidgets.QFileDialog.DontResolveSymlinks)
+		if fname:
+			self.setSaveLoc(fname)
 	
 	def saveData(self, name):
 		#saves existing data under self.saveLoc + name
@@ -187,11 +193,11 @@ class Newport1830_VI(*uic.loadUiType(localPath('Powermeter.ui'))):
 			wdg.setEnabled(not state)
 			
 	def closeEvent(self, event):
-		print("Powerm closeEvent")
+		#close the thread here
 		if self.can_close:
 			self.thread_stop.set()
 			self.workerThread.join(timeout=10)
-			print("powerm worker stopped.")
+			#print("powerm worker stopped.")
 		event.accept()
 
 		

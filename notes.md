@@ -100,3 +100,9 @@ Siin küsimusi on tekkinud nüüd Chira peal exciti tegemisega. Ja mõned nendes
 
 Salvestamine siis. Kuidagi peaks olema välditud ülekirjutamine. Siis, see ... Nimede genereerimine võiks kuidagi toimuda. Võib-olla võiks ka zip kirjutamise peale mõelda. Eniway, see võiks olla ka ikka mingis baasklassis lahendatud. Aga mõtleme. Kõigepealt, kuidas baasklass paika saada. 
 No holetame, et baasklassiks tuleb see My Docus ja seda võib edasi panna (võib ka automaatselt nt. kuupäeva foldri teha, kuigi tegelikult on seal järgmine tase ju üldiselt tegija nimi.) Nii, siis võiks seal olla võimalus, et hakatakse tegema kas nummerdatud või kellaajalisi foldereid ja siis sinna alla kas kaks foldrit või kaks zippi. ainult nummerdust on veits keeruline üldjuhul teha (või noh, mista ka niiväga), aga kellaajalised on veidi arusaamatud. 
+
+## 221018
+
+* pikad import nimed, kas nendega midagi ei saa teha?
+* vinsti baasklass on juba lausa karjuv, kuidas lahendada instr/adapter ja siis protseduuri klass (kus on save, aga instrumentide asemel on teised vinstid ja externaliga on ka teised lood)
+* Võib-olla üldisema timer / thread lähenemise peale peaks ka mõtlema

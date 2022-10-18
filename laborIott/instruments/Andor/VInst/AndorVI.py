@@ -8,6 +8,7 @@ from laborIott.adapters.SDKAdapter import SDKAdapter
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.Andor.Inst.andor import IDus 
 import os
+import userpaths
 
 
 def localPath(filename):
@@ -32,7 +33,7 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 
 		#connect instrument
 		self.connectInstr(address, inport, outport)
-		print("instrument xonnected")
+
 		
 		#parameetrid
 		self.data = []
@@ -46,6 +47,7 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 		self.external = False
 		self.dataQ = Queue()
 		self.dsbl = [self.runButt, self.setParmsButt, self.backChk, self.locButt, self.saveButt, self.formatCombo]
+		self.setSaveLoc(userpaths.get_my_documents())
 		
 		#plot
 		self.xarr = self.idus.wavelengths
@@ -208,12 +210,18 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 	
 	def getX(self):
 		return self.xarr
-			
-	def onGetLoc(self):
-		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", "./",
-							QtWidgets.QFileDialog.ShowDirsOnly
-							| QtWidgets.QFileDialog.DontResolveSymlinks)
+		
+	def setSaveLoc(self, loc):
+		self.saveLoc = loc
 		self.locLabel.setText(self.saveLoc)
+
+	def onGetLoc(self):
+		fname = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+																  QtWidgets.QFileDialog.ShowDirsOnly
+																  | QtWidgets.QFileDialog.DontResolveSymlinks)
+		if fname:
+			self.setSaveLoc(fname)
+												
 		
 	def saveData(self, name):
 		#saves existing data under self.saveLoc + name
@@ -223,6 +231,7 @@ class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 			return
 		if len(self.data) != len(self.xarr):
 			return 
+		
 		
 		if self.formatCombo.currentText() == 'ASCII XY':
 			data = pd.DataFrame(list(zip(self.xarr, self.data)))

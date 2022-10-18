@@ -1,8 +1,9 @@
-from .AndorVI import Andor_VI
+from laborIott.instruments.Andor.VInst.AndorVI import Andor_VI
 from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.Andor.Inst.kymera import IDusKymera
 from PyQt5 import QtWidgets
-from .KymeraDlg import Ui_KymeraDialog #pyuic5 generated dialog
+from laborIott.instruments.Andor.VInst.KymeraDlg import Ui_KymeraDialog #pyuic5 generated dialog
 import os, sys
 
 
@@ -11,8 +12,8 @@ def localPath(filename):
 
 class AndorKymera_VI(Andor_VI):
 	
-	def __init__(self):
-		super(AndorKymera_VI, self).__init__()
+	def __init__(self, address= None, inport= None, outport = None):
+		super(AndorKymera_VI, self).__init__(address, inport, outport)
 		self.dlg = QtWidgets.QDialog()
 		self.kymDlg = Ui_KymeraDialog()
 		self.kymDlg.setupUi(self.dlg)
@@ -41,9 +42,19 @@ class AndorKymera_VI(Andor_VI):
 		self.kymDlg.gratingCombo.currentIndexChanged.connect(self.setGrating)
 	
 	
-	def connectInstr(self): #overrided function
+	def connectInstr(self, address, inport, outport):
 		#instrumendi tekitamine, seekord IDusKymera
-		self.idus = IDusKymera(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
+		if address is None:
+			# local instrument
+			self.idus = IDusKymera(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
+		else:
+			# connect to remote instrument
+			# default port is 5555
+			inp = 5555 if inport is None else inport
+			outp = inp if outport is None else outport
+			self.idus = IDusKymera(ZMQAdapter("iDusKymera", address, inp, outp))
+		
+		
 	
 		
 	def setCenterWL(self, value):
