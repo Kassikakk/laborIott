@@ -213,6 +213,9 @@
          <height>21</height>
         </rect>
        </property>
+       <property name="text">
+        <string>scan.txt</string>
+       </property>
       </widget>
       <widget class="QLabel" name="locLabel">
        <property name="geometry">

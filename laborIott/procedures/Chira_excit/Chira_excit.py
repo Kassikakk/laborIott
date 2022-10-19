@@ -170,6 +170,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 			self.setExternalMode.emit(True)
 			self.startTime = time()
 			self.scanning.set()
+			sleep(1) #make sure the shutter has opened
 			self.scanThread.start()
 
 	def scanProc(self, startwl, stopwl, stepwl, pwrTime, useSpc, usePwr):
@@ -179,7 +180,11 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		while np.sign(stepwl) * curwl <= np.sign(stepwl) * stopwl:  # enable negative step
 
 			self.setChiraWL.emit(curwl)
-			# self.chira.WLreached.wait() #vat'uvitav, kas see töötab?
+			while self.chira.WLreached.is_set(): #first wait for the motion to start
+				pass
+			self.chira.WLreached.wait() #then wait it to stop.
+			#looks like it also works if we're already there
+
 
 			if usePwr:
 				# adjust powermeter wl
