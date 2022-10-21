@@ -5,8 +5,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import pyqtgraph as pg
 import pandas as pd
 
-from laboriott.adapters.SDKAdapter import SDKAdapter
-from laboriott.instruments.Flame.Inst import Flame #LabDev folder on siin pathi peal aga kuidas peaks?
+from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.instruments.Flame.Inst.Flame import Flame #LabDev folder on siin pathi peal aga kuidas peaks?
 import os
 
 
@@ -37,7 +37,7 @@ class Flame_VI(QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		#instrumendi tekitamine
-		self.flame = Flame.Flame(SDKAdapter(localPath("../Inst/OmniDriver32"), False))
+		self.flame = Flame(SDKAdapter(localPath("../Inst/OmniDriver32"), False))
 		#siin peaks kuidagi adapterivahetust organiseerima vajadusel
 		
 		#parameetrid
