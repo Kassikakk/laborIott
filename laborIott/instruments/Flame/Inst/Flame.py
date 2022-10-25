@@ -1,5 +1,5 @@
-from pymeasure.instruments import Instrument
-from pymeasure.instruments.validators import strict_discrete_set
+from laborIott.instrument import Instrument
+from laborIott.validators import strict_discrete_set
 from ctypes import POINTER, Structure, c_int, c_double, addressof
 from threading import Thread, Event
 
