@@ -20,7 +20,7 @@ def localPath(filename):
 
 #from multilistener import MultiListener
 #from queue import Queue
-#from threading import Thread, Event
+from threading import Event
 #from time import sleep, strftime, time
 #import numpy as np
 from math import log10
@@ -44,7 +44,7 @@ class Flame_VI(QMainWindow, Ui_MainWindow):
 		self.data = []
 		self.back = []
 		self.ref = []
-		self.acquiring = False
+		self.acquiring = Event() #define as event so other threads can check it
 		self.saveLoc = './'
 		self.external = False
 		
@@ -127,13 +127,16 @@ class Flame_VI(QMainWindow, Ui_MainWindow):
 				self.setAcq(True)
 				
 	def setAcq(self, state):
-		self.acquiring = state
+		if state:
+			self.acquiring.set()
+		else:
+			self.acquiring.clear()
 		for wdg in [self.setParmsButt, self.saveButt]:
 			wdg.setEnabled(not state)
 
 
 	def run(self):
-		if (self.acquiring): #ongoing acquisition
+		if (self.acquiring.is_set()): #ongoing acquisition
 			return
 		if self.runButt.isChecked() or self.external:
 			#start running
@@ -142,7 +145,7 @@ class Flame_VI(QMainWindow, Ui_MainWindow):
 			self.setAcq(True)
 			
 	def onSetParms(self):
-		if (self.acquiring): #ongoing acquisition
+		if (self.acquiring.is_set()): #ongoing acquisition
 			return
 		try:
 			exp = float(self.expEdit.text())
@@ -196,7 +199,7 @@ class Flame_VI(QMainWindow, Ui_MainWindow):
 		dsbl = [self.runButt, self.setParmsButt, self.backChk, self.elDarkChk, self.locButt, self.saveButt, self.formatCombo]
 		if state:
 			self.runButt.setChecked(False)
-			if (self.acquiring):
+			if (self.acquiring.is_set()):
 				#wait until stopped
 				while(len(self.flame.asyncready) == 0):
 					pass
