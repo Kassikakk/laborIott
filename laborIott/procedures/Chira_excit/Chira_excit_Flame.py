@@ -237,7 +237,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 				# order powerdata saving as needed (construct name)
 				self.savePwrData.emit("{:}nm.txt".format(curwl))
 			else:
-				pwrData = None
+				pwrData = [None, None]
 
 			if useSpc:  # save the spectral data
 				if usePwr:
