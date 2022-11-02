@@ -13,48 +13,59 @@ import os
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
-#ok, but how do we treat the ui part
-# 1) added later 2) some basic ui that can be replaced? In the latter case we need to use the scheme which allows for late connection of .ui
-#I would say that we need two classes VInst ->Saving_VI. Although some might say, just log everything in any case, so there could be saving automatically included as well.
 
 
 class VInst(QtWidgets.QMainWindow):
+	'''
+	The class is supposed to take care of some recurring tasks:
+	-saving data
+	-selecting adapter (default or network)
+	-selecting external mode
+
+	'''
 
 	def __init__(self, uifile, address= None, inport= None, outport = None):
 		super(VInst, self).__init__()
 		uic.loadUi(localPath(uifile), self)
 		#we can determine some widgets here
+		self.dsbl = []
 		self.locButt = self.findChild(QtWidgets.QPushButton, 'locButt')
 		if self.locButt is not None:
 			self.locButt.clicked.connect(self.onGetLoc)
+			self.dsbl += [self.locButt]
 		self.saveButt = self.findChild(QtWidgets.QPushButton, 'saveButt')
 		self.nameEdit = self.findChild(QtWidgets.QLineEdit, 'nameEdit')
 		if self.saveButt is not None and self.nameEdit is not None:
 			self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
-		self.xdata = None
-		self.ydata = None
+			self.dsbl += [self.saveButt, self.nameEdit]
+		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
+		if self.formatCombo is not None:
+			self.dsbl += [self.formatCombo]
+		self.xdata = []
+		self.ydata = []
+		self.address = address
+		self.inport = inport
+		self.outport = outport
 
-		#what do we do here to determine adapter / instrument?
+		#should we use an event here?
 		self.external = False
-		self.dsbl = []
+
 		self.saveLoc = userpaths.get_my_documents()
 
-
-	def connectInstr(self, address, inport, outport):
-		#instrumendi tekitamine
-		if address is None:
-			# local instrument
-			self.idus = IDus(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
+	def getAdapter(self, def_adapter, refname):
+		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
+		if self.address is None:
+			return def_adapter
 		else:
-			# connect to remote instrument
-			# default port is 5555
-			inp = 5555 if inport is None else inport
-			outp = inp if outport is None else outport
-			self.idus = IDus(ZMQAdapter("iDus", address, inp, outp))
+			inp = 5555 if self.inport is None else self.inport
+			outp = inp if self.outport is None else self.outport
+			return ZMQAdapter(refname, self.address, inp, outp)
+
 
 	def setExternal(self, state):
-		self.external = state
 		# do any waiting and stopping needed to enter the second state
+		#in the child class, then call parent
+		self.external = state
 		for wdg in self.dsbl:
 			wdg.setEnabled(not state)
 
@@ -74,7 +85,7 @@ class VInst(QtWidgets.QMainWindow):
 		if self.xdata is not None and (len(self.xdata) != len(self.ydata)):
 			return
 
-		if self.formatCombo.currentText() == 'ASCII XY':
+		if self.formatCombo is None or self.formatCombo.currentText() == 'ASCII XY':
 			data = pd.DataFrame(list(zip(self.xdata, self.ydata)))
 			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
 		elif self.formatCombo.currentText() == 'ASCII Y':
