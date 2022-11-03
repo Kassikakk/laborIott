@@ -7,8 +7,6 @@ import userpaths
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
 import os
-
-
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
@@ -25,7 +23,7 @@ class VInst(QtWidgets.QMainWindow):
 
 	def __init__(self, uifile, address= None, inport= None, outport = None):
 		super(VInst, self).__init__()
-		uic.loadUi(localPath(uifile), self) #should we do localPath here or ?
+		uic.loadUi(uifile, self) #should we do localPath here or ?
 		#we can determine some widgets here
 		#probably zip will be added
 		self.dsbl = []

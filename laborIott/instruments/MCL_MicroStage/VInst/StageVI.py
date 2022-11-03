@@ -4,13 +4,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from laborIott.adapters.SDKAdapter import SDKAdapter
 
 from laborIott.instruments.MCL_MicroStage.Inst.MicroStage import MCL_MicroStage
-from laborIott.instruments.Vinst import VInst, localPath
+from laborIott.instruments.VInst import VInst
+
+import os
+def localPath(filename):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
 
 class Stage_VI(VInst):
 
 	def __init__(self, address=None, inport=None, outport=None):
-		super().__init__('Stage.ui',address, inport, outport)
+		super().__init__(localPath('Stage.ui'),address, inport, outport)
 
 		self.stage = MCL_MicroStage(self.getAdapter(SDKAdapter(localPath("../Inst/MicroDrive"), False), "MCL_MS"))
 
@@ -45,8 +49,8 @@ class Stage_VI(VInst):
 			# check arrival
 			self.posLabel.setStyleSheet("color: red")
 			if not self.stage.ismoving:
-				if not self.external:
-					self.setEnable(True)
+				#if not self.external:
+				#	self.setEnable(True)
 				self.posReached.set()
 				self.posLabel.setStyleSheet("color: black")
 				self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
@@ -93,7 +97,7 @@ class Stage_VI(VInst):
 			if e.type() == QtCore.QEvent.MouseButtonDblClick:
 				# the problem is that it still also releases two single clicks
 				# so maybe shift + click is better?
-				print(e.pos())
+				#print(e.pos())
 				e.accept()  # seems to be of no use here
 			elif e.type() == QtCore.QEvent.Wheel:
 				step = self.mousestep if e.angleDelta().y() > 0 else -self.mousestep # angleDelta needs some adjustment here
@@ -126,14 +130,14 @@ class Stage_VI(VInst):
 		if nameNotSet:
 			n = 0
 			while(True):
-				refName1 = refname + "_%d" % n
+				refName1 = refName + "_%d" % n
 				if refName1 in self.posDict:
 					n += 1
 				else:
 					refName = refName1
 					break
 		self.posDict[refName] = pos
-		self.posList.addItem(QtWidgets.QListWidgetItem("%s: (%f, %f)" % (refName, pos[0], pos[1])))
+		self.posList.addItem(QtWidgets.QListWidgetItem("%s: (%.4f, %.4f)" % (refName, pos[0], pos[1])))
 
 
 		#update listwidget
