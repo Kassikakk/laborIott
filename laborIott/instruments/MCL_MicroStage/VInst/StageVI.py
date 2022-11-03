@@ -2,6 +2,7 @@ import sys
 from threading import Event
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from laborIott.adapters.SDKAdapter import SDKAdapter
+import pandas as pd
 
 from laborIott.instruments.MCL_MicroStage.Inst.MicroStage import MCL_MicroStage
 from laborIott.instruments.VInst import VInst
@@ -35,6 +36,7 @@ class Stage_VI(VInst):
 		self.addListButt.clicked.connect(lambda: self.addToList(self.refEdit.text(), self.stage.pos)) # add position to self.posList (reference from self.refEdit.text()
 
 		self.posList.itemDoubleClicked.connect(self.goByList)
+		self.loadButt.clicked.connect(self.loadList)
 		'''
 		#ja veel ka Delete klahv
 		#ja väljast peaks juurde saama numbri ja refi järgi ja võib.olla oleks ka itemite arvu vaja
@@ -141,6 +143,12 @@ class Stage_VI(VInst):
 
 
 		#update listwidget
+	def loadList(self):
+		fn = QtWidgets.QFileDialog.getOpenFileName(
+            self, 'Open pointlist', self.saveLoc)[0]
+		if fn:
+			pass
+
 
 
 	def setExternal(self, state):

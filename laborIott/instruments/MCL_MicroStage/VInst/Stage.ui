@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>608</width>
-    <height>278</height>
+    <width>764</width>
+    <height>369</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,10 +75,10 @@
    <widget class="QLabel" name="areaLabel">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>40</y>
-      <width>120</width>
-      <height>120</height>
+      <x>490</x>
+      <y>10</y>
+      <width>201</width>
+      <height>200</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -176,8 +176,8 @@
      <rect>
       <x>300</x>
       <y>30</y>
-      <width>131</width>
-      <height>192</height>
+      <width>171</width>
+      <height>241</height>
      </rect>
     </property>
    </widget>
@@ -207,13 +207,78 @@
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="locButt">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>250</y>
+      <width>88</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Folder</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="nameEdit">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>220</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveButt">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>220</y>
+      <width>88</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="locLabel">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>280</y>
+      <width>261</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>./</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadButt">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>290</y>
+      <width>88</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>608</width>
+     <width>764</width>
      <height>30</height>
     </rect>
    </property>
