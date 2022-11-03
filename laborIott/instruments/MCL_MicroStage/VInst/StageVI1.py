@@ -1,22 +1,28 @@
-import sys
+import os, sys
 from threading import Event
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
 from laborIott.instruments.MCL_MicroStage.Inst.MicroStage import MCL_MicroStage
-from laborIott.instruments.Vinst import VInst, localPath
 
 
-class Stage_VI(VInst):
+def localPath(filename):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+
+
+class Stage_VI(*uic.loadUiType(localPath('Stage.ui'))):
 
 	def __init__(self, address=None, inport=None, outport=None):
-		super().__init__('Stage.ui',address, inport, outport)
-
-		self.stage = MCL_MicroStage(self.getAdapter(SDKAdapter(localPath("../Inst/MicroDrive"), False), "MCL_MS"))
+		super(Stage_VI, self).__init__()
+		self.setupUi(self)
+		self.stage = None
+		self.connectInstr(address, inport, outport)
 
 		self.posReached = Event()  # there is currently no threading, so a bool would be ok as well
 		self.posReached.set()
-		self.dsbl += [self.gotoButt, self.goDeltaButt, self.setSpeedButt, self.xEdit, self.yEdit, self.speedEdit]
+		self.dsbl = [self.gotoButt, self.goDeltaButt, self.setSpeedButt, self.xEdit, self.yEdit, self.speedEdit]
+		self.external = False
 		self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
 		self.mousestep = 0.1  # mm per step
 		self.mouseX = True  # mouse direction
@@ -28,10 +34,9 @@ class Stage_VI(VInst):
 		self.gotoButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()], False))
 		self.goDeltaButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()]))
 
-		self.addListButt.clicked.connect(lambda: self.addToList(self.refEdit.text(), self.stage.pos)) # add position to self.posList (reference from self.refEdit.text()
-
-		self.posList.itemDoubleClicked.connect(self.goByList)
+		self.addListButt.clicked.connect(self.addToList) # add position to self.posList (reference from self.refEdit.text()
 		'''
+		self.posList.itemDoubleClicked.connect(...)
 		#ja veel ka Delete klahv
 		#ja väljast peaks juurde saama numbri ja refi järgi ja võib.olla oleks ka itemite arvu vaja
 '''
@@ -51,6 +56,18 @@ class Stage_VI(VInst):
 				self.posLabel.setStyleSheet("color: black")
 				self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
 
+	def connectInstr(self, address, inport, outport):
+		# instrumendi tekitamine
+		if address is None:
+			# local instrument
+			# perhaps we could also do the MCL / cryostage selection here
+			self.stage = MCL_MicroStage(SDKAdapter(localPath("../Inst/MicroDrive"), False))
+		else:
+			# connect to remote instrument
+			# default port is 5555
+			inp = 5555 if inport is None else inport
+			outp = inp if outport is None else outport
+			self.stage = MCL_MicroStage(ZMQAdapter("MCL_MicroStage", address, inp, outp))
 
 	def setSpeed(self, newSpeed):
 		if not self.posReached.is_set():
@@ -77,15 +94,6 @@ class Stage_VI(VInst):
 		else:
 			self.stage.pos = pos
 		self.posReached.clear()
-
-	def goByList(self, litem):
-		#go to pos given by a list item
-		#find key from list item
-		key = litem.text()
-		key = key[:key.find(':')]
-		#this assumes there is no ':' in the refname
-		#now get the position from dict
-		self.gotoPos(self.posDict[key], False)
 
 
 	def eventFilter(self, o, e):
@@ -116,34 +124,30 @@ class Stage_VI(VInst):
 				self.mouseMoveLabel.setText("Dir: %s Step: %.4f" % ('X' if self.mouseX else 'Y', self.mousestep))
 		return super().eventFilter(o, e)
 
-	def addToList(self, refName, pos):
+	def addToList(self):
 		# read/generate refname, record position and put them on a list
-		nameNotSet = True
+		refName = self.refEdit.text()
 		if len(refName) == 0:
 			refName = "pos"
-		else:
-			nameNotSet = refName in self.posDict
-		if nameNotSet:
-			n = 0
-			while(True):
-				refName1 = refname + "_%d" % n
-				if refName1 in self.posDict:
-					n += 1
-				else:
-					refName = refName1
-					break
-		self.posDict[refName] = pos
-		self.posList.addItem(QtWidgets.QListWidgetItem("%s: (%f, %f)" % (refName, pos[0], pos[1])))
+		while(True):
+			#cheki kas refName + "%d" % n on olemas; kui ei, siis breigi
+			# suurenda n
 
 
 		#update listwidget
 
+	def setEnable(self, state):
+		for wdg in self.dsbl:
+			wdg.setEnabled(state)
 
 	def setExternal(self, state):
 		# cancel moving and set enabled/disabled
 		self.stage.ismoving = False
 		self.posReached.set()
-		super().setExternal(state)
+		# set self.acquiring = False
+		self.external = state
+		# check if not goingtoWL
+		self.setEnable(not state)
 
 
 def StageExitHandler():

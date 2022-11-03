@@ -1,9 +1,8 @@
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtWidgets, uic
 import pandas as pd
 import userpaths
-
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -18,7 +17,7 @@ def localPath(filename):
 class VInst(QtWidgets.QMainWindow):
 	'''
 	The class is supposed to take care of some recurring tasks:
-	-saving data
+	-saving data (TODO: zip file support)
 	-selecting adapter (default or network)
 	-selecting external mode
 
@@ -26,8 +25,9 @@ class VInst(QtWidgets.QMainWindow):
 
 	def __init__(self, uifile, address= None, inport= None, outport = None):
 		super(VInst, self).__init__()
-		uic.loadUi(localPath(uifile), self)
+		uic.loadUi(localPath(uifile), self) #should we do localPath here or ?
 		#we can determine some widgets here
+		#probably zip will be added
 		self.dsbl = []
 		self.locButt = self.findChild(QtWidgets.QPushButton, 'locButt')
 		if self.locButt is not None:
