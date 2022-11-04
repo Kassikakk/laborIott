@@ -31,6 +31,7 @@ class VInst(QtWidgets.QMainWindow):
 		if self.locButt is not None:
 			self.locButt.clicked.connect(self.onGetLoc)
 			self.dsbl += [self.locButt]
+		self.locLabel = self.findChild(QtWidgets.QLabel,'locLabel')
 		self.saveButt = self.findChild(QtWidgets.QPushButton, 'saveButt')
 		self.nameEdit = self.findChild(QtWidgets.QLineEdit, 'nameEdit')
 		if self.saveButt is not None and self.nameEdit is not None:
@@ -72,7 +73,8 @@ class VInst(QtWidgets.QMainWindow):
 		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
 							QtWidgets.QFileDialog.ShowDirsOnly
 							| QtWidgets.QFileDialog.DontResolveSymlinks)
-		#self.locLabel.setText(self.saveLoc)
+		if self.locLabel is not  None:
+			self.locLabel.setText(self.saveLoc)
 
 	def saveData(self, name):
 		# saves existing data under self.saveLoc + name

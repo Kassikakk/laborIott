@@ -147,7 +147,15 @@ class Stage_VI(VInst):
 		fn = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Open pointlist', self.saveLoc)[0]
 		if fn:
-			pass
+			try:
+				spc = pd.read_csv(fn, sep = '\t', header = None)
+				if spc.shape[1] != 2:
+					print("Need two columns.")
+					return
+				#we need to make pairs x,y here
+			except:
+				print("Hmmm..can't open this")
+
 
 
 
