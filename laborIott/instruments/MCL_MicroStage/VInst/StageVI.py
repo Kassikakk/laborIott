@@ -1,6 +1,6 @@
 import sys
 from threading import Event
-from PyQt5 import QtCore, QtGui, QtWidgets, uic, Qt
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from laborIott.adapters.SDKAdapter import SDKAdapter
 import pandas as pd
 
@@ -125,16 +125,16 @@ class Stage_VI(VInst):
 				#set the label here
 				self.mouseMoveLabel.setText("Dir: %s Step: %.4f" % ('X' if self.mouseX else 'Y', self.mousestep))
 		elif o is self.posList:
-			if (e.type() == QtCore.QEvent.KeyPress) and (e.key() == Qt.Key_Delete):
+			if (e.type() == QtCore.QEvent.KeyPress) and (e.key() == QtCore.Qt.Key_Delete):
 				#if modifier, delete all, else del current
-				if e.modifiers() == Qt.ControlModifier:
+				if e.modifiers() == QtCore.Qt.ControlModifier:
 					#get all items into a list
-					listItems = self.posList.findItems("*", Qt.MatchWildcard)
+					listItems = self.posList.findItems("*", QtCore.Qt.MatchWildcard)
 				else:
 					#selected items
 					listItems = self.posList.selectedItems()
 				for item in listItems:
-					key = litem.text()
+					key = item.text()
 					key = key[:key.find(':')]
 					self.posDict.pop(key)
 					self.posList.takeItem(self.posList.row(item))
