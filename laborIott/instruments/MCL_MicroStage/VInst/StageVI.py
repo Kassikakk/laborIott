@@ -1,6 +1,6 @@
 import sys
 from threading import Event
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic, Qt
 from laborIott.adapters.SDKAdapter import SDKAdapter
 import pandas as pd
 
@@ -28,6 +28,7 @@ class Stage_VI(VInst):
 		self.posDict = {}
 
 		self.areaLabel.installEventFilter(self)
+		self.posList.installEventFilter(self)
 
 		self.setSpeedButt.clicked.connect(self.setSpeed)
 		self.gotoButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()], False))
@@ -95,7 +96,9 @@ class Stage_VI(VInst):
 
 
 	def eventFilter(self, o, e):
-		if o is self.areaLabel and not self.external:
+		if self.external:
+			return
+		if o is self.areaLabel:
 			if e.type() == QtCore.QEvent.MouseButtonDblClick:
 				# the problem is that it still also releases two single clicks
 				# so maybe shift + click is better?
@@ -111,6 +114,7 @@ class Stage_VI(VInst):
 			elif e.type() == QtCore.QEvent.MouseButtonRelease:
 				button = e.button()  # 1-left 2-right 4-center
 				if button == 1:
+					#maybe if modifier = Ctrl, goto point?
 					if self.mousestep > 0.0002:
 						self.mousestep /= 2
 				elif button == 2:
@@ -120,6 +124,20 @@ class Stage_VI(VInst):
 					self.mouseX = not self.mouseX
 				#set the label here
 				self.mouseMoveLabel.setText("Dir: %s Step: %.4f" % ('X' if self.mouseX else 'Y', self.mousestep))
+		elif o is self.posList:
+			if (e.type() == QtCore.QEvent.KeyPress) and (e.key() == Qt.Key_Delete):
+				#if modifier, delete all, else del current
+				if e.modifiers() == Qt.ControlModifier:
+					#get all items into a list
+					listItems = self.posList.findItems("*", Qt.MatchWildcard)
+				else:
+					#selected items
+					listItems = self.posList.selectedItems()
+				for item in listItems:
+					key = litem.text()
+					key = key[:key.find(':')]
+					self.posDict.pop(key)
+					self.posList.takeItem(self.posList.row(item))
 		return super().eventFilter(o, e)
 
 	def addToList(self, refName, pos):
@@ -144,8 +162,7 @@ class Stage_VI(VInst):
 
 		#update listwidget
 	def loadList(self):
-		fn = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Open pointlist', self.saveLoc)[0]
+		fn = QtWidgets.QFileDialog.getOpenFileName(self, 'Open pointlist', self.saveLoc)[0]
 		if fn:
 			try:
 				spc = pd.read_csv(fn, sep = '\t', header = None)
@@ -153,8 +170,20 @@ class Stage_VI(VInst):
 					print("Need two columns.")
 					return
 				#we need to make pairs x,y here
+				for i in range(len(spc[0])):
+					self.addToList('',(spc[0][i],spc[1][i]))
 			except:
 				print("Hmmm..can't open this")
+
+	def saveData(self, name): #override
+		#prepare xdata and ydata
+		self.xdata = []
+		self.ydata = []
+		for k in self.posDict:
+			self.xdata += [self.posDict[k][0]]
+			self.ydata += [self.posDict[k][1]]
+		super().saveData(name)
+
 
 
 
