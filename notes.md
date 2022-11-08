@@ -109,3 +109,17 @@ No holetame, et baasklassiks tuleb see My Docus ja seda võib edasi panna (võib
 * Võib-olla üldisema timer / thread lähenemise peale peaks ka mõtlema
 
 Muide mingi väga keeruline on tekitada mingit mõistlikku installivarianti nii, et mitte-py failid ka arvesse võetaks. https://stackoverflow.com/questions/24347450/how-do-you-add-additional-files-to-a-wheel - Siin on hulgaliselt variante, mis ühel töötasid, teisel mitte, ei hakanud neid isegi mitte proovima. Tekitab praegu whl-i (python setup.py bdist_wheel) ja pipinstallib selle, siis ülejäänud failid (dll,ui,ico,conf) vaatab käsitsi, et nad paigal on.
+
+## 221108
+
+Nüüd siis Ruby_Proc juures tagasi ja ka Stage figureerib siin, nimelt et kas on mõtet teha mingit scänni koos sellega, et võimaldaks hulga keri läbi käia. Võib-olla on, aga siis, et kuidas ja mida salvestada? 
+
+Vahelduseks, et vahepeal sai tehtud Chirale protseduur koos Flamega, aga pole väga kindel, et see on perspektiivne, nimelt mis selgub on, et (seda sai vaadata Kymeraga tegelikult) punases on selline pilt, et Xe jooned tungivad sisse, ergastus on hulga laiem kui pilu ette näeb ja joonte korral mitme maksimumiga, mis üldjuhul ei lange kokku ettenähtud lainepikkusega. Muus piirkonnas on pilt igatahes parem; võib-olla väikeseks korrektsiooniks võiks teoreetiliselt mingi referents olla, aga võib-olla see pole ka nii oluline. Niisiis, et kuni ca 700 nm-ni on olukord päris hea, sealt 800-ni teatud mööndustega, aga siis edasi juba pole Chira selliseks otstarbeks väga kasutatav. Võib-olla teatavat võimsusreferentsi isegi võib saada, kui nt läbivalgustusrežiimi kasutada, aga lainepikkusskaalat eriti usaldada ei tasu. Seega tuleks siis Ti-Sph töölepaneku peale tõsisemalt mõelda jällegi.
+
+Ok, aga tagasi Jobin-Yvoni juurde. Oot ma nüüd ei saa aru: Sai MCL stage-le tehtud just positsioonide seivimise võimalus ja nüüd ma avastan, et teisel päeval on kõik positsioonid kuidagi nihkes. Ei tundu, et oleks nihkunud rakk, kus need kerad sees on, siis kas on paigast läinud enkooder kuidagi? Sel juhul tuleb mingi offset kasutusele võtta, mida iga kord uuesti määrata? Programmi uuestikäivitamisel igatahes tundub koht säilivat. Proovime siis kasti välja-sisse lülitada. - See ka justkui ei mõjutaks eriti? Kuidagi pikema aja jooksul siis? Seda kiiresti proovida ei saa. 
+
+Üritan saada mingit tunnetust, et kuidas nende keradega peaks õieti käituma, sest tundub, et erinev positsioneering kerale annab kuigivõrd ikka erineva rõhu küll. Määramatusehinnangut peaks ka tegema, aga tundub, et see siiski on midagi veel lisaks sellele. 
+
+Tegin siis mingi rõhutsükli ära, algväärtused on küll üsna erinevad. Vaatasin 4 kera, üks oli nn. nullkera. Üldiselt on mulje, et rõhukonstandid on üpris samad (määramatuse piires), aga üks väiksem kera, sellel tundus, et oleks nagu veidi väiksem olnud see koef. Aga kuidas mingi korralikum katse teha, seda peab õieti mõtlema, siin on oluliseks faktoriks veel ka aeg. Rõhu muutmise järel relakseerumine toimub ikka üpris pikalt, nagu siin näha oli, kiirem osa paari minutiga, aeglasem kasv jätkub veel paarkümmend minutitki. 
+
+Lasin lõpuks välisrõhu 1 bar peale, sellest sees rõhk kohe ei muutunud kuigi palju (6.4 -> 5.7 kbar), aga küllap ta vaikselt langeb. Näis, mis üleöö teeb.
