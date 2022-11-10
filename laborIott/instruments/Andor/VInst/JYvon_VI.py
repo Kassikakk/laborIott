@@ -38,7 +38,7 @@ class JYvon_VI(Andor_VI):
 			self.graphicsView.addItem(self.nelns[i])
 			self.nelns[i].setPen(None)
 		#self.onCalcLambda()
-		self.onCalcFromLimb(6256.0)
+		self.onCalcFromLimb(6259.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
 			self.neSpins[i].valueChanged.connect(lambda x, a=i: self.nelns[a].setPos(self.xarr[x]))
