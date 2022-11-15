@@ -33,6 +33,8 @@ class Stage_VI(VInst):
 		self.setSpeedButt.clicked.connect(self.setSpeed)
 		self.gotoButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()], False))
 		self.goDeltaButt.clicked.connect(lambda: self.gotoPos([self.xEdit.text(), self.yEdit.text()]))
+		self.resetEncButt.clicked.connect(lambda: self.gotoPos(None))
+		self.centerButt.clicked.connect(self.centerStage)
 
 		self.addListButt.clicked.connect(lambda: self.addToList(self.refEdit.text(), self.stage.pos)) # add position to self.posList (reference from self.refEdit.text()
 
@@ -73,7 +75,13 @@ class Stage_VI(VInst):
 	def gotoPos(self, pos, relative=True):
 		if not self.posReached.is_set():
 			return
-		#pos võis ju Nonesid ka sisaldada
+		
+		if pos is None: #reset the encoders
+			self.stage.pos = pos
+			self.posReached.clear() # to refresh pos
+			return
+		
+		#on the other hand, pos as a list may contain Nones
 		try:
 			pos = [None if p is None else float(p) for p in pos]
 		except ValueError:
@@ -93,7 +101,17 @@ class Stage_VI(VInst):
 		#this assumes there is no ':' in the refname
 		#now get the position from dict
 		self.gotoPos(self.posDict[key], False)
-
+	
+	def centerStage(self):
+		#move stage to extremes
+		poss = []
+		for p in [[-100,0],[0,-100],[100,0], [0,100]]:
+			self.stage.pos = p
+			while self.stage.ismoving:
+				pass
+			poss += [self.stage.pos]
+		self.stage.pos = [(poss[0][0] + poss[2][0])/2,(poss[1][1] + poss[3][1])/2]
+		self.posReached.clear()
 
 	def eventFilter(self, o, e):
 		if self.external:

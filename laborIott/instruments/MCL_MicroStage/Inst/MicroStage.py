@@ -49,6 +49,9 @@ class MCL_MicroStage(Instrument):
 		#if is moving, it is possible to 1)disregard, 2)stop 3) wait. Go for 1) for now.
 		if self.ismoving:
 			return
+		if val is None: #use this to reset encoders
+			ret = self.values("MCL_MDResetEncoders(byref(c_ushort),%d)" % self.handle)
+			return
 		curpos = self.pos
 		self.delta = (val[0] - curpos[0], val[1] - curpos[1])
 
@@ -78,6 +81,7 @@ class MCL_MicroStage(Instrument):
 		elif val[1] is None:
 			self.values("MCL_MDMoveR(2, c_double(%f), c_double(%f), 0, %d)" % (self.speed, val[0], self.handle))
 		else:
+			#print(self.speed, val[0], self.speed, val[1])
 			self.values("MCL_MDMoveThreeAxesR(1, c_double(%f), c_double(%f), 0, \
 				2, c_double(%f), c_double(%f), 0,\
 				3, c_double(0.0), c_double(0.0), 0, %d)" \

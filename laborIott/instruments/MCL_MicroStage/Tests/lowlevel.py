@@ -1,0 +1,10 @@
+import ctypes as ct
+dll = ct.cdll.LoadLibrary("../Inst/MicroDrive")
+e1 = ct.c_double()
+e2 = ct.c_double()
+e3 = ct.c_double()
+e4 = ct.c_double()
+handle = dll.MCL_InitHandle()
+dll.MCL_MDReadEncoders(ct.byref(e1), ct.byref(e2),ct.byref(e3),ct.byref(e4), handle)
+print(e1,e2,e3,e4)
+dll.MCL_ReleaseHandle(handle)
