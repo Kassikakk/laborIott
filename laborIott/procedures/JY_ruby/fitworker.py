@@ -115,14 +115,14 @@ class FitWorker(QtCore.QThread): #või Thread
 				if self.fitters[n].active:
 					#handling of cyclic case should go here
 					if not self.fitters[n].cyclic:
-						print(self.fitters[n].fitter.paramlist)
-						plist = self.fitters[n].fitter.paramlist
+						#print(self.fitters[n].fitter.paramlist)
+						plist = self.fitters[n].fitter.paramlist #plist is just a reference here
 						for i in range(len(plist)):
 							plist[i] = 0
-						plist[0] = 695
+						plist[0] = xData[max(enumerate(yData), key = lambda y: y[1])[0]] #was 695
 						plist[1] = 1
 						if len(plist) > 6:  #well if there are more parameters (like Voigt...)?
-							plist[3] = 693
+							plist[3] = plist[0] - 2 #this is somewhat arbitrary
 							plist[4] = 1
 						#print(self.fitters[n].fitter.paramlist)
 					#clarify the range here. If it is relative or absolute.
@@ -130,7 +130,7 @@ class FitWorker(QtCore.QThread): #või Thread
 					#then develop from there
 					if self.fitters[n].relrange:
 						#I think we can use this trick to get the x-value index:
-						xi = min(enumerate(xData), key = lambda x: abs(plist[0] - x[1]))[0]
+						xi = min(enumerate(xData), key = lambda x: abs(self.fitters[n].fitter.paramlist[0] - x[1]))[0]
 						p1 = xi - abs(self.fitters[n].range[0])
 						p2 = xi + abs(self.fitters[n].range[1])
 					else:
