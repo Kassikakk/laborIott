@@ -139,6 +139,7 @@ class FitWorker(QtCore.QThread): #või Thread
 					#check if we're still within range
 					p1 = 0 if p1 < 0 else p1
 					p2 = 1024 if p2 > 1024 else p2
+					#print(p1,p2)
 
 
 
