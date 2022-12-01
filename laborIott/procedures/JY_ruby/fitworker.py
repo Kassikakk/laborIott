@@ -20,6 +20,7 @@ class FitContainer(object): # combines Fitter with a few variables relevant to t
 		self.range = [0, 1024]
 		self.sloped = True
 		self.cyclic = True
+		self.relrange = False
 		self.fitter = Fitter([])
 
 class FitWorker(QtCore.QThread): #või Thread
@@ -50,7 +51,7 @@ class FitWorker(QtCore.QThread): #või Thread
 		#val = None are ignored
 		settings_dict = self.settings_queue.get(False)
 		for key in settings_dict:
-			if key in ['active', 'range', 'sloped','cyclic']:
+			if key in ['active', 'range', 'sloped','cyclic', 'relrange']:
 				for i,val in enumerate(settings_dict[key]):
 					if val is not None:
 						command = "self.fitters[i].{} = val".format(key)
@@ -114,25 +115,41 @@ class FitWorker(QtCore.QThread): #või Thread
 				if self.fitters[n].active:
 					#handling of cyclic case should go here
 					if not self.fitters[n].cyclic:
-						print(self.fitters[n].fitter.paramlist)
-						plist = self.fitters[n].fitter.paramlist
+						#print(self.fitters[n].fitter.paramlist)
+						plist = self.fitters[n].fitter.paramlist #plist is just a reference here
 						for i in range(len(plist)):
 							plist[i] = 0
-						plist[0] = 695
+						plist[0] = xData[max(enumerate(yData), key = lambda y: y[1])[0]] #was 695
 						plist[1] = 1
 						if len(plist) > 6:  #well if there are more parameters (like Voigt...)?
-							plist[3] = 693
+							plist[3] = plist[0] - 2 #this is somewhat arbitrary
 							plist[4] = 1
-						print(self.fitters[n].fitter.paramlist)
+						#print(self.fitters[n].fitter.paramlist)
+					#clarify the range here. If it is relative or absolute.
+					#for absolute, it's easy. For relative we take plist[0] and find the point
+					#then develop from there
+					if self.fitters[n].relrange:
+						#I think we can use this trick to get the x-value index:
+						xi = min(enumerate(xData), key = lambda x: abs(self.fitters[n].fitter.paramlist[0] - x[1]))[0]
+						p1 = xi - abs(self.fitters[n].range[0])
+						p2 = xi + abs(self.fitters[n].range[1])
+					else:
+						p1 = abs(self.fitters[n].range[0])
+						p2 = abs(self.fitters[n].range[1])
+					#check if we're still within range
+					p1 = 0 if p1 < 0 else p1
+					p2 = 1024 if p2 > 1024 else p2
+					#print(p1,p2)
 
 
 
-					if (self.fitters[n].fitter.fit(xData[self.fitters[n].range[0]:self.fitters[n].range[1]],
-												   yData[self.fitters[n].range[0]:self.fitters[n].range[1]]) == 0):
+
+					if (self.fitters[n].fitter.fit(xData[p1:p2], yData[p1:p2]) == 0):
 						#additional evaluation that data is reasonable
 						self.dataReady.emit((n, self.fitters[n].fitter.paramlist,
-											 xData[self.fitters[n].range[0]:self.fitters[n].range[1]],
-											 self.fitters[n].fitter.fitted, self.fitters[n].fitter.uncertlist, self.fitters[n].fitter.rsqr))
+											 xData[p1:p2], self.fitters[n].fitter.fitted, 
+											 self.fitters[n].fitter.uncertlist, 
+											 self.fitters[n].fitter.rsqr))
 						#print(n,self.fitters[n].range[0],self.fitters[n].range[1])
 						#also send other evaluative data. Uncertainty approximation and goodness of fit
 					else:

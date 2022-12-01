@@ -65,6 +65,8 @@ class RubyProc(QtWidgets.QMainWindow):
 		self.slopeChk2.toggled.connect(lambda a: self.setSettingsQueue('sloped'))
 		self.cyclicChk1.toggled.connect(lambda a: self.setSettingsQueue('cyclic'))
 		self.cyclicChk2.toggled.connect(lambda a: self.setSettingsQueue('cyclic'))
+		self.relRangeChk1.toggled.connect(lambda a: self.setSettingsQueue('relrange'))
+		self.relRangeChk2.toggled.connect(lambda a: self.setSettingsQueue('relrange'))
 		self.modelCombo1.currentIndexChanged.connect(lambda a: self.setSettingsQueue('model'))
 		self.modelCombo2.currentIndexChanged.connect(lambda a: self.setSettingsQueue('model'))
 		self.showPRadio1.toggled.connect(lambda a: self.pUnitLabel1.setText('kbar' if self.showPRadio1.isChecked() else 'nm'))
@@ -93,7 +95,7 @@ class RubyProc(QtWidgets.QMainWindow):
 				if not n:
 					self.andor.setOverlay(i, [],[],None)
 			
-		if setting is None or setting == 'range':
+		if setting is None or setting == 'range' or setting == 'relrange':
 			try:
 				#this requires a rather strict validation since during editing all kinds of values may appear transiently
 				#convert from 1 - to 0 - based list
@@ -104,6 +106,8 @@ class RubyProc(QtWidgets.QMainWindow):
 						listok = False 
 				if listok:
 					p_dict['range'] = trylist
+				if setting == 'relrange':
+					p_dict['relrange'] = [self.relRangeChk1.isChecked(), self.relRangeChk2.isChecked()]
 			except ValueError: #just forget it
 				pass
 			#TODO: try and range check should be performed here
