@@ -11,7 +11,7 @@ from laborIott.instruments.MCL_MicroStage.VInst.StageVI import Stage_VI
 
 class RubyStage(RubyProc):
 
-	def __init__(self,uifile, address= None, inport= None, outport = None):):
+	def __init__(self, uifile, address= None, inport= None, outport = None):
 
 		self.stage = Stage_VI() #address etc, but eventually this should run from some ini file
 		#more inits here
@@ -35,14 +35,24 @@ class RubyStage(RubyProc):
 		self.collecting = True
 
 		if len(self.values) >= self.noOfCycles:
+			#engage waiting event, this may take some time
 			#save the data and timestamp
+			#we need the keylist here already
+			#make sure it doesn't just explode if there are 0 or 1 recorded positions
 
-			#move stage to next pos (make sure new scan waits too? Dowe need an extra event for that?)
+			#move stage to next pos (make sure new scan waits too? Dowe need an extra event for that?(probably))
 			noPosItems = len(self.stage.posDict)
 			if noPosItems > 0: #1?
-				self.stage.posDict[self.curPosIndex]
+				keylist = list(self.stage.posDict.keys())
+				for i in range(3): #3 times is mostly good enough
+					self.stage.gotoPos(self.stage.posDict[keylist[self.curPosIndex]], False)
+			self.curPosIndex += 1
+			if self.curPosIndex >= noPosItems:
+				self.curPosIndex = 0
+
 			#reset the series
 			self.resetSeries()
+			#release waiting event
 
 		super(RubyStage, self).update(dataTuple)
 
@@ -55,7 +65,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(ExitHandler)
+	#app.aboutToQuit.connect(ExitHandler)
 	# handle possible command line parameters: address, inport, outport
 	args = sys.argv[1:4]
 	# port values, if provided, should be integers
