@@ -16,7 +16,7 @@ from laborIott.instruments.Andor.VInst.JYvon_VI import JYvon_VI
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
-class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
+class RubyProc(QtWidgets.QMainWindow):
 	
 	setExternalMode = QtCore.pyqtSignal(bool)
 	startIdus = QtCore.pyqtSignal(bool)
@@ -24,9 +24,10 @@ class RubyProc(*uic.loadUiType(localPath('RubyPressure.ui'))):
 	updateFitShape = QtCore.pyqtSignal(int, tuple, tuple, str)
 
 
-	def __init__(self, address= None, inport= None, outport = None):
+	def __init__(self, uifile, address= None, inport= None, outport = None):
 		super(RubyProc, self).__init__()
-		self.setupUi(self) 
+		uic.loadUi(uifile, self)
+		#self.setupUi(self) #seda nüüd vaja on?
 
 		self.andor = JYvon_VI(address, inport, outport)
 
@@ -282,6 +283,6 @@ if __name__ == '__main__':
 	for i in (1,2):
 		if len(args) > i:
 			args[i] = int(args[i])
-	window = RubyProc(*args)
+	window = RubyProc("RubyPressure.ui", *args)
 	window.show()
 	sys.exit(app.exec_())
