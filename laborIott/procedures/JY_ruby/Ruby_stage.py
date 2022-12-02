@@ -1,9 +1,13 @@
 from Ruby_proc import RubyProc
 import pandas as pd
-
-
+import numpy as np
+import os, sys
+from PyQt5 import QtWidgets
 
 from laborIott.instruments.MCL_MicroStage.VInst.StageVI import Stage_VI
+
+def localPath(filename):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 '''
 
 
@@ -19,9 +23,9 @@ class RubyStage(RubyProc):
 		#mingi signal (or two?) needs to be connected to cycle the positions and return the posindex
 		#where is the current index held? Here I guess. Hey waida minit, we can access the list of self.stage directly
 		#index needs to be here, though
-		self.noOfCycles = 30
+		self.noOfCycles = 10
 
-		self.curPosIndex =
+		self.curPosIndex = 0
 		self.data = pd.DataFrame()
 
 		self.stage.show()
@@ -36,12 +40,13 @@ class RubyStage(RubyProc):
 		super(RubyStage, self).update(dataTuple)
 		# actually it comes here for every selected fitter, so 0..2 times for every point
 		#so we should check here if it is the last one
-		if self.fitBox2.isChecked() and dataTuple[0] != 2:
+		if self.fitBox2.isChecked() and dataTuple[0] != 1:
 			return
 		#well, if neither of the boxes is checked, then...
+		
 
 
-		if len(self.values) >= self.noOfCycles:
+		if len(self.values[dataTuple[0]]) >= self.noOfCycles:
 			self.processing.set() #engage waiting event, as this may take some time
 			#make sure it doesn't just explode if there are 0 or 1 recorded positions
 			keylist = list(self.stage.posDict.keys())
@@ -51,21 +56,24 @@ class RubyStage(RubyProc):
 			for i in range(2):
 				N = len(self.values[i])
 				if N > 0:
-					outlist += [self.colsum[i] / N, np.sqrt(self.colsum2[index] / N  - mean**2)]
+					mean = self.colsum[i] / N
+					outlist += [mean, np.sqrt(self.colsum2[i] / N  - mean**2)]
 				#else [0,0]?
 			outlist += keylist[self.curPosIndex]
-			self.data = pd.concat(self.data,outlist)
+			self.data = pd.concat([self.data,pd.DataFrame([outlist])])
 			#check if name is given
 			name = self.nameEdit.text()
 			if len(name) > 0:
 				self.data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+				print("Save ok.")
 
 			#move stage to next pos (make sure new scan waits too. We use the processing event for that.)
 			noPosItems = len(self.stage.posDict)
 			if noPosItems > 0: #1?
 				for i in range(3): #3 times is mostly good enough
+					print("going", i)
 					self.stage.gotoPos(self.stage.posDict[keylist[self.curPosIndex]], False)
-					self.stage.posReached.wait()
+					self.stage.posReached.wait() #jääb siia toppama? timeri handler peaks maha võtma
 				self.curPosIndex += 1
 				if self.curPosIndex >= noPosItems:
 					self.curPosIndex = 0
@@ -75,11 +83,6 @@ class RubyStage(RubyProc):
 			self.processing.clear()
 			#release waiting event
 
-
-
-	def saveData(self, name):
-
-		#super(RubyStage, self).saveData(name) #vot siin ma ei tea?
 
 if __name__ == '__main__':
 	if not QtWidgets.QApplication.instance():
@@ -94,6 +97,6 @@ if __name__ == '__main__':
 	for i in (1, 2):
 		if len(args) > i:
 			args[i] = int(args[i])
-	window = RubyStage("RubyPressure.ui", *args)
+	window = RubyStage(localPath("RubyPressure.ui"), *args)
 	window.show()
 	sys.exit(app.exec_())
