@@ -28,12 +28,13 @@ class FitWorker(QtCore.QThread): #või Thread
 	dataReady = QtCore.pyqtSignal(tuple)
 
 
-	def __init__(self, startsignal, data_queue, settings_queue):
+	def __init__(self, startsignal, data_queue, settings_queue, processing_event):
 		super(FitWorker, self).__init__()
 		self.running = Event()
 		self.startsignal = startsignal
 		self.data_queue = data_queue
 		self.settings_queue = settings_queue
+		self.processing_event = processing_event
 		self.numFitters = 2
 		self.fitters = []
 		for i in range(self.numFitters):
@@ -95,6 +96,9 @@ class FitWorker(QtCore.QThread): #või Thread
 		self.running.set()
 
 		while(True):
+			while self.processing_event.is_set(): #if there is any processing going on
+				if not self.running.is_set():
+					return
 			self.startsignal.emit(True)  # hope it wööks?
 			# wait for data arrival
 			while self.data_queue.empty():

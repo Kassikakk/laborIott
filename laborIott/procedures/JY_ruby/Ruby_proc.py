@@ -40,7 +40,7 @@ class RubyProc(QtWidgets.QMainWindow):
 		self.processing = Event()
 		self.processing.clear()
 		self.settings_queue = Queue()
-		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.settings_queue)
+		self.runThread = FitWorker(self.startIdus, self.andor.dataQ, self.settings_queue, self.processing)
 		self.colorlist = ['w', 'r'] #fitted overlay colors
 		'''
 		#self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta

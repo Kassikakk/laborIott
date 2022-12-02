@@ -1,4 +1,5 @@
 from Ruby_proc import RubyProc
+import pandas as pd
 
 
 
@@ -20,7 +21,8 @@ class RubyStage(RubyProc):
 		#index needs to be here, though
 		self.noOfCycles = 30
 
-		self.curPosIndex = 0
+		self.curPosIndex =
+		self.data = pd.DataFrame()
 
 		self.stage.show()
 		super(RubyStage, self).__init__(uifile, address, inport, outport)
@@ -28,33 +30,52 @@ class RubyStage(RubyProc):
 
 
 	def update(self, dataTuple):
-		#this will catch every fitting, right?
-		#so we count a number of calls here
-		#then move the stage and write the data
-		#also waiting for the stagemove to happen
+
 		self.collecting = True
+		#do the main processing
+		super(RubyStage, self).update(dataTuple)
+		# actually it comes here for every selected fitter, so 0..2 times for every point
+		#so we should check here if it is the last one
+		if self.fitBox2.isChecked() and dataTuple[0] != 2:
+			return
+		#well, if neither of the boxes is checked, then...
+
 
 		if len(self.values) >= self.noOfCycles:
-			#engage waiting event, this may take some time
-			#save the data and timestamp
-			#we need the keylist here already
+			self.processing.set() #engage waiting event, as this may take some time
 			#make sure it doesn't just explode if there are 0 or 1 recorded positions
+			keylist = list(self.stage.posDict.keys())
 
-			#move stage to next pos (make sure new scan waits too? Dowe need an extra event for that?(probably))
+			#save the data and timestamp, data and keystring
+			outlist = [self.values[dataTuple[0]][-1][0]] #timestamp
+			for i in range(2):
+				N = len(self.values[i])
+				if N > 0:
+					outlist += [self.colsum[i] / N, np.sqrt(self.colsum2[index] / N  - mean**2)]
+				#else [0,0]?
+			outlist += keylist[self.curPosIndex]
+			self.data = pd.concat(self.data,outlist)
+			#check if name is given
+			name = self.nameEdit.text()
+			if len(name) > 0:
+				self.data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+
+			#move stage to next pos (make sure new scan waits too. We use the processing event for that.)
 			noPosItems = len(self.stage.posDict)
 			if noPosItems > 0: #1?
-				keylist = list(self.stage.posDict.keys())
 				for i in range(3): #3 times is mostly good enough
 					self.stage.gotoPos(self.stage.posDict[keylist[self.curPosIndex]], False)
-			self.curPosIndex += 1
-			if self.curPosIndex >= noPosItems:
-				self.curPosIndex = 0
+					self.stage.posReached.wait()
+				self.curPosIndex += 1
+				if self.curPosIndex >= noPosItems:
+					self.curPosIndex = 0
 
 			#reset the series
 			self.resetSeries()
+			self.processing.clear()
 			#release waiting event
 
-		super(RubyStage, self).update(dataTuple)
+
 
 	def saveData(self, name):
 
