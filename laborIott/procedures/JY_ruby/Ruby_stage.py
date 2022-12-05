@@ -30,6 +30,7 @@ class RubyStage(RubyProc):
 
 		self.stage.show()
 		super(RubyStage, self).__init__(uifile, address, inport, outport)
+		self.setExternalMode.connect(self.stage.setExternal)
 		#ok?
 
 
@@ -64,16 +65,15 @@ class RubyStage(RubyProc):
 			#check if name is given
 			name = self.nameEdit.text()
 			if len(name) > 0:
-				self.data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
-				print("Save ok.")
+				self.data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False, float_format="%.4f")
 
 			#move stage to next pos (make sure new scan waits too. We use the processing event for that.)
 			noPosItems = len(self.stage.posDict)
 			if noPosItems > 0: #1?
 				for i in range(3): #3 times is mostly good enough
-					print("going", i)
 					self.stage.gotoPos(self.stage.posDict[keylist[self.curPosIndex]], False)
-					self.stage.posReached.wait() #jääb siia toppama? timeri handler peaks maha võtma
+					while self.stage.posReached.is_set(): #jääb siia toppama? timeri handler peaks maha võtma
+						pass
 				self.curPosIndex += 1
 				if self.curPosIndex >= noPosItems:
 					self.curPosIndex = 0

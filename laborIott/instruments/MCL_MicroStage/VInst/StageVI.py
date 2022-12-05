@@ -7,6 +7,7 @@ import pandas as pd
 from laborIott.instruments.MCL_MicroStage.Inst.MicroStage import MCL_MicroStage
 from laborIott.instruments.VInst import VInst
 
+
 import os
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
@@ -19,7 +20,7 @@ class Stage_VI(VInst):
 
 		self.stage = MCL_MicroStage(self.getAdapter(SDKAdapter(localPath("../Inst/MicroDrive"), False), "MCL_MS"))
 
-		self.posReached = Event()  # there is currently no threading, so a bool would be ok as well
+		self.posReached = Event()  
 		self.posReached.set()
 		self.dsbl += [self.gotoButt, self.goDeltaButt, self.setSpeedButt, self.xEdit, self.yEdit, self.speedEdit]
 		self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
@@ -52,12 +53,10 @@ class Stage_VI(VInst):
 		# handle goingtopos
 		if not self.posReached.is_set():
 			# check arrival
-			print("oi oi")
 			self.posLabel.setStyleSheet("color: red")
 			if not self.stage.ismoving:
 				#if not self.external:
 				#	self.setEnable(True)
-				print("setime")
 				self.posReached.set()
 				self.posLabel.setStyleSheet("color: black")
 				self.posLabel.setText("{:.4f}	{:.4f}".format(*self.stage.pos))
@@ -66,7 +65,7 @@ class Stage_VI(VInst):
 	def setSpeed(self, newSpeed):
 		if not self.posReached.is_set():
 			return
-		try:
+		try: 
 			newSpeed = float(newSpeed)
 		except ValueError:
 			print("not floatable")
@@ -92,10 +91,9 @@ class Stage_VI(VInst):
 		if relative:
 			self.stage.delta = pos
 		else:
-			print("läheb", pos)
 			self.stage.pos = pos
 		self.posReached.clear()
-		print("clearitud")
+
 
 	def goByList(self, litem):
 		#go to pos given by a list item
@@ -119,7 +117,7 @@ class Stage_VI(VInst):
 
 	def eventFilter(self, o, e):
 		if self.external:
-			return
+			return super().eventFilter(o, e)
 		if o is self.areaLabel:
 			if e.type() == QtCore.QEvent.MouseButtonDblClick:
 				# the problem is that it still also releases two single clicks
