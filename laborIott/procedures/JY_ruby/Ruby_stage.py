@@ -28,9 +28,10 @@ class RubyStage(RubyProc):
 		self.curPosIndex = 0
 		self.data = pd.DataFrame()
 
-		self.stage.show()
+		
 		super(RubyStage, self).__init__(uifile, address, inport, outport)
 		self.setExternalMode.connect(self.stage.setExternal)
+		self.stage.show()
 		#ok?
 
 
@@ -53,14 +54,16 @@ class RubyStage(RubyProc):
 			keylist = list(self.stage.posDict.keys())
 
 			#save the data and timestamp, data and keystring
-			outlist = [self.values[dataTuple[0]][-1][0]] #timestamp
+			timestamp = self.values[dataTuple[0]][-1][0]
+			outlist = [timestamp] #timestamp
+			self.dZeroValEdit1.setText(str(timestamp - 703200000))
 			for i in range(2):
 				N = len(self.values[i])
 				if N > 0:
 					mean = self.colsum[i] / N
 					outlist += [mean, np.sqrt(self.colsum2[i] / N  - mean**2)]
 				#else [0,0]?
-			outlist += keylist[self.curPosIndex]
+			outlist += [keylist[self.curPosIndex]]
 			self.data = pd.concat([self.data,pd.DataFrame([outlist])])
 			#check if name is given
 			name = self.nameEdit.text()
