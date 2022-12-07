@@ -1,12 +1,12 @@
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+import pyqtgraph as pg
 import pandas as pd
 
-from laborIott.instruments.VInst import VInst
-
 from laborIott.adapters.SDKAdapter import SDKAdapter
-from laborIott.instruments.Andor.Inst.andor import IDus
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
+from laborIott.instruments.Andor.Inst.andor import IDus 
 import os
 import userpaths
 
@@ -15,21 +15,28 @@ def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
 from queue import Queue
+#from threading import Thread, Event
+#from time import sleep, strftime, time
+#import numpy as np
 from math import log10
 
+#import Spectra
 
-class Andor_VI(VInst):
+
+#Ui_MainWindow, QMainWindow = uic.loadUiType(localPath('Andor.ui'))
+
+class Andor_VI(*uic.loadUiType(localPath('Andor.ui'))):
 
 	def __init__(self, address= None, inport= None, outport = None):
-		super().__init__(localPath('Andor.ui'),address, inport, outport)
-
+		super(Andor_VI, self).__init__()
+		self.setupUi(self)
 
 		#connect instrument
-		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False)))
+		self.connectInstr(address, inport, outport)
 
 		
 		#parameetrid
-		self.ydata = []
+		self.data = []
 		self.back = []
 		self.ref = []
 		self.idus.noAccum = 1
@@ -43,10 +50,10 @@ class Andor_VI(VInst):
 		self.setSaveLoc(userpaths.get_my_documents())
 		
 		#plot
-		self.xdata = self.idus.wavelengths
+		self.xarr = self.idus.wavelengths
 
 		#self.graphicsView.setBackground('w')
-		self.plot = self.graphicsView.plot([self.xdata[0], self.xdata[-1]], [0, 1], pen = (255, 131, 0)) #fanta
+		self.plot = self.graphicsView.plot([self.xarr[0],self.xarr[-1]],[0,1], pen = (255,131,0)) #fanta
 
 		
 		
@@ -57,7 +64,6 @@ class Andor_VI(VInst):
 		self.setParmsButt.clicked.connect(self.onSetParms) 
 		self.locButt.clicked.connect(self.onGetLoc)
 		self.saveButt.clicked.connect(lambda : self.saveData(self.nameEdit.text()))
-		self.loadRefButt.clicked.connect(self.loadRef)
 
 		
 		#konnektid
@@ -66,13 +72,26 @@ class Andor_VI(VInst):
 		self.timer.start(200)
 		
 
+	def connectInstr(self, address, inport, outport):
+		#instrumendi tekitamine
+		if address is None:
+			# local instrument
+			self.idus = IDus(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
+		else:
+			# connect to remote instrument
+			# default port is 5555
+			inp = 5555 if inport is None else inport
+			outp = inp if outport is None else outport
+			self.idus = IDus(ZMQAdapter("iDus", address, inp, outp))
 
+		
+		
+		
 	def onTimer(self):
 		
 		if self.acquiring and self.idus.status != 'Acqring': #measurement data arrival 
 			datalist = self.idus.data
-			if self.reverseChk.isChecked():
-				datalist.reverse() #for sideport camera
+			#datalist.reverse() #if needed
 			self.setAcq(False)
 			
 			#back set või lahut.
@@ -82,36 +101,36 @@ class Andor_VI(VInst):
 				self.runButt.setChecked(False)
 				if len(self.back) == len(self.ref):
 					self.absChk.setEnabled(True)
-				self.plot.setData(self.xdata, datalist)
+				self.plot.setData(self.xarr,datalist)
 				
 			elif self.refChk.isChecked():
+				self.ref = datalist
 				self.sigChk.setChecked(True)
 				self.runButt.setChecked(False)
-				if len(self.back) == len(datalist):
+				if len(self.back) == len(self.ref):
 					self.absChk.setEnabled(True)
-					datalist = [datalist[i] - self.back[i] for i in range(len(self.back))]
-					self.ref = datalist #ref has back subbed already
-				self.plot.setData(self.xdata, datalist)
+					datalist = [self.ref[i] - self.back[i] for i in range(len(self.back))]
+				self.plot.setData(self.xarr,datalist)
 			else:
 				if len(self.back) == len(datalist):
 					if not self.absChk.isChecked():
-						self.ydata = [datalist[i] - self.back[i] for i in range(len(datalist))]
+						self.data = [datalist[i] - self.back[i] for i in range(len(datalist))]
 					else:
 						#calculate absorption
-						self.ydata = []
+						self.data = []
 						for i in range(len(datalist)):
-							R = self.ref[i]
+							R = (self.ref[i] - self.back[i])
 							S = (datalist[i] - self.back[i])
 							if R > 0 and S > 0:
-								self.ydata += [log10(R) - log10(S)]
+								self.data += [log10(R) - log10(S)]
 							else:
-								self.ydata += [0]
+								self.data += [0]
 
 				else:
-					self.ydata = datalist
-				self.plot.setData(self.xdata, self.ydata)
+					self.data = datalist
+				self.plot.setData(self.xarr,self.data)
 				if self.external:
-					self.dataQ.put([self.xdata, self.ydata])
+					self.dataQ.put([self.xarr,self.data])
 			
 
 			
@@ -190,40 +209,42 @@ class Andor_VI(VInst):
 		self.idus.shutter = 'open' if self.shutButt.isChecked() else 'closed'
 	
 	def getX(self):
-		return self.xdata
+		return self.xarr
 		
 	def setSaveLoc(self, loc):
 		self.saveLoc = loc
 		self.locLabel.setText(self.saveLoc)
 
-	def loadRef(self):
-		fn = QtWidgets.QFileDialog.getOpenFileName(self, 'Load reference', self.saveLoc)[0]
-		if fn:
-			try:
-				spc = pd.read_csv(fn, sep = '\t', header = None)
-				'''
-				if we have two cols, take the second
-				if one, take this, more is suspicious
-				'''
-				no_cols = spc.shape[1]
-				if no_cols in (1,2):
-					if len(spc[no_cols - 1]) == len(self.ydata):
-						self.ref = list(spc[no_cols - 1]) #list needed?
-						self.absChk.setEnabled(True)
-					else:
-						print("spectrum size doesn't match")
-
-				else:
-					print("not sure what this is")
-
-			except:
-				print("Hmmm..can't open this")
-
-
+	def onGetLoc(self):
+		fname = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+																  QtWidgets.QFileDialog.ShowDirsOnly
+																  | QtWidgets.QFileDialog.DontResolveSymlinks)
+		if fname:
+			self.setSaveLoc(fname)
+												
+		
+	def saveData(self, name):
+		#saves existing data under self.saveLoc + name
+		#however, name validity and existance should be checked first
+		#also if we have any data
+		if len(name) == 0:
+			return
+		if len(self.data) != len(self.xarr):
+			return 
+		
+		
+		if self.formatCombo.currentText() == 'ASCII XY':
+			data = pd.DataFrame(list(zip(self.xarr, self.data)))
+			data.to_csv(os.path.join(self.saveLoc,name),sep = '\t', header = False, index = False)
+		elif self.formatCombo.currentText() == 'ASCII Y':
+			data = pd.DataFrame(list(self.data))
+			data.to_csv(os.path.join(self.saveLoc,name),sep = '\t', header = False, index = False)
+		#the rest will follow
 	
 	def setExternal(self, state):
 		#cancel acquisition and set enabled/disabled  
-
+		#set self.acquiring = False
+		self.external = state
 		if state:
 			self.runButt.setChecked(False)
 			if (self.acquiring):
@@ -232,7 +253,9 @@ class Andor_VI(VInst):
 					pass
 				data = self.idus.data
 				self.setAcq(False)
-		super().setExternal(state)
+				
+		for wdg in self.dsbl:
+			wdg.setEnabled(not state)
 		
 
 		
