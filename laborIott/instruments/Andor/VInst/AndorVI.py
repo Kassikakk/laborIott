@@ -25,7 +25,7 @@ class Andor_VI(VInst):
 
 
 		#connect instrument
-		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False)))
+		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),"iDus"))
 
 		
 		#parameetrid
