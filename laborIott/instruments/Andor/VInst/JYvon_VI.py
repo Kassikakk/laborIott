@@ -22,7 +22,9 @@ class JYvon_VI(Andor_VI):
 		self.dlg = QtWidgets.QDialog()
 		self.lamDlg = Ui_LambdaDialog()
 		self.lamDlg.setupUi(self.dlg)
-		self.dlg.closeEvent = self.removeLines
+		self.keepNeLines = True
+		if not self.keepNeLines:
+			self.dlg.closeEvent = self.removeLines
 
 		self.lambdaButt.setEnabled(True)
 		# any additional disablements?
@@ -36,7 +38,8 @@ class JYvon_VI(Andor_VI):
 		for i in range(3):
 			self.nelns += [pg.InfiniteLine(self.xarr[self.neSpins[i].value()])]
 			self.graphicsView.addItem(self.nelns[i])
-			self.nelns[i].setPen(None)
+			if not self.keepNeLines:
+				self.nelns[i].setPen(None)
 		#self.onCalcLambda()
 		self.onCalcFromLimb(6259.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
