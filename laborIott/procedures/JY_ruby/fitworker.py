@@ -1,5 +1,5 @@
 #from fittingfns import Lorentz_fit, DLorentz_fit
-from fitter import Fitter
+from laborIott.utils.fitter import Fitter
 from PyQt5 import QtCore
 from threading import Event
 import numpy as np

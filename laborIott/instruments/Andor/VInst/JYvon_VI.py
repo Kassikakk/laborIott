@@ -1,4 +1,5 @@
 from laborIott.instruments.Andor.VInst.AndorVI import Andor_VI
+from laborIott.utils.fitter import Fitter
 from PyQt5 import QtWidgets
 import pyqtgraph as pg
 import numpy as np
@@ -8,6 +9,10 @@ import os, sys
 
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+
+#Gauss function for line fitting
+def Gauss(x,xc,w,A):
+	return A * np.exp(-((x - xc) / (2*w))** 2)
 
 
 class JYvon_VI(Andor_VI):
@@ -29,14 +34,14 @@ class JYvon_VI(Andor_VI):
 		self.lambdaButt.setEnabled(True)
 		# any additional disablements?
 
-		self.neSpins = [self.lamDlg.NeSpin1,self.lamDlg.NeSpin2,self.lamDlg.NeSpin3]
+		self.neSpins = [self.lamDlg.NeEdit1,self.lamDlg.NeEdit2,self.lamDlg.NeEdit3]
 		self.neVals = [692.94675, 693.7664, 696.5431]
 		self.neChecks = [self.lamDlg.NeCheck1,self.lamDlg.NeCheck2,self.lamDlg.NeCheck3]
 		self.necolors = ['r','g','b']
 		self.nelns = []
 		# we'll try to make them appear and disappear with the dialog?
 		for i in range(3):
-			self.nelns += [pg.InfiniteLine(self.xarr[self.neSpins[i].value()])]
+			self.nelns += [pg.InfiniteLine(self.xdata[self.neSpins[i].value()])]
 			self.graphicsView.addItem(self.nelns[i])
 			if not self.keepNeLines:
 				self.nelns[i].setPen(None)
@@ -44,11 +49,12 @@ class JYvon_VI(Andor_VI):
 		self.onCalcFromLimb(6259.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
-			self.neSpins[i].valueChanged.connect(lambda x, a=i: self.nelns[a].setPos(self.xarr[x]))
+			self.neSpins[i].valueChanged.connect(lambda x, a=i: self.nelns[a].setPos(self.xdata[x]))
 			self.neChecks[i].clicked.connect(
 				lambda x, a=i: self.nelns[a].setPen(self.necolors[a] if self.neChecks[a].isChecked() else None))
 
 		self.lamDlg.calcLmbdButt.clicked.connect(self.onCalcLambda)
+		self.lamDlg.fitPxelButt.clicked.connect(self.fitNeLines)
 
 		#create some overlays
 		self.noOverlays = 3
@@ -67,17 +73,57 @@ class JYvon_VI(Andor_VI):
 		bn = 13.45
 		ap = -6.26E-5
 		bp = 0.108
-		self.xarr = np.array([(limbval - (bn + bp * (512.0 - p)))/(an + ap * (512.0 - p)) for p in range(1024)])
+		self.xdata = np.array([(limbval - (bn + bp * (512.0 - p)))/(an + ap * (512.0 - p)) for p in range(1024)])
 		#ok but we should also adjust the Ne line markers here
-		step = (self.xarr[1023] - self.xarr[0]) / 1023
-		self.lamDlg.startEdit.setText("{:.5f}".format(self.xarr[0]))
+		step = (self.xdata[1023] - self.xdata[0]) / 1023
+		self.lamDlg.startEdit.setText("{:.5f}".format(self.xdata[0]))
 		self.lamDlg.stepEdit.setText("{:.5f}".format(step))
 
 		for i in range(3):
-			pos = int((self.neVals[i] -self.xarr[0]) / step )
+			pos = int((self.neVals[i] -self.xdata[0]) / step )
 			if (pos > -1) and (pos < 1024):
 				self.neSpins[i].setValue(pos)
-				self.nelns[i].setPos(self.xarr[self.neSpins[i].value()])
+				self.nelns[i].setPos(self.xdata[self.neSpins[i].value()])
+
+	def fitNeLines(self):
+		#define fitter 
+		fitter = Fitter([Gauss, lambda x, a: a])
+		# ± how many points is searched from spinner or fitted from maximum 
+		srchrange = 20
+		fitrange = 15
+		#Go over all lines
+		for i in range(3):
+			if not self.neChecks[i].isChecked():
+				continue
+			#set the search range; keep it within limits
+			try:
+				n1 = n2 =  int(float(self.neSpins[i].getText()))
+			except ValueError:
+				continue
+			n1 -= srchrange
+			if n1 < 0: n1 = 0
+			n2 += srchrange
+			if n2 > (len(self.ydata) - 1): n2 = len(self.ydata) - 1 
+			#search the maximum within [n1:n2], record pixel index and max value
+			nmax = max(enumerate(self.ydata[n1:n2]), key = lambda x: x[1])[0]
+			ymax = self.ydata[nmax]
+			y0 = min(self.ydata[n1:n2])
+			#now redefine n1, n2 to fitting range
+			n1 = nmax  - fitrange
+			if n1 < 0: n1 = 0
+			n2 = nmax + fitrange
+			if n2 > (len(self.ydata) - 1): n2 = len(self.ydata) - 1
+			#configure the fitter and do the fitting
+			fitter.paramlist = [float(nmax), 1.0, ymax, y0]
+			if (fitter.fit(list(range(n1, n2)), self.ydata[n1:n2]) == 0):
+				#fitting results are in
+				self.neSpins[i].setText("{:.3f}".format(fitter.paramlist[0]))
+				print(fitter.paramlist) #diagnostically
+				#move the line to place (maybe they will go if change acts programmatically)
+				#also record fitter.uncertlist[0]
+				#and if wanted, show self.xdata[n1:n2], fitter.fitted in an overlay
+				#wait a little maybe
+	#you can clear the overlay here
 
 
 	def onCalcLambda(self):
@@ -104,12 +150,12 @@ class JYvon_VI(Andor_VI):
 			step = Sxy / Sxx
 			start = (Ey - step * Ex) / N + step
 			# r=Sxy/sqrt(fabs(Sxx*Syy))
-			self.xarr = np.arange(len(self.xarr)) * step + start  # we could also separate this action
+			self.xdata = np.arange(len(self.xdata)) * step + start  # we could also separate this action
 			self.lamDlg.startEdit.setText("{:.5f}".format(start))
 			self.lamDlg.stepEdit.setText("{:.5f}".format(step))
 			# readjust line positions
 			for i in range(3):
-				self.nelns[i].setPos(self.xarr[self.neSpins[i].value()])
+				self.nelns[i].setPos(self.xdata[self.neSpins[i].value()])
 
 	def setLambdaDlg(self):
 		self.dlg.show()
