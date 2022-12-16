@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'JYLambda.ui'
+# Form implementation generated from reading ui file '.\JYLambda.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -29,11 +29,6 @@ class Ui_LambdaDialog(object):
         self.NeCheck1.setGeometry(QtCore.QRect(20, 30, 81, 20))
         self.NeCheck1.setChecked(True)
         self.NeCheck1.setObjectName("NeCheck1")
-        self.NeSpin1 = QtWidgets.QSpinBox(self.wlScaleBox)
-        self.NeSpin1.setGeometry(QtCore.QRect(110, 30, 61, 22))
-        self.NeSpin1.setMaximum(1024)
-        self.NeSpin1.setProperty("value", 355)
-        self.NeSpin1.setObjectName("NeSpin1")
         self.startEdit = QtWidgets.QLineEdit(self.wlScaleBox)
         self.startEdit.setGeometry(QtCore.QRect(240, 70, 71, 20))
         self.startEdit.setObjectName("startEdit")
@@ -47,27 +42,30 @@ class Ui_LambdaDialog(object):
         self.label_4.setGeometry(QtCore.QRect(190, 110, 41, 16))
         self.label_4.setObjectName("label_4")
         self.calcLmbdButt = QtWidgets.QPushButton(self.wlScaleBox)
-        self.calcLmbdButt.setGeometry(QtCore.QRect(200, 30, 75, 23))
+        self.calcLmbdButt.setGeometry(QtCore.QRect(260, 30, 75, 23))
         self.calcLmbdButt.setCheckable(False)
         self.calcLmbdButt.setObjectName("calcLmbdButt")
         self.NeCheck2 = QtWidgets.QCheckBox(self.wlScaleBox)
         self.NeCheck2.setGeometry(QtCore.QRect(20, 70, 81, 20))
         self.NeCheck2.setChecked(True)
         self.NeCheck2.setObjectName("NeCheck2")
-        self.NeSpin2 = QtWidgets.QSpinBox(self.wlScaleBox)
-        self.NeSpin2.setGeometry(QtCore.QRect(110, 70, 61, 22))
-        self.NeSpin2.setMaximum(1024)
-        self.NeSpin2.setProperty("value", 470)
-        self.NeSpin2.setObjectName("NeSpin2")
         self.NeCheck3 = QtWidgets.QCheckBox(self.wlScaleBox)
         self.NeCheck3.setGeometry(QtCore.QRect(20, 110, 81, 20))
         self.NeCheck3.setChecked(True)
         self.NeCheck3.setObjectName("NeCheck3")
-        self.NeSpin3 = QtWidgets.QSpinBox(self.wlScaleBox)
-        self.NeSpin3.setGeometry(QtCore.QRect(110, 110, 61, 22))
-        self.NeSpin3.setMaximum(1024)
-        self.NeSpin3.setProperty("value", 858)
-        self.NeSpin3.setObjectName("NeSpin3")
+        self.fitPxelButt = QtWidgets.QPushButton(self.wlScaleBox)
+        self.fitPxelButt.setGeometry(QtCore.QRect(180, 30, 75, 23))
+        self.fitPxelButt.setCheckable(False)
+        self.fitPxelButt.setObjectName("fitPxelButt")
+        self.NeEdit1 = QtWidgets.QLineEdit(self.wlScaleBox)
+        self.NeEdit1.setGeometry(QtCore.QRect(110, 30, 61, 20))
+        self.NeEdit1.setObjectName("NeEdit1")
+        self.NeEdit2 = QtWidgets.QLineEdit(self.wlScaleBox)
+        self.NeEdit2.setGeometry(QtCore.QRect(110, 70, 61, 20))
+        self.NeEdit2.setObjectName("NeEdit2")
+        self.NeEdit3 = QtWidgets.QLineEdit(self.wlScaleBox)
+        self.NeEdit3.setGeometry(QtCore.QRect(110, 110, 61, 20))
+        self.NeEdit3.setObjectName("NeEdit3")
         self.verticalLayout.addWidget(self.wlScaleBox)
 
         self.retranslateUi(LambdaDialog)
@@ -75,11 +73,16 @@ class Ui_LambdaDialog(object):
 
     def retranslateUi(self, LambdaDialog):
         _translate = QtCore.QCoreApplication.translate
-        LambdaDialog.setWindowTitle(_translate("LambdaDialog", "λ - scale"))
-        self.wlScaleBox.setTitle(_translate("LambdaDialog", "λ - scale"))
+        LambdaDialog.setWindowTitle(_translate("LambdaDialog", "╬╗ - scale"))
+        self.wlScaleBox.setTitle(_translate("LambdaDialog", "╬╗ - scale"))
         self.NeCheck1.setText(_translate("LambdaDialog", "692.9 nm"))
         self.label_2.setText(_translate("LambdaDialog", "Start"))
         self.label_4.setText(_translate("LambdaDialog", "Step"))
         self.calcLmbdButt.setText(_translate("LambdaDialog", "Calc"))
         self.NeCheck2.setText(_translate("LambdaDialog", "693.8 nm Ar"))
         self.NeCheck3.setText(_translate("LambdaDialog", "696.5 nm"))
+        self.fitPxelButt.setText(_translate("LambdaDialog", "Fit"))
+        self.NeEdit1.setText(_translate("LambdaDialog", "355"))
+        self.NeEdit2.setText(_translate("LambdaDialog", "470"))
+        self.NeEdit3.setText(_translate("LambdaDialog", "858"))
+        

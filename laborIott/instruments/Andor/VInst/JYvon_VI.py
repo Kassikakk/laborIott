@@ -5,6 +5,7 @@ import pyqtgraph as pg
 import numpy as np
 from scipy.interpolate import interp1d
 from laborIott.instruments.Andor.VInst.LambdaDlg import Ui_LambdaDialog  # pyuic5 generated dialog
+from time import sleep
 import os, sys
 
 
@@ -49,7 +50,7 @@ class JYvon_VI(Andor_VI):
 		self.onCalcFromLimb(6259.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
-			self.neEdits[i].changed.connect(lambda x, a=i: self.adjustNeLineMarker(i))
+			self.neEdits[i].textChanged.connect(lambda x, a=i: self.adjustNeLineMarker(i))
 			self.neChecks[i].clicked.connect(
 				lambda x, a=i: self.nelns[a].setPen(self.necolors[a] if self.neChecks[a].isChecked() else None))
 
@@ -66,7 +67,7 @@ class JYvon_VI(Andor_VI):
 
 	def adjustNeLineMarker(self, i):
 		try:
-			pos = float(self.neEdits[i].getText())
+			pos = float(self.neEdits[i].text())
 			xval = interp1d(list(range(len(self.xdata))), self.xdata)(pos)
 		except ValueError: #either not floatable or value out of range
 			return
@@ -107,7 +108,7 @@ class JYvon_VI(Andor_VI):
 				continue
 			#set the search range; keep it within limits
 			try:
-				n1 = n2 =  int(float(self.neEdits[i].getText()))
+				n1 = n2 =  int(float(self.neEdits[i].text()))
 			except ValueError:
 				continue
 			n1 -= srchrange
@@ -125,7 +126,7 @@ class JYvon_VI(Andor_VI):
 			if n2 > (len(self.ydata) - 1): n2 = len(self.ydata) - 1
 			#configure the fitter and do the fitting
 			fitter.paramlist = [float(nmax), 1.0, ymax, y0]
-			if (fitter.fit(list(range(n1, n2)), self.ydata[n1:n2]) == 0):
+			if (fitter.fit(np.array(range(n1, n2)), np.array(self.ydata[n1:n2])) == 0):
 				#fitting results are in
 				self.neEdits[i].setText("{:.3f}".format(fitter.paramlist[0]))
 				print(fitter.paramlist) #diagnostically
@@ -136,8 +137,8 @@ class JYvon_VI(Andor_VI):
 				self.setOverlay(2, self.xdata[n1:n2], fitter.fitted,'r')
 				#wait a little maybe
 				sleep(0.2)
-	#you can clear the overlay here
-	self.setOverlay(2,[],[],None)
+		#you can clear the overlay here
+		self.setOverlay(2,[],[],None)
 
 
 	def onCalcLambda(self):
@@ -146,7 +147,7 @@ class JYvon_VI(Andor_VI):
 		for i in range(3):
 			if self.neChecks[i].isChecked():
 				try:
-					points += [float(self.neEdits[i].getText())]
+					points += [float(self.neEdits[i].text())]
 					vals += [self.neVals[i]]
 				except ValueError:
 					continue
