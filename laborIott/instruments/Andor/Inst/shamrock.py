@@ -21,7 +21,7 @@ class Shamrock(Instrument):
 	@property
 	def centerpos(self):
 		ret = self.values("ShamrockGetWavelength({}, byref(c_float))".format(self.device))
-		return ret[1] if ret[0] == success  else ret[0] #kuigi none pole vist väga hea?
+		return ret[1] if ret[0] == success  else None #kuigi none pole vist väga hea?
 
 	@centerpos.setter
 	def centerpos(self, val):
@@ -43,6 +43,27 @@ class Shamrock(Instrument):
 		return ret[1]
 	#wavelengths - OK
 	#centerpos NB 0 supported - OK
+	
+	@property
+	def slit(self):
+		ret =self.values("ShamrockGetAutoSlitWidth({}, 1, byref(c_float))".format(self.device))
+		return ret[1] if ret[0] == success  else ret[0]
+
+	@slit.setter
+	def slit(self, val):
+		#we should check val limits here
+		self.write("ShamrockSetAutoSlitWidth({}, 1, c_float({}))".format(self.device, val))
+	
+	@property
+	def gratingdict(self):
+		dictout = {}
+		nofilts = self.write("ShamrockGetNumberGratings({}, byref(c_int))".format(self.device))[1]
+		for i in range(nofilts):
+			ret = self.write("ShamrockGetGratingInfo({}, {},byref(c_float), byref(c_char), byref(c_int),byref(c_int))".format(self.device,i))
+			desc = "{} l/mm {}".format(ret[1], ret[2])
+			print(ret)
+			dictout[desc] = i
+		return dictout
 	#slit
 	#grating 
 	#	ret =self.values("ShamrockGetWavelengthLimits({},{},byref(c_float),byref(c_float))".format(self.device,grating))

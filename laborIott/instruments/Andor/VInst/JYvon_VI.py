@@ -50,7 +50,7 @@ class JYvon_VI(Andor_VI):
 		self.onCalcFromLimb(6259.0)
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
-			self.neEdits[i].textChanged.connect(lambda x, a=i: self.adjustNeLineMarker(i))
+			self.neEdits[i].textChanged.connect(lambda x, a=i: self.adjustNeLineMarker(i)) #2 kogu aeg?
 			self.neChecks[i].clicked.connect(
 				lambda x, a=i: self.nelns[a].setPen(self.necolors[a] if self.neChecks[a].isChecked() else None))
 
@@ -71,6 +71,7 @@ class JYvon_VI(Andor_VI):
 			xval = interp1d(list(range(len(self.xdata))), self.xdata)(pos)
 		except ValueError: #either not floatable or value out of range
 			return
+		print("set {}◙ pos".format(i)) 
 		self.nelns[i].setPos(xval)
 
 
@@ -116,7 +117,7 @@ class JYvon_VI(Andor_VI):
 			n2 += srchrange
 			if n2 > (len(self.ydata) - 1): n2 = len(self.ydata) - 1 
 			#search the maximum within [n1:n2], record pixel index and max value
-			nmax = max(enumerate(self.ydata[n1:n2]), key = lambda x: x[1])[0]
+			nmax = max(enumerate(self.ydata[n1:n2]), key = lambda x: x[1])[0] + n1
 			ymax = self.ydata[nmax]
 			y0 = min(self.ydata[n1:n2])
 			#now redefine n1, n2 to fitting range
@@ -126,17 +127,19 @@ class JYvon_VI(Andor_VI):
 			if n2 > (len(self.ydata) - 1): n2 = len(self.ydata) - 1
 			#configure the fitter and do the fitting
 			fitter.paramlist = [float(nmax), 1.0, ymax, y0]
+			#print(np.array(range(n1, n2)), np.array(self.ydata[n1:n2]))
 			if (fitter.fit(np.array(range(n1, n2)), np.array(self.ydata[n1:n2])) == 0):
 				#fitting results are in
 				self.neEdits[i].setText("{:.3f}".format(fitter.paramlist[0]))
 				print(fitter.paramlist) #diagnostically
+				print(fitter.uncertlist)
 				#move the line to place (maybe they will go if change acts programmatically)
 				#also record fitter.uncertlist[0]
 				self.neUncerts[i] = fitter.uncertlist[0]
 				#and if wanted, show self.xdata[n1:n2], fitter.fitted in an overlay
 				self.setOverlay(2, self.xdata[n1:n2], fitter.fitted,'r')
 				#wait a little maybe
-				sleep(0.2)
+				sleep(1)
 		#you can clear the overlay here
 		self.setOverlay(2,[],[],None)
 
