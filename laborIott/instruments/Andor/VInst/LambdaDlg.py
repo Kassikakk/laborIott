@@ -73,8 +73,8 @@ class Ui_LambdaDialog(object):
 
     def retranslateUi(self, LambdaDialog):
         _translate = QtCore.QCoreApplication.translate
-        LambdaDialog.setWindowTitle(_translate("LambdaDialog", "╬╗ - scale"))
-        self.wlScaleBox.setTitle(_translate("LambdaDialog", "╬╗ - scale"))
+        LambdaDialog.setWindowTitle(_translate("LambdaDialog", "λ - scale"))
+        self.wlScaleBox.setTitle(_translate("LambdaDialog", "λ - scale"))
         self.NeCheck1.setText(_translate("LambdaDialog", "692.9 nm"))
         self.label_2.setText(_translate("LambdaDialog", "Start"))
         self.label_4.setText(_translate("LambdaDialog", "Step"))
@@ -82,7 +82,7 @@ class Ui_LambdaDialog(object):
         self.NeCheck2.setText(_translate("LambdaDialog", "693.8 nm Ar"))
         self.NeCheck3.setText(_translate("LambdaDialog", "696.5 nm"))
         self.fitPxelButt.setText(_translate("LambdaDialog", "Fit"))
-        self.NeEdit1.setText(_translate("LambdaDialog", "355"))
-        self.NeEdit2.setText(_translate("LambdaDialog", "470"))
-        self.NeEdit3.setText(_translate("LambdaDialog", "858"))
+        self.NeEdit1.setText(_translate("LambdaDialog", "392"))
+        self.NeEdit2.setText(_translate("LambdaDialog", "507"))
+        self.NeEdit3.setText(_translate("LambdaDialog", "895"))
         

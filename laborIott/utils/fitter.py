@@ -13,6 +13,19 @@ class Fitter(object):
 		self.fitted = np.array([])
 		self.parno = []
 		self.chi = 0.0
+		'''
+		Let's keep the stdev's and errcoef separated
+		the stdevs may be needed in subsequent calculations
+		though we might change it in the future
+
+		As to the rsqrlim, it stores the discrimination limit
+		of a very unique (:)) goodness-of-fit parameter, which is 
+		-log10(1-r), roughly representing how many 9-s are there in 
+		r = 0.999... before a smaller number.
+		1.0 is a rather reasonable value but can also be set slightly lower.
+		'''
+		self.errcoef = 1
+		self.rsqrlim = 1.0
 		if hasattr(funclist, '__iter__' ):
 			self.setFuncList(funclist)
 
@@ -54,9 +67,9 @@ class Fitter(object):
 			df = len(xdata) - len(self.paramlist) #vabadusastmete arv (äkki veel -1 ka?)
 			#if errcoef is None: #Studenti koefitsient vastavalt  etteantud konfidentsile:
 			conflevel = 0.99
-			errcoef = tdist.interval(conflevel, df, loc=0, scale=1)[1]
+			self.errcoef = tdist.interval(conflevel, df, loc=0, scale=1)[1]
 			
-			self.uncertlist = [errcoef * sqrt(pcov[n, n]) for n in range(len(popt))]
+			self.uncertlist = [sqrt(pcov[n, n]) for n in range(len(popt))]
 		except TypeError:  # mingil juhul seal pcov = inf ja käitub floadina
 			return 2
 		except ValueError:
@@ -68,7 +81,7 @@ class Fitter(object):
 		self.rsqr = - np.log10(sum((ydata - self.fitted)**2)/sum((ydata - ymean)**2))
 		#we can now probably draw some conclusions based on the chi value
 		#and if ok, evaluate the paramlist
-		if self.rsqr > 1.0: #TODO: put the discrimination value here
+		if self.rsqr > self.rsqrlim: #the discrimination value
 			self.paramlist = list(popt)
 		else:
 			return 4

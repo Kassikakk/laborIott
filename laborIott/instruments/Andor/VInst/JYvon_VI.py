@@ -47,15 +47,18 @@ class JYvon_VI(Andor_VI):
 			self.adjustNeLineMarker(i)
 			self.nelns[i].setPen(None)
 		#self.onCalcLambda()
-		self.onCalcFromLimb(6259.0)
+		
 		self.lambdaButt.clicked.connect(self.setLambdaDlg)
 		for i in range(3):
-			self.neEdits[i].textChanged.connect(lambda x, a=i: self.adjustNeLineMarker(i)) #2 kogu aeg?
-			self.neChecks[i].clicked.connect(
+			self.neEdits[i].textChanged.connect(lambda x, a=i: self.adjustNeLineMarker(a)) #2 kogu aeg?
+			self.neChecks[i].toggled.connect(
 				lambda x, a=i: self.nelns[a].setPen(self.necolors[a] if self.neChecks[a].isChecked() else None))
 
 		self.lamDlg.calcLmbdButt.clicked.connect(self.onCalcLambda)
 		self.lamDlg.fitPxelButt.clicked.connect(self.fitNeLines)
+
+		#Set some initial wl scale
+		#self.onCalcFromLimb(6259.0)
 
 		#create some overlays
 		self.noOverlays = 3
@@ -65,13 +68,13 @@ class JYvon_VI(Andor_VI):
 			#self.graphicsView.addItem(self.overlays[i])
 			#self.overlays[i].setPen(None)
 
+
 	def adjustNeLineMarker(self, i):
 		try:
 			pos = float(self.neEdits[i].text())
 			xval = interp1d(list(range(len(self.xdata))), self.xdata)(pos)
 		except ValueError: #either not floatable or value out of range
 			return
-		print("set {}◙ pos".format(i)) 
 		self.nelns[i].setPos(xval)
 
 
@@ -95,7 +98,7 @@ class JYvon_VI(Andor_VI):
 			pos = (self.neVals[i] -self.xdata[0]) / step 
 			if (pos > -1) and (pos < 1024):
 				self.neEdits[i].setText("{:.3f}".format(pos))
-				self.adjustNeLineMarker(i) #will it go by itself?
+				#self.adjustNeLineMarker(i) #will it go by itself?
 
 	def fitNeLines(self):
 		#define fitter 
@@ -128,20 +131,24 @@ class JYvon_VI(Andor_VI):
 			#configure the fitter and do the fitting
 			fitter.paramlist = [float(nmax), 1.0, ymax, y0]
 			#print(np.array(range(n1, n2)), np.array(self.ydata[n1:n2]))
-			if (fitter.fit(np.array(range(n1, n2)), np.array(self.ydata[n1:n2])) == 0):
+			ret = fitter.fit(np.array(range(n1, n2)), np.array(self.ydata[n1:n2]))
+			if (ret == 0):
 				#fitting results are in
 				self.neEdits[i].setText("{:.3f}".format(fitter.paramlist[0]))
 				print(fitter.paramlist) #diagnostically
 				print(fitter.uncertlist)
+				print(fitter.errcoef)
 				#move the line to place (maybe they will go if change acts programmatically)
 				#also record fitter.uncertlist[0]
 				self.neUncerts[i] = fitter.uncertlist[0]
 				#and if wanted, show self.xdata[n1:n2], fitter.fitted in an overlay
-				self.setOverlay(2, self.xdata[n1:n2], fitter.fitted,'r')
+				#self.setOverlay(2, self.xdata[n1:n2], fitter.fitted,'r')
 				#wait a little maybe
-				sleep(1)
+			else:
+				print("Fitter returns ",ret)
+				self.neChecks[i].setChecked(False)
 		#you can clear the overlay here
-		self.setOverlay(2,[],[],None)
+		#self.setOverlay(2,[],[],None)
 
 
 	def onCalcLambda(self):

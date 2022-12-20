@@ -131,3 +131,15 @@ Kus ma siia kirja paneks, et mis refaktoorimist oleks vaja mingil hetkel teha:
 * stringi formatt % pealt .format'i peale
 * instrumentides parem valmidus erroonilisteks tulemusteks (siin-seal midagi ka on)
 * ja ühtlasi siis ka ühendatuse - ühendamise (ja vastupidi) kontseptsioon. Võib-olla võiks see olla viidud ka baasinstrumenti.
+
+## 221220
+
+Proovin siin sotti saada igasugu määramatusarvutustest ja nende progresseerumisest. Neooni joonte paigalefittimine on praegu siin teema ja kui ma saan sellised tulemused:
+
+692.94675 392.733 0.014 
+
+693.7664  506.920 0.063 
+
+696.5431  895.426 0.014 
+
+ja kattetegur 99% jaoks on 2.78 siin koguaeg, siis mida siit järeldada saab? Vaatan praegu, et siin äkki tuleks isegi mõlemat pidi mingit määramatust arvestada, kui juba nii, sest ma ei tea, kui täpselt ka neid Ne andmeid kuskilt leida saab; samm on ju 0.00715 näiteks ja kui me isegi loeme kõik numbrid täpseks, siis lainepikkuste abs. määramatus on ikka väiksem kohati.

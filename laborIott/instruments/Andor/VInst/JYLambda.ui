@@ -167,7 +167,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>355</string>
+       <string>392</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="NeEdit2">
@@ -180,7 +180,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>470</string>
+       <string>507</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="NeEdit3">
@@ -193,7 +193,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>858</string>
+       <string>895</string>
       </property>
      </widget>
     </widget>
