@@ -34,6 +34,8 @@ class RubyProc(QtWidgets.QMainWindow):
 		self.values = [[],[]]
 		self.colsum = [0,0]
 		self.colsum2 = [0,0]
+		#record  last measured wl-s, so they can be used as base
+		self.zerowl = [None, None]
 		self.collecting = False
 		self.saveLoc = './'
 		self.running = Event()
@@ -56,6 +58,8 @@ class RubyProc(QtWidgets.QMainWindow):
 		self.updateFitShape.connect(self.andor.setOverlay)
 		self.updateData.connect(self.update)
 		self.runButt.clicked.connect(self.onStart)
+		self.setZeroButt1.clicked.connect(lambda a: self.setZeroVal(0))
+		self.setZeroButt2.clicked.connect(lambda a: self.setZeroVal(1))
 		# also connect all changes to settingsqueue set
 		self.fitBox1.toggled.connect(lambda a:  self.setSettingsQueue('active'))
 		self.fitBox2.toggled.connect(lambda a: self.setSettingsQueue('active'))
@@ -81,6 +85,13 @@ class RubyProc(QtWidgets.QMainWindow):
 
 		self.andor.show()
 
+	def setZeroVal(self, i):
+		if self.zerowl[i] is None:
+			return
+		if i == 0:
+			self.zeroValEdit1.setText("{:.4f}".format(self.zerowl[0]))
+		else:
+			self.zeroValEdit2.setText("{:.4f}".format(self.zerowl[1]))
 		
 	def setSettingsQueue(self, setting = None): #handle the params queue
 		#if there is a dict in the queue already, grab it first
@@ -146,6 +157,9 @@ class RubyProc(QtWidgets.QMainWindow):
 
 		RLabel.setText("{:.4f}".format(chi))
 		SNLabel.setText("{:.3f}".format(uncertlist[0]))
+		#print(paramlist[0], uncertlist[0])
+		#record for zero wl setting
+		self.zerowl[index] = paramlist[0]
 		if self.collecting:
 			colval = p if pRadio.isChecked() else paramlist[0]
 			self.values[index].append([int(time()*10 - 16e9), colval])  # collect power while acquiring
@@ -287,6 +301,6 @@ if __name__ == '__main__':
 	for i in (1,2):
 		if len(args) > i:
 			args[i] = int(args[i])
-	window = RubyProc("RubyPressure.ui", *args)
+	window = RubyProc(localPath("RubyPressure.ui"), *args)
 	window.show()
 	sys.exit(app.exec_())

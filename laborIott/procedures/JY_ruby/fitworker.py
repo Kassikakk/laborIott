@@ -150,6 +150,7 @@ class FitWorker(QtCore.QThread): #või Thread
 
 					if (self.fitters[n].fitter.fit(xData[p1:p2], yData[p1:p2]) == 0):
 						#additional evaluation that data is reasonable
+						#print(self.fitters[n].fitter.errcoef)
 						self.dataReady.emit((n, self.fitters[n].fitter.paramlist,
 											 xData[p1:p2], self.fitters[n].fitter.fitted, 
 											 self.fitters[n].fitter.uncertlist, 
