@@ -11,7 +11,9 @@ shrock = Shamrock(SDKAdapter(localPath("../Inst/ShamrockCIF"), False), 26.0, 102
 
 #print(shrock.centerpos)
 #print(shrock.wavelengths)
-print(shrock.slit)
-shrock.slit = 150
-print(shrock.slit)
-#print(shrock.gratingdict)
+#print(shrock.slit)
+#shrock.slit = 100
+#print(shrock.slit)
+#shrock.grating = 2
+shrock.flipper = 1
+print(shrock.flipper)
