@@ -15,5 +15,9 @@ shrock = Shamrock(SDKAdapter(localPath("../Inst/ShamrockCIF"), False), 26.0, 102
 #shrock.slit = 100
 #print(shrock.slit)
 #shrock.grating = 2
-shrock.flipper = 1
-print(shrock.flipper)
+shrock.flipper = 'direct'
+shrock.shutter = 'open'
+print(shrock.flipper, shrock.shutter)
+shrock.flipper = 'side'
+shrock.shutter = 'closed'
+print(shrock.flipper, shrock.shutter)

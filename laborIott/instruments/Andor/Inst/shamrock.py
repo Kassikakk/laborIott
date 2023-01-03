@@ -10,6 +10,7 @@ class Shamrock(Instrument):
 		self.device = 0 #if we only have one device
 		#or perhaps we should set pixelwidth and numpixels as properties
 		#seeing as we might want to use another camera as well
+		#or just give functions to change them (emm...)
 		self.write("ShamrockSetPixelWidth({}, c_float({}))".format(self.device,pixelwidth))
 		self.numpixels = numpixels
 		self.write("ShamrockSetNumberPixels({},{})".format(self.device, numpixels))
@@ -44,7 +45,7 @@ class Shamrock(Instrument):
 	def wavelengths(self):
 		#returns an array [numpixels] of wl values
 		ret =self.values("ShamrockGetCalibration({},byref(c_float*{}),{})".format(self.device,self.numpixels, self.numpixels))
-		return ret[1]
+		return ret[1] if ret[0] == success  else None
 	#wavelengths - OK
 	#centerpos NB 0 supported - OK
 	
@@ -62,11 +63,11 @@ class Shamrock(Instrument):
 	def gratingdict(self):
 		dictout = {}
 		nofilts = self.values("ShamrockGetNumberGratings({}, byref(c_int))".format(self.device))[1]
-		print(nofilts)
 		for i in range(nofilts):
 			#filter numbering is 1-based
 			ret = self.values("ShamrockGetGratingInfo({}, {},byref(c_float), byref(c_char*4), byref(c_int),byref(c_int))".format(self.device,i+1))
 			desc = "{} l/mm ".format(int(ret[1] + 0.5))
+			#format the blaze value (max 4 chars) and add to the description
 			for s in ret[2]:
 				if ord(s) == 0:
 					break
@@ -89,13 +90,28 @@ class Shamrock(Instrument):
 	@property
 	def flipper(self):
 		ret = self.values("ShamrockGetFlipperMirror({}, 2, byref(c_int))".format(self.device))
-		return ret[1] if ret[0] == success  else None
+		return ('direct', 'side')[ret[1]] if ret[0] == success  else None
 
 	@flipper.setter
 	def flipper(self, val):
-		 self.write("ShamrockSetFlipperMirror({}, 2, {})".format(self.device, val))
-	#slit - OK
-	#grating - OK
-	#gratingdict - OK
-	#flipper
-	#shutter vist ka siis (vinst overrideb selle)
+		try:
+			#only accept these two values
+			ind = ('direct', 'side').index(val)
+		except ValueError:
+			return
+		self.write("ShamrockSetFlipperMirror({}, 2, {})".format(self.device, ind))
+
+	@property
+	def shutter(self):
+		ret = self.values("ShamrockGetShutter({}, byref(c_int))".format(self.device))
+		return ('closed','open')[ret[1]] if ret[0] == success  else None
+
+	@shutter.setter
+	def shutter(self, val):
+		try:
+			#only accept these two values
+			ind = ('closed','open').index(val)
+		except ValueError:
+			return
+		self.write("ShamrockSetShutter({}, {})".format(self.device, ind))
+
