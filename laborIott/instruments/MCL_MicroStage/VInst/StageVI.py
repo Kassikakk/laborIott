@@ -15,8 +15,8 @@ def localPath(filename):
 
 class Stage_VI(VInst):
 
-	def __init__(self, address=None, inport=None, outport=None):
-		super().__init__(localPath('Stage.ui'),address, inport, outport)
+	def __init__(self):
+		super().__init__(localPath('Stage.ui'))
 
 		self.stage = MCL_MicroStage(self.getAdapter(SDKAdapter(localPath("../Inst/MicroDrive"), False), "MCL_MS"))
 
@@ -215,9 +215,7 @@ class Stage_VI(VInst):
 		super().setExternal(state)
 
 
-def StageExitHandler():
-	# note howeva that it only works for separate launching, not in multi-instrument procedures
-	pass
+
 
 
 if __name__ == '__main__':
@@ -225,15 +223,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(StageExitHandler)
-	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[1:4]
-	# port values, if provided, should be integers
-	# this errors if they are not
-	for i in (1, 2):
-		if len(args) > i:
-			args[i] = int(args[i])
-
-	window = Stage_VI(*args)
+	
+	window = Stage_VI()
 	window.show()
 	sys.exit(app.exec_())

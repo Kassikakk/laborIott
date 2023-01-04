@@ -18,8 +18,8 @@ class IDusShamrock_VI(Andor_VI): #IDusShamrock or AndorShamrock? Can other camer
 	we'll see if we can handle this in the future.
 	'''
 
-	def __init__(self, address= None, inport= None, outport = None):
-		super(IDusShamrock_VI, self).__init__(address, inport, outport)
+	def __init__(self):
+		super(IDusShamrock_VI, self).__init__()
 		#prep the dialog
 		self.dlg = QtWidgets.QDialog()
 		self.shamDlg = Ui_ShamrockDialog()
@@ -106,14 +106,8 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[1:4]
-	# port values, if provided, should be integers
-	# this errors if they are not
-	for i in (1,2):
-		if len(args) > i:
-			args[i] = int(args[i])
+	
 
-	window = IDusShamrock_VI(*args)
+	window = IDusShamrock_VI()
 	window.show()
 	sys.exit(app.exec_())

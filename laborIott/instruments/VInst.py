@@ -3,6 +3,7 @@ import sys
 from PyQt5 import QtWidgets, uic
 import pandas as pd
 import userpaths
+import configparser as cp
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -16,12 +17,13 @@ class VInst(QtWidgets.QMainWindow):
 	'''
 	The class is supposed to take care of some recurring tasks:
 	-saving data (TODO: zip file support)
-	-selecting adapter (default or network)
+	-selecting adapter: default or network (specify an .ini file with [ZMQ] section for instruments that need it)
+	(and put it in local config/laborIott/Inst, filename <refname>.ini)
 	-selecting external mode
 
 	'''
 
-	def __init__(self, uifile, address= None, inport= None, outport = None):
+	def __init__(self, uifile):
 		super(VInst, self).__init__()
 		uic.loadUi(uifile, self) #should we do localPath here or ?
 		#we can determine some widgets here
@@ -42,9 +44,6 @@ class VInst(QtWidgets.QMainWindow):
 			self.dsbl += [self.formatCombo]
 		self.xdata = []
 		self.ydata = []
-		self.address = address
-		self.inport = inport
-		self.outport = outport
 
 		#should we use an event here?
 		self.external = False
@@ -53,12 +52,29 @@ class VInst(QtWidgets.QMainWindow):
 
 	def getAdapter(self, def_adapter, refname):
 		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
-		if self.address is None:
+		#so any instrument now should get an adapter through this function
+		
+		conf_loc = os.join(userpaths.get_local_appdata(), '/laborIott/Inst/'+refname + '.ini')
+		conf = cp.ConfigParser()
+		#present?
+		if conf.read(conf_loc) == []:
 			return def_adapter
-		else:
-			inp = 5555 if self.inport is None else self.inport
-			outp = inp if self.outport is None else self.outport
-			return ZMQAdapter(refname, self.address, inp, outp)
+		#has ZMQ section?
+		if not conf.has_section('ZMQ'):
+			return def_adapter
+		#no 'active' key or the value is yes
+		if not conf['ZMQ'].getboolean('active', True):
+			return def_adapter
+		#has address
+		address = conf['ZMQ'].get('address','')
+		if len(address) == 0:
+			return def_adapter
+		#if any of the above is false, return def_adapter
+		#else construct a ZMQAdapter
+		inport = conf['ZMQ'].getint('inport',5555)
+		outport = conf['ZMQ'].getint('outport',inport)
+		return ZMQAdapter(refname, address, inport, outport)
+
 
 
 	def setExternal(self, state):

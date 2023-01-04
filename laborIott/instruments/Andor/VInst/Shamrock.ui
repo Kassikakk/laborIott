@@ -48,13 +48,6 @@
       <widget class="QLineEdit" name="cWlEdit"/>
      </item>
      <item>
-      <widget class="QPushButton" name="cWlButt">
-       <property name="text">
-        <string>Set</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="rangeLabel">
        <property name="minimumSize">
         <size>
@@ -64,6 +57,13 @@
        </property>
        <property name="text">
         <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cWlButt">
+       <property name="text">
+        <string>Set</string>
        </property>
       </widget>
      </item>
@@ -109,6 +109,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
    <item>
@@ -142,7 +155,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gratingCombo"/>
+      <widget class="QComboBox" name="gratingCombo">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -178,6 +211,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="flipperCombo">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <item>
         <property name="text">
          <string>direct</string>
@@ -189,6 +228,19 @@
         </property>
        </item>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

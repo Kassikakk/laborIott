@@ -20,14 +20,16 @@ from math import log10
 
 class Andor_VI(VInst):
 
-	def __init__(self, address= None, inport= None, outport = None):
-		super().__init__(localPath('Andor.ui'),address, inport, outport)
+	def __init__(self, refname = "iDus"):
+
+		# the refname parameter is needed for derived classes which may want to define a different name
+		# to use different settings for connection
+		super().__init__(localPath('Andor.ui'))
 
 
 		#connect instrument
-		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),"iDus"))
-
-		
+		self.connectInstr(refname)
+	
 		#parameetrid
 		self.ydata = []
 		self.back = []
@@ -64,6 +66,10 @@ class Andor_VI(VInst):
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.onTimer)
 		self.timer.start(200)
+
+	def connectInstr(self, refname):
+		#define as separate function so it can be overridden
+		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),refname))
 		
 
 
@@ -236,13 +242,7 @@ class Andor_VI(VInst):
 		
 
 		
-def AndorExitHandler():
-	#QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
-	#anything needed before checkout
-	pass
 
-	#window.IDusLstnr.stop()
-	#window.IDusLstnr.join(timeout=100)
 
 
 #needed for running from within Spyder etc.
@@ -251,15 +251,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(AndorExitHandler)
-	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[1:4]
-	# port values, if provided, should be integers
-	# this errors if they are not
-	for i in (1,2):
-		if len(args) > i:
-			args[i] = int(args[i])
-
-	window = Andor_VI(*args)
+		
+	window = Andor_VI() #you may add a different refname as a parameter
 	window.show()
 	sys.exit(app.exec_())

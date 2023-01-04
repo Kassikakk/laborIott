@@ -12,8 +12,8 @@ def localPath(filename):
 
 class AndorKymera_VI(Andor_VI):
 	
-	def __init__(self, address= None, inport= None, outport = None):
-		super(AndorKymera_VI, self).__init__(address, inport, outport)
+	def __init__(self, refname = "iDus"):
+		super(AndorKymera_VI, self).__init__(refname)
 		self.dlg = QtWidgets.QDialog()
 		self.kymDlg = Ui_KymeraDialog()
 		self.kymDlg.setupUi(self.dlg)
@@ -42,18 +42,10 @@ class AndorKymera_VI(Andor_VI):
 		self.kymDlg.gratingCombo.currentIndexChanged.connect(self.setGrating)
 	
 	
-	def connectInstr(self, address, inport, outport):
-		#instrumendi tekitamine, seekord IDusKymera
-		if address is None:
-			# local instrument
-			self.idus = IDusKymera(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False))
-		else:
-			# connect to remote instrument
-			# default port is 5555
-			inp = 5555 if inport is None else inport
-			outp = inp if outport is None else outport
-			self.idus = IDusKymera(ZMQAdapter("iDusKymera", address, inp, outp))
-		
+	def connectInstr(self, refname):
+		#overridden for IDusKymera
+		self.idus = IDusKymera(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),refname))
+
 		
 	
 		
@@ -98,13 +90,7 @@ class AndorKymera_VI(Andor_VI):
 		
 		
 		
-def AndorExitHandler():
-	#QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
-	#anything needed before checkout
-	pass
 
-	#window.IDusLstnr.stop()
-	#window.IDusLstnr.join(timeout=100)
 
 
 #needed for running from within Spyder etc.
@@ -113,7 +99,6 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(AndorExitHandler)
-	window = AndorKymera_VI()
+	window = AndorKymera_VI() #refname may be added here
 	window.show()
 	sys.exit(app.exec_())

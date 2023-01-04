@@ -24,8 +24,8 @@ class JYvon_VI(Andor_VI):
 	usable with a wider range of spectrometers.
 	'''
 
-	def __init__(self, address= None, inport= None, outport = None):
-		super(JYvon_VI, self).__init__(address, inport, outport)
+	def __init__(self, refname = "JYiDus"):
+		super(JYvon_VI, self).__init__(refname)
 		self.dlg = QtWidgets.QDialog()
 		self.lamDlg = Ui_LambdaDialog()
 		self.lamDlg.setupUi(self.dlg)
@@ -210,14 +210,10 @@ if __name__ == '__main__':
 	else:
 		app = QtWidgets.QApplication.instance()
 	
-	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[1:4]
-	# port values, if provided, should be integers
-	# this errors if they are not
-	for i in (1,2):
-		if len(args) > i:
-			args[i] = int(args[i])
-
-	window = JYvon_VI(*args)
+	# handle possible command line parameters: refname?
+	#args = sys.argv[1:]
+	
+	
+	window = JYvon_VI() #(*args)?
 	window.show()
 	sys.exit(app.exec_())
