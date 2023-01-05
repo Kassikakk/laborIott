@@ -54,8 +54,10 @@ class VInst(QtWidgets.QMainWindow):
 		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
 		#so any instrument now should get an adapter through this function
 		
-		conf_loc = os.join(userpaths.get_local_appdata(), '/laborIott/Inst/'+refname + '.ini')
+		#simple adding seems ok:
+		conf_loc = userpaths.get_local_appdata()+ '/laborIott/Inst/'+refname + '.ini'
 		conf = cp.ConfigParser()
+		#if any of the following is false, return def_adapter
 		#present?
 		if conf.read(conf_loc) == []:
 			return def_adapter
@@ -69,20 +71,24 @@ class VInst(QtWidgets.QMainWindow):
 		address = conf['ZMQ'].get('address','')
 		if len(address) == 0:
 			return def_adapter
-		#if any of the above is false, return def_adapter
+		
 		#else construct a ZMQAdapter
 		inport = conf['ZMQ'].getint('inport',5555)
 		outport = conf['ZMQ'].getint('outport',inport)
 		return ZMQAdapter(refname, address, inport, outport)
 
+	def setEnable(self, state):
+		#define separately so VInsts can use it
+		for wdg in self.dsbl:
+			wdg.setEnabled(not state)
 
 
 	def setExternal(self, state):
 		# do any waiting and stopping needed to enter the second state
 		#in the child class, then call parent
 		self.external = state
-		for wdg in self.dsbl:
-			wdg.setEnabled(not state)
+		self.setEnable(not state)
+		
 
 
 	def onGetLoc(self):

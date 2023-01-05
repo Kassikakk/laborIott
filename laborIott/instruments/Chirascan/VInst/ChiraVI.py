@@ -5,8 +5,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 #import pandas as pd
 from threading import Event
 
+from laborIott.instruments.VInst import VInst
+
 from laborIott.adapters.SDKAdapter import SDKAdapter
-from laborIott.adapters.ZMQAdapter import ZMQAdapter
+#from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.Chirascan.Inst.Chirascan import ChiraScan
 import os
 
@@ -14,26 +16,16 @@ import os
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
-Ui_MainWindow, QMainWindow = uic.loadUiType(localPath('ChiraScan.ui'))
 
+class Chira_VI(VInst):
 
-class Chira_VI(QMainWindow, Ui_MainWindow):
-
-	def __init__(self,address= None, inport= None, outport = None):
-		super(Chira_VI, self).__init__()
-		self.setupUi(self)
+	def __init__(self):
+		super(Chira_VI, self).__init__(localPath('ChiraScan.ui'))
+		#self.setupUi(self)
 
 		#instrumendi tekitamine
-		#if remoteaddress is None:
-		if address is None:
-			# local instrument
-			self.chira = ChiraScan(SDKAdapter(localPath("../Inst/FOPCIUSB"),False)) 
-		else:
-			# connect to remote instrument
-			# default port is 5555
-			inp = 5555 if inport is None else inport
-			outp = inp if outport is None else outport
-			self.chira = ChiraScan(ZMQAdapter("chira", address, inp, outp))
+		self.chira = ChiraScan(self.getAdapter(SDKAdapter(localPath("../Inst/FOPCIUSB"),False),'chira'))
+		
 		
 		self.WLreached = Event()
 		self.WLreached.set()
@@ -42,8 +34,7 @@ class Chira_VI(QMainWindow, Ui_MainWindow):
 		
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
-		self.dsbl = [self.goWlButt, self.shutButt, self.setBwButt]
-		self.external = False
+		self.dsbl += [self.goWlButt, self.shutButt, self.setBwButt]
 		self.wlEdit.setText("{:.1f}".format(self.chira.wavelength))
 		
 
@@ -103,21 +94,7 @@ class Chira_VI(QMainWindow, Ui_MainWindow):
 		self.chira.bandwidth = newBW
 		self.bwEdit.setText("{:.1f}".format(self.chira.bandwidth))
 		
-	def setEnable(self, state):
-		for wdg in self.dsbl:
-			wdg.setEnabled(state)
-			
-	def setExternal(self, state):
-		#cancel moving and set enabled/disabled  
-		#set self.acquiring = False
-		self.external = state
-		#check if not goingtoWL
-		self.setEnable(not state)
-		
-def ExitHandler():
-	#QtWidgets.QMessageBox.information(None,window.wlLabel.text() , "Going somewhere?")
-	#anything needed before checkout
-	pass
+
 
 
 
@@ -127,14 +104,7 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	app.aboutToQuit.connect(ExitHandler)
-	# handle possible command line parameters: address, inport, outport
-	args = sys.argv[1:4]
-	# port values, if provided, should be integers
-	# this errors if they are not
-	for i in (1,2):
-		if len(args) > i:
-			args[i] = int(args[i])
-	window = Chira_VI(*args)
+	#	
+	window = Chira_VI()
 	window.show()
 	sys.exit(app.exec_())
