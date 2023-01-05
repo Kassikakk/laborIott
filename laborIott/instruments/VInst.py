@@ -50,27 +50,31 @@ class VInst(QtWidgets.QMainWindow):
 
 		self.saveLoc = userpaths.get_my_documents()
 
-	def getAdapter(self, def_adapter, refname):
+	def getZMQAdapter(self, refname):
 		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
 		#so any instrument now should get an adapter through this function
 		
 		#simple adding seems ok:
 		conf_loc = userpaths.get_local_appdata()+ '/laborIott/Inst/'+refname + '.ini'
 		conf = cp.ConfigParser()
-		#if any of the following is false, return def_adapter
+		#if any of the following is false, return None
 		#present?
+		print(conf_loc)
 		if conf.read(conf_loc) == []:
-			return def_adapter
+			#print(conf_loc + " not Found")
+			return None
 		#has ZMQ section?
 		if not conf.has_section('ZMQ'):
-			return def_adapter
+			return None
 		#no 'active' key or the value is yes
+		#print("section found")
 		if not conf['ZMQ'].getboolean('active', True):
-			return def_adapter
+			return None
 		#has address
 		address = conf['ZMQ'].get('address','')
 		if len(address) == 0:
-			return def_adapter
+			return None
+		#print("address ok")
 		
 		#else construct a ZMQAdapter
 		inport = conf['ZMQ'].getint('inport',5555)
@@ -80,7 +84,7 @@ class VInst(QtWidgets.QMainWindow):
 	def setEnable(self, state):
 		#define separately so VInsts can use it
 		for wdg in self.dsbl:
-			wdg.setEnabled(not state)
+			wdg.setEnabled(state)
 
 
 	def setExternal(self, state):

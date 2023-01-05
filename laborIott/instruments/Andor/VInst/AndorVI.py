@@ -69,7 +69,11 @@ class Andor_VI(VInst):
 
 	def connectInstr(self, refname):
 		#define as separate function so it can be overridden
-		self.idus = IDus(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),refname))
+		adapter = self.getZMQAdapter(refname)
+		if adapter is None:
+			adapter = SDKAdapter(localPath("../Inst/atmcd32d_legacy"),False)
+		self.idus = IDus(adapter)
+		
 		
 
 

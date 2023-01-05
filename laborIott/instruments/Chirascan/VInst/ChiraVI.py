@@ -23,8 +23,11 @@ class Chira_VI(VInst):
 		super(Chira_VI, self).__init__(localPath('ChiraScan.ui'))
 		#self.setupUi(self)
 
-		#instrumendi tekitamine
-		self.chira = ChiraScan(self.getAdapter(SDKAdapter(localPath("../Inst/FOPCIUSB"),False),'chira'))
+		#how to make it a bit nicer?
+		adapter = self.getZMQAdapter('chira')
+		if adapter is None:
+			adapter = SDKAdapter(localPath("../Inst/FOPCIUSB"),False)
+		self.chira = ChiraScan(adapter)
 		
 		
 		self.WLreached = Event()

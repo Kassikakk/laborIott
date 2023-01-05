@@ -44,7 +44,10 @@ class AndorKymera_VI(Andor_VI):
 	
 	def connectInstr(self, refname):
 		#overridden for IDusKymera
-		self.idus = IDusKymera(self.getAdapter(SDKAdapter(localPath("../Inst/atmcd32d_legacy"), False),refname))
+		adapter = self.getZMQAdapter(refname)
+		if adapter is None:
+			adapter = SDKAdapter(localPath("../Inst/atmcd32d_legacy"),False)
+		self.idus = IDusKymera(adapter)
 
 		
 	

@@ -1,6 +1,6 @@
 import sys
 from threading import Event
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets
 from laborIott.adapters.SDKAdapter import SDKAdapter
 import pandas as pd
 
@@ -18,7 +18,10 @@ class Stage_VI(VInst):
 	def __init__(self):
 		super().__init__(localPath('Stage.ui'))
 
-		self.stage = MCL_MicroStage(self.getAdapter(SDKAdapter(localPath("../Inst/MicroDrive"), False), "MCL_MS"))
+		adapter = self.getZMQAdapter("MCL_MS")
+		if adapter is None:
+			adapter = SDKAdapter(localPath("../Inst/MicroDrive"),False)
+		self.stage = MCL_MicroStage(adapter)
 
 		self.posReached = Event()  
 		self.posReached.set()

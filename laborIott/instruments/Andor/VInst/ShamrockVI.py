@@ -30,7 +30,10 @@ class IDusShamrock_VI(Andor_VI): #IDusShamrock or AndorShamrock? Can other camer
 		#create the spectrometer instrument - well, this should be integrated in VInst connect framework
 		#probably by some settings file somewhere (right here?)
 		#ok we have already done some thinking about it, so coming up.
-		self.shrock = Shamrock(self.getAdapter(SDKAdapter(localPath("../Inst/ShamrockCIF"), False),"Shamrock"), 26.0, 1024)
+		adapter = self.getZMQAdapter("Shamrock")
+		if adapter is None:
+			adapter = SDKAdapter(localPath("../Inst/ShamrockCIF"),False)
+		self.shrock = Shamrock(adapter, 26.0, 1024)
 
 		#initialize self.shamDlg 4 fields
 		
