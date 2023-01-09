@@ -59,7 +59,7 @@ class VInst(QtWidgets.QMainWindow):
 		conf = cp.ConfigParser()
 		#if any of the following is false, return None
 		#present?
-		print(conf_loc)
+		#print(conf_loc)
 		if conf.read(conf_loc) == []:
 			#print(conf_loc + " not Found")
 			return None

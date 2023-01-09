@@ -40,7 +40,10 @@ class IDusShamrock_VI(Andor_VI): #IDusShamrock or AndorShamrock? Can other camer
 		self.setWlScale() #also set the scale
 		self.shamDlg.slitEdit.setText("{:.1f}".format(self.shrock.slit))
 
-		self.shamDlg.flipperCombo.setCurrentText(self.shrock.flipper)
+		flpos = self.shrock.flipper
+		self.shamDlg.flipperCombo.setCurrentText(flpos)
+		if flpos == 'side':
+			self.reverseChk.setChecked(True)
 		
 		gdict = self.shrock.gratingdict
 		self.shamDlg.gratingCombo.addItems(list(gdict.keys()))

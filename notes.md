@@ -155,3 +155,14 @@ Formaalselt praegu vist ei ole probleemi lokaalse adapteri korral süsteemi tö�
 ## 230104
 
 No nüüd sai hakatud seda implementeerima, et kuidas ZMQ võimalikku ühendust kontrollida ja praegu on nii, et igal seadmel on mingi refname ja selle kohta on masina seadetes (AppData/Local või ~/.config) all laborIott/Inst/< refname >.ini, kui on vaja seda saada üle võrgu või muid seadeid salvestada. Selles peab siis olema [ ZMQ ] sektsioon ja seal address, inport, outport, active ja address on ainuke kohustuslik. Mingeid segadusi siin ka kohe ilmnes. Sama seadet võib tahta nii lokaalselt kui üle võrgu ja sel juhul peaks olema võimalik neile eri refnamed anda. Seda siis ka sai korraldatud, refname(d) mingi defauldiga võiksid siis olla VI parameetrites ja tegelikult võiks neid ka promoveerida command linele. Siis instrumendi tasemel liidetud instrumendid (kui on vaja mitte juurde deffida instrumenti, vaid asendada), nt. Kymera, sai instrumendi defineerimine eraldi funktsiooni tõstetud, siis on võimalik seda overrideda.
+
+##  230105
+
+Kena, aga üks kaalutlus veel lisandus. Asi selles, et getAdapter võtab kohe ette default adapteri, koostades juba kohe ära ka vastava adapteri objekti. Selgub aga (Chirascanni näitel), et see adapter ei pruugi seadme antud masina taga mitteolemasolul isegi veatult konstrueeruda. Seega tuleks asja ajada sellisel moel, et adapteri moodustamine algaks alles juhul, kui on selge, et ZMQ pole sätitud. Mõneti muudab see programmiteksti vist koledamaks (või kuidas seda teha saaks?), aga muidugi jätab ära tarbetut tegevust.
+
+## 230109 
+
+Mulle ikkagi hakkab tunduma, et võiks mingi üldise spektromeetri VI objekti ikka ka vahele pista, sest vastavat tegevust järjest koguneb. No lambda correction näiteks ja siis mingid klaviatuurishortcutid (Esc, F3, F6, F9). Ok
+
+Sellest lambda korrektsioonist peaks arutama. Kui meil on juba see instrumendi settingu fail ehk .ini fail, siis seal saaks ka defineerida jooni. Edasi oleks vaja ühte listi, sinna võiksid ju nt. tekkida kõik need jooned, mis parasjagu pildile mahuvad ja seal peaks olema checkbox, label ja edit. Üldiselt peaks muu kõik olema saadav JYAndori eeskujul. Nii et esimene asi oleks siis saada selline listbox või -view.
+Janomaitea, see spektromeetri lülitamine on ka ikka asi, et kas saaks kuidagi seda ühekordset ja vaba jooksu ikka eristada ja mis saab kineetikast ja siis et bäcki ja refi taasettemanamine peaks ka kuidagi ikka võimalik olema (et kui raadio valida, siis äkki tuleb ette ja saaks neid ka salvestada ja võib/olla ka bäcki näiteks tagasi manada, äkki mingil hetkel vaja).
