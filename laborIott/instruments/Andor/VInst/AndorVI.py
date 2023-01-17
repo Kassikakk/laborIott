@@ -221,7 +221,7 @@ class Andor_VI(VInst):
 						self.ref = list(spc[no_cols - 1]) #list needed?
 						self.absChk.setEnabled(True)
 					else:
-						print("spectrum size doesn't match")
+						print("spectrum size doesn't match",len(spc[no_cols - 1]),len(self.ydata))
 
 				else:
 					print("not sure what this is")

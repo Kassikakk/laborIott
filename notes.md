@@ -165,4 +165,10 @@ Kena, aga üks kaalutlus veel lisandus. Asi selles, et getAdapter võtab kohe et
 Mulle ikkagi hakkab tunduma, et võiks mingi üldise spektromeetri VI objekti ikka ka vahele pista, sest vastavat tegevust järjest koguneb. No lambda correction näiteks ja siis mingid klaviatuurishortcutid (Esc, F3, F6, F9). Ok
 
 Sellest lambda korrektsioonist peaks arutama. Kui meil on juba see instrumendi settingu fail ehk .ini fail, siis seal saaks ka defineerida jooni. Edasi oleks vaja ühte listi, sinna võiksid ju nt. tekkida kõik need jooned, mis parasjagu pildile mahuvad ja seal peaks olema checkbox, label ja edit. Üldiselt peaks muu kõik olema saadav JYAndori eeskujul. Nii et esimene asi oleks siis saada selline listbox või -view.
-Janomaitea, see spektromeetri lülitamine on ka ikka asi, et kas saaks kuidagi seda ühekordset ja vaba jooksu ikka eristada ja mis saab kineetikast ja siis et bäcki ja refi taasettemanamine peaks ka kuidagi ikka võimalik olema (et kui raadio valida, siis äkki tuleb ette ja saaks neid ka salvestada ja võib/olla ka bäcki näiteks tagasi manada, äkki mingil hetkel vaja).
+Janomaitea, see spektromeetri lülitamine on ka ikka asi, et kas saaks kuidagi seda ühekordset ja vaba jooksu ikka eristada ja mis saab kineetikast ja siis et bäcki ja refi taasettemanamine peaks ka kuidagi ikka võimalik olema (et kui raadio valida, siis äkki tuleb ette ja saaks neid ka salvestada ja võib/olla ka bäcki näiteks tagasi manada, äkki mingil hetkel vaja). 
+
+Refi nimi võiks näha olla ja siis ka võib.olla mingi kell, millal viimati bõkki võeti.
+
+## 230116
+
+Ja ma mõtlen nüüd, et tegelikult peaks mingi protseduuri kala ka kokku panema, et see poleks väga raske teha, s.m.e. võib-olla siis mingi baasklass ja/või checklist, kuidas parimini toimida. No kasvõi, et kui praegu ma tahaks kokku panna mingi automatiseeritud Shamrocki keeraja ja järjest mõõtja, et siis kui raskeks see asi läheb või ta tegelikult ei peakski minema.
