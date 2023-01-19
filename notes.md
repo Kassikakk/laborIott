@@ -172,3 +172,7 @@ Refi nimi võiks näha olla ja siis ka võib.olla mingi kell, millal viimati bõ
 ## 230116
 
 Ja ma mõtlen nüüd, et tegelikult peaks mingi protseduuri kala ka kokku panema, et see poleks väga raske teha, s.m.e. võib-olla siis mingi baasklass ja/või checklist, kuidas parimini toimida. No kasvõi, et kui praegu ma tahaks kokku panna mingi automatiseeritud Shamrocki keeraja ja järjest mõõtja, et siis kui raskeks see asi läheb või ta tegelikult ei peakski minema.
+
+## 230119 
+
+Ja üks mõte veel, et instrumenti võiks sisse olla ehitatud mingi state log mehhanism, et kirjutab igasugu parameetrid, mis parasjagu on, korraga faili, koos mingi ajatempliga (nt. failinimi). Siis lihtsam aru pidada. Vastav nupp siis savemise juurde. 

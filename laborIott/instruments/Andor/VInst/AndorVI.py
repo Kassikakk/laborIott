@@ -101,6 +101,7 @@ class Andor_VI(VInst):
 					self.absChk.setEnabled(True)
 					datalist = [datalist[i] - self.back[i] for i in range(len(self.back))]
 					self.ref = datalist #ref has back subbed already
+					self.refLabel.setText('<local>')
 				self.plot.setData(self.xdata, datalist)
 			else:
 				if len(self.back) == len(datalist):
@@ -207,10 +208,10 @@ class Andor_VI(VInst):
 		self.locLabel.setText(self.saveLoc)
 
 	def loadRef(self):
-		fn = QtWidgets.QFileDialog.getOpenFileName(self, 'Load reference', self.saveLoc)[0]
-		if fn:
+		fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Load reference', self.saveLoc)[0]
+		if fname:
 			try:
-				spc = pd.read_csv(fn, sep = '\t', header = None)
+				spc = pd.read_csv(fname, sep = '\t', header = None)
 				'''
 				if we have two cols, take the second
 				if one, take this, more is suspicious
@@ -220,6 +221,7 @@ class Andor_VI(VInst):
 					if len(spc[no_cols - 1]) == len(self.ydata):
 						self.ref = list(spc[no_cols - 1]) #list needed?
 						self.absChk.setEnabled(True)
+						self.refLabel.setText(fname.split('/')[-1])
 					else:
 						print("spectrum size doesn't match",len(spc[no_cols - 1]),len(self.ydata))
 

@@ -474,6 +474,19 @@
           <string>Reverse</string>
          </property>
         </widget>
+        <widget class="QLabel" name="refLabel">
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>170</y>
+           <width>101</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string> </string>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -486,7 +499,7 @@
      <x>0</x>
      <y>0</y>
      <width>704</width>
-     <height>30</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
