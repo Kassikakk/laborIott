@@ -38,7 +38,7 @@ class Andor_VI(VInst):
 		self.idus.expTime = 0.5
 		self.idus.acqmode = 'single'
 		self.acquiring = False
-		self.saveLoc = './'
+		self.saveLoc = self.refLoc = './'
 		self.external = False
 		self.dataQ = Queue()
 		self.dsbl = [self.runButt, self.setParmsButt, self.backChk, self.locButt, self.saveButt, self.formatCombo]
@@ -206,9 +206,10 @@ class Andor_VI(VInst):
 	def setSaveLoc(self, loc):
 		self.saveLoc = loc
 		self.locLabel.setText(self.saveLoc)
+		self.refLoc = self.saveLoc
 
 	def loadRef(self):
-		fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Load reference', self.saveLoc)[0]
+		fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Load reference', self.refLoc)[0]
 		if fname:
 			try:
 				spc = pd.read_csv(fname, sep = '\t', header = None)
@@ -221,7 +222,8 @@ class Andor_VI(VInst):
 					if len(spc[no_cols - 1]) == len(self.ydata):
 						self.ref = list(spc[no_cols - 1]) #list needed?
 						self.absChk.setEnabled(True)
-						self.refLabel.setText(fname.split('/')[-1])
+						self.refLabel.setText(os.path.basename(fname))#fname.split('/')[-1])
+						self.refLoc = os.path.dirname(fname)
 					else:
 						print("spectrum size doesn't match",len(spc[no_cols - 1]),len(self.ydata))
 
