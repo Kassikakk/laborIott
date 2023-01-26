@@ -24,12 +24,12 @@ class RubyProc(QtWidgets.QMainWindow):
 	updateFitShape = QtCore.pyqtSignal(int, tuple, tuple, str)
 
 
-	def __init__(self, uifile, address= None, inport= None, outport = None):
+	def __init__(self, uifile):
 		super(RubyProc, self).__init__()
 		uic.loadUi(uifile, self)
 		#self.setupUi(self) #seda nüüd vaja on?
 
-		self.andor = JYvon_VI(address, inport, outport)
+		self.andor = JYvon_VI()
 
 		self.values = [[],[]]
 		self.colsum = [0,0]

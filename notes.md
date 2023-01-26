@@ -176,3 +176,5 @@ Ja ma mõtlen nüüd, et tegelikult peaks mingi protseduuri kala ka kokku panema
 ## 230119 
 
 Ja üks mõte veel, et instrumenti võiks sisse olla ehitatud mingi state log mehhanism, et kirjutab igasugu parameetrid, mis parasjagu on, korraga faili, koos mingi ajatempliga (nt. failinimi). Siis lihtsam aru pidada. Vastav nupp siis savemise juurde. 
+
+Võibb-olla mingil hetkel võiks mõelda, et kuidas oleks parem foldrite süsteem ka ja äkki mingid abifailid (dll, ini on nagunii, aga kalib näiteks) saaks kuhugi eraldada, mis annaks ka nende otsimisel mõnevõrra parema tulemuse. Vot ikoonide kohta ma ei tea, neid kaugelt otsida oleks ehk halvem. Aga kui jääks ainult py failid (kuigi ui kipub ju ikkagi ka jääma), siis oleks setuppimine lihtsam.
