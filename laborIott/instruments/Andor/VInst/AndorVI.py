@@ -49,6 +49,7 @@ class Andor_VI(VInst):
 
 		#self.graphicsView.setBackground('w')
 		self.plot = self.graphicsView.plot([self.xdata[0], self.xdata[-1]], [0, 1], pen = (255, 131, 0)) #fanta
+		#https://pyqtgraph.readthedocs.io/en/latest/api_reference/widgets/plotwidget.html
 
 		
 		
@@ -232,6 +233,29 @@ class Andor_VI(VInst):
 
 			except:
 				print("Hmmm..can't open this")
+
+	def keyPressEvent(self, e):
+		#get autoRange setting [x,y]
+		autoState =  self.graphicsView.getPlotItem().getViewBox().getState()['autoRange']
+		if e.key() == QtCore.Qt.Key_Escape:
+			if self.acquiring and not self.external:
+				pass #stop acquisition, think about how to do it
+		elif e.key() == QtCore.Qt.Key_F3:
+			pass #toggle continuous run
+		elif e.key() == QtCore.Qt.Key_F5:
+			pass #start/stop single run
+		elif e.key() == QtCore.Qt.Key_F6: #toggle y auto/fixed scale (x auto will be enabled too)
+			if autoState[1]: #autoscale on
+				self.graphicsView.disableAutoRange('y')
+			else:
+				self.graphicsView.enableAutoRange('xy')
+		elif e.key() == QtCore.Qt.Key_F9: #fit in window
+			if not autoState[0]: #x autoscale off		
+				self.graphicsView.setXRange(min(self.xdata), max(self.xdata))
+			if not autoState[1]: #y autoscale off		
+				self.graphicsView.setYRange(min(self.ydata), max(self.ydata))
+			#toggle btw autoscale and min-max of the graph
+
 
 
 	
