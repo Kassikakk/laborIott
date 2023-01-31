@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import pandas as pd
 
 from laborIott.adapters.serial import SerialAdapter
+from laborIott.instruments.VInst import VInst
 from laborIott.instruments.Newport842.Inst.Newport842 import Newport842
 import numpy as np
 from threading import Thread, Event
@@ -19,29 +20,31 @@ siis saving
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
-Ui_MainWindow, QMainWindow = uic.loadUiType(localPath('Powermeter.ui'))
 
-class Newport842_VI(QMainWindow, Ui_MainWindow):
+class Newport842_VI(VInst):
 	updateData = QtCore.pyqtSignal(tuple)
 
 	def __init__(self, can_close = True):
-		super(Newport842_VI, self).__init__()
-		self.setupUi(self)
+		super(Newport842_VI, self).__init__(localPath('Powermeter.ui'))
+		#self.setupUi(self)
+
+		#how to make it a bit nicer?
+		adapter = self.getZMQAdapter('nwp842')
+		if adapter is None:
+			adapter = SerialAdapter("COM5",baudrate=115200, timeout = 0.3)
+		self.pwrmtr = Newport842(adapter)
 		
-		#kuidas port ette anda?
-		self.pwrmtr = Newport842(SerialAdapter("COM5",baudrate=115200, timeout = 0.3))
 		
 		#initialize some fields
 		self.pwrWlEdit.setText("{:.1f}".format(self.pwrmtr.wl))
 		self.attnChk.setChecked(self.pwrmtr.attenuator)
 		
 		
-		self.pwr = []
+		self.ydata = []
 		self.collecting = False
 		#external stuff
 		self.external = False
-		self.dsbl = [self.pwrWlButt, self.startButt, self.resetButt, self.attnChk]
-		self.saveLoc = './'
+		self.dsbl += [self.pwrWlButt, self.startButt, self.resetButt, self.attnChk]
 		self.can_close = can_close
 		
 		self.measuring = Event()
@@ -57,14 +60,14 @@ class Newport842_VI(QMainWindow, Ui_MainWindow):
 		self.resetButt.clicked.connect(self.resetSeries)
 		self.attnChk.toggled.connect(self.attnChange)
 		self.aScaleChk.clicked.connect(self.aScaleChange)
-		self.locButt.clicked.connect(self.onGetLoc)
-		self.saveButt.clicked.connect(lambda : self.saveData(self.nameEdit.text()))
+
 		self.updateData.connect(self.update)
 		
 		self.workerThread = Thread(target = self.worker)
 		self.workerThread.start()
-		
 
+		
+	'''
 	def onTimer(self):
 		#check if data arrived?
 		while not self.resultQ.empty():
@@ -73,22 +76,23 @@ class Newport842_VI(QMainWindow, Ui_MainWindow):
 				inval *= 1e6 #measure in uW
 				self.pwrLabel.setText("{:.2f} uW".format(inval))
 				if self.collecting:
-					self.pwr.append(inval) #collect power while acquiring
+					self.ydata.append(inval) #collect power while acquiring
 					#update mean and stdev vals
-					self.NLabel.setText("{}".format(len(self.pwr)))
-					self.meanLabel.setText("{}".format(np.mean(self.pwr))) #mida siia?
-					self.stdevLabel.setText('%s' % float('%.2g' % np.var(self.pwr)))
+					self.NLabel.setText("{}".format(len(self.ydata)))
+					self.meanLabel.setText("{}".format(np.mean(self.ydata))) #mida siia?
+					self.stdevLabel.setText('%s' % float('%.2g' % np.var(self.ydata)))
+	'''
 					
 	def update(self, value):
 		if type(value[0]) is float:
 			valuW = value[0]*1e6 #measure in uW
 			self.pwrLabel.setText("{:.2f} uW".format(valuW))
 			if self.collecting:
-				self.pwr.append(valuW) #collect power while acquiring
+				self.ydata.append(valuW) #collect power while acquiring
 				#update mean and stdev vals
-				self.NLabel.setText("{}".format(len(self.pwr)))
-				self.meanLabel.setText("{}".format(np.mean(self.pwr))) #mida siia?
-				self.stdevLabel.setText('%s' % float('%.2g' % np.var(self.pwr)))
+				self.NLabel.setText("{}".format(len(self.ydata)))
+				self.meanLabel.setText("{}".format(np.mean(self.ydata))) #mida siia?
+				self.stdevLabel.setText('%s' % float('%.2g' % np.var(self.ydata)))
 			
 	def worker(self):
 		#where the actual measurement happens
@@ -137,7 +141,7 @@ class Newport842_VI(QMainWindow, Ui_MainWindow):
 	def setCollect(self, value, clearOnStart = False):
 		
 		if(value and clearOnStart):
-			self.pwr = []
+			self.ydata = []
 		self.startButt.setText("Pause" if value else "Cont")
 		self.collecting = value
 
@@ -145,37 +149,15 @@ class Newport842_VI(QMainWindow, Ui_MainWindow):
 	def resetSeries(self):
 		if not self.collecting:
 			self.startButt.setText("Start")
-		self.pwr = []
+		self.ydata = []
 	
 	def getData(self,meanDevOnly = True):
 		if meanDevOnly:
-			self.dataQ.put((np.mean(self.pwr),np.var(self.pwr)))
+			self.dataQ.put((np.mean(self.ydata),np.var(self.ydata)))
 		else:
-			self.dataQ.put(self.pwr)
-		return self.pwr
-		
-	#saving
-	
-	def onGetLoc(self):
-		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", "./",
-							QtWidgets.QFileDialog.ShowDirsOnly
-							| QtWidgets.QFileDialog.DontResolveSymlinks)
-		self.locLabel.setText(self.saveLoc)
-	
-	def saveData(self, name):
-		#saves existing data under self.saveLoc + name
-		#however, name validity and existance should be checked first
-		#also if we have any data
-		if len(name) == 0:
-			return
-		if len(self.pwr) == 0:
-			return 
-		
-		if self.formatCombo.currentText() == 'ASCII Y':
-			data = pd.DataFrame(list(self.pwr))
-			#if zip, support it here
-			data.to_csv(os.path.join(self.saveLoc,name),sep = '\t', header = False, index = False)
-		#the rest will follow
+			self.dataQ.put(self.ydata)
+		return self.ydata
+
 		
 	def setExternal(self, state):
 		#cancel moving and set enabled/disabled  
