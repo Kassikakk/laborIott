@@ -8,7 +8,7 @@ from laborIott.instruments.VInst import VInst
 from laborIott.adapters.SDKAdapter import SDKAdapter
 from laborIott.instruments.Andor.Inst.andor import IDus
 import os
-import userpaths
+
 
 
 def localPath(filename):
@@ -38,11 +38,10 @@ class Andor_VI(VInst):
 		self.idus.expTime = 0.5
 		self.idus.acqmode = 'single'
 		self.acquiring = False
-		self.saveLoc = self.refLoc = './'
+		self.refLoc = self.saveLoc 
 		self.external = False
 		self.dataQ = Queue()
 		self.dsbl = [self.runButt, self.setParmsButt, self.backChk, self.locButt, self.saveButt, self.formatCombo]
-		self.setSaveLoc(userpaths.get_my_documents())
 		
 		#plot
 		self.xdata = self.idus.wavelengths

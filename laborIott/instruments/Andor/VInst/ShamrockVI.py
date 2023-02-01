@@ -27,9 +27,7 @@ class IDusShamrock_VI(Andor_VI): #IDusShamrock or AndorShamrock? Can other camer
 		
 		self.dsbl += [self.shamDlg.cWlEdit, self.shamDlg.slitEdit, self.shamDlg.cWlButt, 
 			self.shamDlg.slitButt, self.shamDlg.flipperCombo, self.shamDlg.gratingCombo] #also add shamDlg widgets
-		#create the spectrometer instrument - well, this should be integrated in VInst connect framework
-		#probably by some settings file somewhere (right here?)
-		#ok we have already done some thinking about it, so coming up.
+		#create the spectrometer instrument (i.e. the VInst will have 2 instruments)
 		adapter = self.getZMQAdapter("Shamrock")
 		if adapter is None:
 			adapter = SDKAdapter(localPath("../Inst/ShamrockCIF"),False)

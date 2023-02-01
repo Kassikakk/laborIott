@@ -43,7 +43,6 @@ class Newport842_VI(VInst):
 		self.ydata = []
 		self.collecting = False
 		#external stuff
-		self.external = False
 		self.dsbl += [self.pwrWlButt, self.startButt, self.resetButt, self.attnChk]
 		self.can_close = can_close
 		
@@ -160,13 +159,11 @@ class Newport842_VI(VInst):
 
 		
 	def setExternal(self, state):
-		#cancel moving and set enabled/disabled  
+		#stop collecting (thread remains working)  
 		self.collecting = False
 		self.resetSeries()
-		self.external = state
-		
-		for wdg in self.dsbl:
-			wdg.setEnabled(not state)
+		super().setExternal(state)
+
 			
 	def closeEvent(self, event):
 		print("Powerm closeEvent")

@@ -20,6 +20,9 @@ class VInst(QtWidgets.QMainWindow):
 	-selecting adapter: default or network (specify an .ini file with [ZMQ] section for instruments that need it)
 	(and put it in local config/laborIott/Inst, filename <refname>.ini)
 	-selecting external mode
+	-handling the possible other settings in .ini file
+	Each instrument is supposed to have a unique refname which is used for settings file and ZMQ connection id
+	Note however that a vinst may have multiple instruments (->refnames).
 
 	'''
 
@@ -29,6 +32,7 @@ class VInst(QtWidgets.QMainWindow):
 		#we can determine some widgets here
 		#probably zip will be added
 		self.dsbl = []
+
 		self.locButt = self.findChild(QtWidgets.QPushButton, 'locButt')
 		if self.locButt is not None:
 			self.locButt.clicked.connect(self.onGetLoc)
@@ -50,35 +54,41 @@ class VInst(QtWidgets.QMainWindow):
 
 		self.saveLoc = userpaths.get_my_documents()
 
-	def getZMQAdapter(self, refname):
-		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
-		#so any instrument now should get an adapter through this function
-		
-		#simple adding seems ok:
+	def getConfigSection(self, section, refname):
 		conf_loc = userpaths.get_local_appdata()+ '/laborIott/Inst/'+refname + '.ini'
 		conf = cp.ConfigParser()
-		#if any of the following is false, return None
-		#present?
+		#is the file present?
 		#print(conf_loc)
 		if conf.read(conf_loc) == []:
 			#print(conf_loc + " not Found")
 			return None
-		#has ZMQ section?
-		if not conf.has_section('ZMQ'):
+		#has the section?
+		return None if not conf.has_section(section) else conf[section]
+			
+
+	def getZMQAdapter(self, refname):
+		#this will select either the default adapter or ZMQ (possibly some other protocol) if access over LAN is needed
+		#so any instrument now should get an adapter through this function
+		#the refname argument is because there may be multiple instruments connected to a 
+		
+		#simple adding seems ok:
+		#if any of the following is false, return None
+		zmqSection =  self.getConfigSection('ZMQ', refname)
+		if zmqSection is None:
 			return None
 		#no 'active' key or the value is yes
 		#print("section found")
-		if not conf['ZMQ'].getboolean('active', True):
+		if not zmqSection.getboolean('active', True):
 			return None
 		#has address
-		address = conf['ZMQ'].get('address','')
+		address = zmqSection.get('address','')
 		if len(address) == 0:
 			return None
 		#print("address ok")
 		
 		#else construct a ZMQAdapter
-		inport = conf['ZMQ'].getint('inport',5555)
-		outport = conf['ZMQ'].getint('outport',inport)
+		inport = zmqSection.getint('inport',5555)
+		outport = zmqSection.getint('outport',inport)
 		return ZMQAdapter(refname, address, inport, outport)
 
 	def setEnable(self, state):
