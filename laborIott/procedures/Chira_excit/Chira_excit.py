@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import userpaths
 
-# from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI as Newport_VI
-from laborIott.instruments.Newport1830.VInst.Newport1830VI import Newport1830_VI as Newport_VI
+from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI as Newport_VI
+#from laborIott.instruments.Newport1830.VInst.Newport1830VI import Newport1830_VI as Newport_VI
 from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI
 from laborIott.instruments.Chirascan.VInst.ChiraVI import Chira_VI
 
