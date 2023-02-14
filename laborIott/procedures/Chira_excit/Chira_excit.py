@@ -8,9 +8,11 @@ import numpy as np
 import pandas as pd
 import userpaths
 
+#No ega selline instrumentide selekteerimine nüüd päris normaalne ei ole
 from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI as Newport_VI
 #from laborIott.instruments.Newport1830.VInst.Newport1830VI import Newport1830_VI as Newport_VI
-from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI
+#from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI as Andor_VI
+from laborIott.instruments.Andor.VInst.ShamrockVI import IDusShamrock_VI as Andor_VI
 from laborIott.instruments.Chirascan.VInst.ChiraVI import Chira_VI
 
 
@@ -40,8 +42,8 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm = Newport_VI(False)
-		self.andor = AndorKymera_VI()
+		self.powerm = None #Newport_VI(False)
+		self.andor = Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
 		self.scanning = Event()
@@ -49,7 +51,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
 		self.plotx = [[0, 1]]
 		self.ploty = [[0, 0]]
-		self.spectraX = self.andor.getX()  # get the current x scale
+		
 		self.extPwrData = None  # external powerdata
 		self.setSaveLoc(userpaths.get_my_documents())
 
@@ -60,37 +62,48 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 					 self.formatCombo]  # vist e/v kõik peale start nupu (kui mingi view selector just jääb veel
 		self.setWidgetState(False)  # no scanning
 		self.startButt.clicked.connect(self.onStart)
-		self.showPwrmButt.clicked.connect(lambda: self.powerm.show())
-		self.showSpctrmButt.clicked.connect(lambda: self.andor.show())
-		self.showChiraButt.clicked.connect(lambda: self.chira.show())
+
+		if self.powerm is not None:
+
+			self.showPwrmButt.clicked.connect(lambda: self.powerm.show())
+			self.showSpctrmButt.clicked.connect(lambda: self.andor.show())
+			# outer connections
+			self.setpowerWL.connect(self.powerm.setPwrWL)
+			self.setPwrCollection.connect(self.powerm.setCollect)
+			self.getPwrData.connect(self.powerm.getData)
+			self.savePwrData.connect(self.powerm.saveData)
+			self.setExternalMode.connect(self.powerm.setExternal)
+			self.powerm.show()
+			
+
+		if self.andor is not None:
+			self.spectraX = self.andor.getX()  # get the current x scale
+			self.startIdus.connect(self.andor.run)
+			self.saveSpcData.connect(self.andor.saveData)
+			self.setExternalMode.connect(self.andor.setExternal)
+			self.andor.show()
+
+
+
+		if self.chira is not None: #if we ever use this
+			self.showChiraButt.clicked.connect(lambda: self.chira.show())
+			self.setChiraShutter.connect(self.chira.setShutter)
+			self.setChiraWL.connect(self.chira.gotoWL)
+			self.setExternalMode.connect(self.chira.setExternal)
+			self.chira.show()
 
 		self.spcChk.clicked.connect(lambda: self.setWidgetState(False))
 		self.pwrChk.clicked.connect(lambda: self.setWidgetState(False))
 		self.locButt.clicked.connect(self.onGetLoc)
 		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
-
-		# outer connections
-		self.setpowerWL.connect(self.powerm.setPwrWL)
-		self.setPwrCollection.connect(self.powerm.setCollect)
-		self.getPwrData.connect(self.powerm.getData)
-		self.savePwrData.connect(self.powerm.saveData)
-
-		self.startIdus.connect(self.andor.run)
-		self.saveSpcData.connect(self.andor.saveData)
-
-		self.setChiraShutter.connect(self.chira.setShutter)
-		self.setChiraWL.connect(self.chira.gotoWL)
-
-		self.setExternalMode.connect(self.powerm.setExternal)
-		self.setExternalMode.connect(self.andor.setExternal)
-		self.setExternalMode.connect(self.chira.setExternal)
+		
 		self.updateData.connect(self.update)
 		self.scanFinished.connect(self.cleanScan)
 
 		# show everything
-		self.powerm.show()
-		self.andor.show()
-		self.chira.show()
+		
+		
+		
 
 	def setWidgetState(self, scanstate):
 		for b in self.dsbl:
@@ -122,8 +135,8 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 				return
 			nopoints = int((stopwl - startwl) / stepwl + 1)
 			pwrTime = float(self.pwrTimeEdit.text())
-			usePwr = self.pwrChk.isChecked()
-			useSpc = self.spcChk.isChecked()
+			usePwr = self.pwrChk.isChecked() and self.powerm is not None
+			useSpc = self.spcChk.isChecked() and self.andor is not None
 			self.spectraX = self.andor.getX()  # update
 
 			if nopoints < 1:
@@ -257,7 +270,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		if spcData is not None:
 			spsum = self.getSum(self.spectraX, spcData)
 			# figure out power
-			power = self.getPwr(pwrData[0])
+			power = self.getPwr(1.0 if pwrData is None else pwrData[0])
 			# see what's power & calc excit
 			# put into plot
 			self.ploty[0][index] = spsum / power
@@ -351,10 +364,13 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		if self.scanning.is_set():
 			self.scanning.clear()
 			self.scanThread.join(timeout=10)
-		self.powerm.can_close = True
-		self.powerm.close()
-		self.andor.close()
-		self.chira.close()
+		if self.powerm is not None:
+			self.powerm.can_close = True
+			self.powerm.close()
+		if self.andor is not None:
+			self.andor.close()
+		if self.chira is not None:
+			self.chira.close()
 		event.accept()
 
 

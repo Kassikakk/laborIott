@@ -180,3 +180,7 @@ Ja üks mõte veel, et instrumenti võiks sisse olla ehitatud mingi state log me
 Save returni defauldiks, aga siis on kindlasti overwrite checki vaja.
 
 Võibb-olla mingil hetkel võiks mõelda, et kuidas oleks parem foldrite süsteem ka ja äkki mingid abifailid (dll, ini on nagunii, aga kalib näiteks) saaks kuhugi eraldada, mis annaks ka nende otsimisel mõnevõrra parema tulemuse. Vot ikoonide kohta ma ei tea, neid kaugelt otsida oleks ehk halvem. Aga kui jääks ainult py failid (kuigi ui kipub ju ikkagi ka jääma), siis oleks setuppimine lihtsam.
+
+## 230214
+
+Novot nüüd jälle probleem. Just et protseduuri osas. Tahaks mõõta Shamrockiga ja keerata Chirat, aga võimsusmõõtjat ei olekski nagu Vaja. Tegelikult veel sellise variandi peale võiks ju ka mõelda, et pole ka Chiratki, vaid näiteks Cäry tuleb sisse. Ja kuidas siis seljuhul aparaate valikuliselt välja jätta. Mul hetkel kohe see kõige üldisem versioon ei kerki silma ette, aga nagu eelpool mainitud, siis ilmselt mingi baasklass on jälle hea, aga siis peaks ka mingi .ini faili peale küllap mõtlema, à la nagu kunagi tegelikult juba tehtud saigi. Aga ok et võib-olla prooviks seda sinna sisse viia, et kõik jääb küll samaks, aga powerm ja tegelikult siis juba ka spectrom. võiksid Noned olla.
