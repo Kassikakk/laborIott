@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, uic
 import pandas as pd
 import userpaths
 import configparser as cp
+#from zipfile import ZipFile
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -124,6 +125,12 @@ class VInst(QtWidgets.QMainWindow):
 		if self.formatCombo is None or self.formatCombo.currentText() == 'ASCII XY':
 			data = pd.DataFrame(list(zip(self.xdata, self.ydata)))
 			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+			'''
+			#the zip version will have something like (I guess)
+			with ZipFile(self.saveLoc, mode='w') as zfile:
+    			zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
+				#do something to write the file or will it already?
+			'''
 		elif self.formatCombo.currentText() == 'ASCII Y':
 			data = pd.DataFrame(list(self.ydata))
 			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
