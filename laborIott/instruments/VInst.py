@@ -17,6 +17,7 @@ class VInst(QtWidgets.QMainWindow):
 	'''
 	The class is supposed to take care of some recurring tasks:
 	-saving data (TODO: zip file support)
+		-define self.xdata as a list(like) to have x-data
 	-selecting adapter: default or network (specify an .ini file with [ZMQ] section for instruments that need it)
 	(and put it in local config/laborIott/Inst, filename <refname>.ini)
 	-selecting external mode
@@ -46,7 +47,8 @@ class VInst(QtWidgets.QMainWindow):
 		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
 		if self.formatCombo is not None:
 			self.dsbl += [self.formatCombo]
-		self.xdata = []
+		#account for the possibility of no x-data (but we should have y)
+		self.xdata = None
 		self.ydata = []
 
 		#should we use an event here?
@@ -122,6 +124,7 @@ class VInst(QtWidgets.QMainWindow):
 			return
 
 		if self.formatCombo is None or self.formatCombo.currentText() == 'ASCII XY':
+			#TODO: this should not happen if self.xdata is None (but we shouldn't have 'ASCII XY' option then, anyway)
 			data = pd.DataFrame(list(zip(self.xdata, self.ydata)))
 			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
 		elif self.formatCombo.currentText() == 'ASCII Y':

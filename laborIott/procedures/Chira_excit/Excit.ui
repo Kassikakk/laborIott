@@ -339,6 +339,9 @@
        </property>
        <property name="text">
         <string>AutoCreate folders</string>
+       </property>       
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>
