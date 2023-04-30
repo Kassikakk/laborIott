@@ -129,7 +129,7 @@ class VInst(QtWidgets.QMainWindow):
 			#the zip version will have something like (I guess)
 			with ZipFile(self.saveLoc, mode='w') as zfile:
     			zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
-				#do something to write the file or will it already?
+				#do something to write the file or will it already? Let's see
 			'''
 		elif self.formatCombo.currentText() == 'ASCII Y':
 			data = pd.DataFrame(list(self.ydata))
