@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, uic
 import pandas as pd
 import userpaths
 import configparser as cp
+from zipfile import ZipFile
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -47,6 +48,10 @@ class VInst(QtWidgets.QMainWindow):
 		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
 		if self.formatCombo is not None:
 			self.dsbl += [self.formatCombo]
+		self.saveToZip = self.findChild(QtWidgets.QCheckBox,'saveToZip')
+		if self.saveToZip is not None:
+			self.saveToZip.clicked.connect(self.onZipClick)
+			self.dsbl += [self.saveToZip]
 		#account for the possibility of no x-data (but we should have y)
 		self.xdata = None
 		self.ydata = []
@@ -105,6 +110,12 @@ class VInst(QtWidgets.QMainWindow):
 		self.external = state
 		self.setEnable(not state)
 		
+	def onZipClick(self, zipUsed):
+		#We need to change saveLoc here to be a zip file if "save to zip" is used, else a folder
+		#We do so by calling onGetLoc; however we also need to revert if selecting fails
+		pass
+
+
 
 
 	def onGetLoc(self):
@@ -130,6 +141,15 @@ class VInst(QtWidgets.QMainWindow):
 		elif self.formatCombo.currentText() == 'ASCII Y':
 			data = pd.DataFrame(list(self.ydata))
 			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+		'''
+ 			#the zip version will have something like (I guess)
+ 			with ZipFile(self.saveLoc, mode='w') as zfile:
+     			zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
+ 				#do something to write the file or will it already? Let's see
+			well this is all fine, but I'm thinking, can we use any other formats as well (int, double)?
+			another concern is calling save from a procedure - one could count on the mode set within the instrument
+			but I guess there will be a mess if it starts auto-creating folders (which in itself is a useful feature)
+ 			'''
 
 
 
