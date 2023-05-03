@@ -4,11 +4,7 @@ from PyQt5 import QtWidgets, uic
 import pandas as pd
 import userpaths
 import configparser as cp
-<<<<<<< HEAD
-#from zipfile import ZipFile
-=======
 from zipfile import ZipFile
->>>>>>> 072c73fd3336beb57b78c6e4d5f28292a3a7669e
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -117,15 +113,19 @@ class VInst(QtWidgets.QMainWindow):
 	def onZipClick(self, zipUsed):
 		#We need to change saveLoc here to be a zip file if "save to zip" is used, else a folder
 		#We do so by calling onGetLoc; however we also need to revert if selecting fails
-		pass
+		self.onGetLoc()
+
 
 
 
 
 	def onGetLoc(self):
-		self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
-							QtWidgets.QFileDialog.ShowDirsOnly
-							| QtWidgets.QFileDialog.DontResolveSymlinks)
+		if(self.saveToZip.isChecked()):
+			self.saveLoc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")
+		else:
+			self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+								QtWidgets.QFileDialog.ShowDirsOnly
+								| QtWidgets.QFileDialog.DontResolveSymlinks)
 		if self.locLabel is not  None:
 			self.locLabel.setText(self.saveLoc)
 
