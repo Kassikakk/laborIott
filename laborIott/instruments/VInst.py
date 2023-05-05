@@ -5,6 +5,7 @@ import pandas as pd
 import userpaths
 import configparser as cp
 from zipfile import ZipFile
+import struct
 
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
@@ -124,11 +125,12 @@ class VInst(QtWidgets.QMainWindow):
 
 	def onGetLoc(self):
 		if(self.saveToZip.isChecked()):
-			self.saveLoc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")
+			self.saveLoc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")[0]
 		else:
 			self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
 								QtWidgets.QFileDialog.ShowDirsOnly
 								| QtWidgets.QFileDialog.DontResolveSymlinks)
+		print(self.saveLoc)
 		if self.locLabel is not  None:
 			self.locLabel.setText(self.saveLoc)
 
@@ -157,6 +159,7 @@ class VInst(QtWidgets.QMainWindow):
 		if formatting == "ASCII":
 			if zipped:
 				data.to_csv(self.saveLoc, sep='\t', header=False, index=False, mode='a', compression = {'method':'zip', 'archive_name': name})
+				#somehow it tries to write twice, with Windous at least
 				#or:
 				#with ZipFile(self.saveLoc, mode='w') as zfile:
 					#zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
@@ -177,6 +180,7 @@ class VInst(QtWidgets.QMainWindow):
 			if zipped:
 				with ZipFile(self.saveLoc, mode='a') as zfile: #'a' gives error if file exists already, 'w' erases everything else?
 					zfile.writestr(name, b)
+				#somehow it tries to write twice, with Windous at least
 			else:
 				with open(os.path.join(self.saveLoc, name), 'wb') as f:
 					f.write(b)
