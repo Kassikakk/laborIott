@@ -211,22 +211,27 @@
          </property>
          <item>
           <property name="text">
-           <string>ASCII XY</string>
+           <string>ASCII</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>ASCII X</string>
+           <string>int (4B)</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>float x</string>
+           <string>long int (8B)</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>double x</string>
+           <string>float (4B)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>double (8B)</string>
           </property>
          </item>
         </widget>
@@ -498,6 +503,22 @@
          </property>
          <property name="text">
           <string>Save to zip</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="useXYFormat">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>112</y>
+           <width>101</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Include X</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </widget>

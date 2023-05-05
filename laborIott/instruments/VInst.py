@@ -52,6 +52,9 @@ class VInst(QtWidgets.QMainWindow):
 		if self.saveToZip is not None:
 			self.saveToZip.clicked.connect(self.onZipClick)
 			self.dsbl += [self.saveToZip]
+		self.useXYFormat = self.findChild(QtWidgets.QCheckBox,'useXYFormat')
+		if self.useXYFormat is not None:
+			self.dsbl += [self.useXYFormat]
 		#account for the possibility of no x-data (but we should have y)
 		self.xdata = None
 		self.ydata = []
@@ -135,31 +138,49 @@ class VInst(QtWidgets.QMainWindow):
 		# also if we have any data
 		if len(name) == 0:
 			return
-		if self.xdata is not None and (len(self.xdata) != len(self.ydata)):
-			return
 
-		if self.formatCombo is None or self.formatCombo.currentText() == 'ASCII XY':
-			#TODO: this should not happen if self.xdata is None (but we shouldn't have 'ASCII XY' option then, anyway)
+		#Let's use X data if it's there (in equal amount to Y data) and not explicitly excluded
+		useX = self.xdata is not None
+		useX &= (self.useXYFormat is None or self.useXYFormat.isChecked())
+
+		if useX and (len(self.xdata) != len(self.ydata)):
+			return
+		
+		formatting = 'ASCII' if self.formatCombo is None else self.formatCombo.currentText()
+		zipped = self.saveToZip is not None and self.saveToZip.isChecked()
+
+		if useX:
 			data = pd.DataFrame(list(zip(self.xdata, self.ydata)))
-			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
-			'''
-			#the zip version will have something like (I guess)
-			with ZipFile(self.saveLoc, mode='w') as zfile:
-    			zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
-				#do something to write the file or will it already? Let's see
-			'''
-		elif self.formatCombo.currentText() == 'ASCII Y':
+		else:
 			data = pd.DataFrame(list(self.ydata))
-			data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
-		'''
- 			#the zip version will have something like (I guess)
- 			with ZipFile(self.saveLoc, mode='w') as zfile:
-     			zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
- 				#do something to write the file or will it already? Let's see
-			well this is all fine, but I'm thinking, can we use any other formats as well (int, double)?
-			another concern is calling save from a procedure - one could count on the mode set within the instrument
-			but I guess there will be a mess if it starts auto-creating folders (which in itself is a useful feature)
- 			'''
+
+		if formatting == "ASCII":
+			if zipped:
+				data.to_csv(self.saveLoc, sep='\t', header=False, index=False, mode='a', compression = {'method':'zip', 'archive_name': name})
+				#or:
+				#with ZipFile(self.saveLoc, mode='w') as zfile:
+					#zfile.writestr(name, data.to_csv(sep='\t', header=False, index=False))
+			else:
+				data.to_csv(os.path.join(self.saveLoc, name), sep='\t', header=False, index=False)
+		else:
+			b = b''
+			form_char = 'q' if formatting[0] == 'l' else formatting[0] #not sure if this is decent enough
+			#form_char = {'int':'i', 'longint':'q', 'float':'f', 'double':'d'}[formatting[:formatting.find(' ')]]
+			for i, row in data.iterrows():
+				for col in data.columns:
+					if form_char in 'iq':
+						b += struct.pack(form_char, int(row[col]))
+					elif form_char in 'df':
+						b += struct.pack(form_char, float(row[col]))
+					else:
+						return #unknown type
+			if zipped:
+				with ZipFile(self.saveLoc, mode='a') as zfile: #'a' gives error if file exists already, 'w' erases everything else?
+					zfile.writestr(name, b)
+			else:
+				with open(os.path.join(self.saveLoc, name), 'wb') as f:
+					f.write(b)
+
 
 
 
