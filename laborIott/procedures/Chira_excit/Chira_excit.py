@@ -11,8 +11,8 @@ import userpaths
 #No ega selline instrumentide selekteerimine nüüd päris normaalne ei ole
 #from laborIott.instruments.Newport842.VInst.Newport842VI import Newport842_VI as Newport_VI
 from laborIott.instruments.Newport1830.VInst.Newport1830VI import Newport1830_VI as Newport_VI
-from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI as Andor_VI
-#from laborIott.instruments.Andor.VInst.ShamrockVI import IDusShamrock_VI as Andor_VI
+#from laborIott.instruments.Andor.VInst.KymeraVI import AndorKymera_VI as Andor_VI
+from laborIott.instruments.Andor.VInst.ShamrockVI import IDusShamrock_VI as Andor_VI
 from laborIott.instruments.Chirascan.VInst.ChiraVI import Chira_VI
 
 
@@ -42,7 +42,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm =  Newport_VI(False)
+		self.powerm =  None #Newport_VI(False)
 		self.andor = Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
