@@ -42,8 +42,8 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm =  None #Newport_VI(False)
-		self.andor = Andor_VI() #can also be None
+		self.powerm =  Newport_VI(False)
+		self.andor = None #Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
 		self.scanning = Event()
@@ -137,7 +137,8 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 			pwrTime = float(self.pwrTimeEdit.text())
 			usePwr = self.pwrChk.isChecked() and self.powerm is not None
 			useSpc = self.spcChk.isChecked() and self.andor is not None
-			self.spectraX = self.andor.getX()  # update
+			if self.andor is not None:
+				self.spectraX = self.andor.getX()  # update
 
 			if nopoints < 1:
 				QtWidgets.QMessageBox.information(self, "NB!", "The scan has just one point")
