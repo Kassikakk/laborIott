@@ -42,8 +42,8 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm =  Newport_VI(False)
-		self.andor = None #Andor_VI() #can also be None
+		self.powerm =  None #Newport_VI(False)
+		self.andor = Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
 		self.scanning = Event()
@@ -96,6 +96,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		self.pwrChk.clicked.connect(lambda: self.setWidgetState(False))
 		self.locButt.clicked.connect(self.onGetLoc)
 		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
+		self.powerRefFile.clicked.connect(self.getPowerData) #TODO: this needs a better approach
 		
 		self.updateData.connect(self.update)
 		self.scanFinished.connect(self.cleanScan)
@@ -320,7 +321,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		# read external power data file into self.extPwrData
 		if self.powerRefFile.isChecked():
 			allok = True
-			fname = QtGui.QFileDialog.getOpenFileName(self, 'Power data file')[0]
+			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Power data file')[0]
 			# try:
 			data = pd.read_csv(fname, sep='\t', header=None)
 			if len(data.columns) == 2:
