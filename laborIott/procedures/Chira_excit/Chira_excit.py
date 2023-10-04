@@ -42,7 +42,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm =  Newport_VI(False)
+		self.powerm =  None #Newport_VI(False)
 		self.andor = Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
@@ -272,7 +272,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 		if spcData is not None:
 			spsum = self.getSum(self.spectraX, spcData)
 			# figure out power
-			power = self.getPwr(1.0 if pwrData is None else pwrData[0])
+			power = self.getPwr(1.0 if pwrData is None else pwrData[0], self.plotx[0][index])
 			# see what's power & calc excit
 			# put into plot
 			self.ploty[0][index] = spsum / power
@@ -304,11 +304,12 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 			maxind = int((max1 - x[0]) / step)
 		return sum(y[minind:maxind])
 
-	def getPwr(self, defaultval):
-		if self.powerRefFile.isChecked():  # there may be no power data
+	def getPwr(self, defaultval, wavelen = None):
+		if self.powerRefFile.isChecked() and wavelen is not None:  # there may be no power data
 			try:
-				pwr = interp1d(self.extPwrData[0], self.extPwrData[1])(float(self.wlLabel.text()))
-			except:  # out of limits
+				pwr = interp1d(self.extPwrData[0], self.extPwrData[1])(wavelen)
+			except ValueError:  # out of limits
+				print("powerref out of limits at {}?".format(wavelen))
 				pwr = 1.0
 			return pwr
 		elif self.powerRefCur.isChecked() and defaultval is not None:
