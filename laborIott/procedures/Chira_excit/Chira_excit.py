@@ -42,7 +42,7 @@ class ChiraExcit(*uic.loadUiType(localPath('Excit.ui'))):
 	def __init__(self):
 		super(ChiraExcit, self).__init__()
 		self.setupUi(self)
-		self.powerm =  None #Newport_VI(False)
+		self.powerm =  Newport_VI(False) #None
 		self.andor = Andor_VI() #can also be None
 		self.chira = Chira_VI()
 
