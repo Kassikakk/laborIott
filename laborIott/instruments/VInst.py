@@ -130,7 +130,6 @@ class VInst(QtWidgets.QMainWindow):
 			self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
 								QtWidgets.QFileDialog.ShowDirsOnly
 								| QtWidgets.QFileDialog.DontResolveSymlinks)
-		print(self.saveLoc)
 		if self.locLabel is not  None:
 			self.locLabel.setText(self.saveLoc)
 

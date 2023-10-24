@@ -57,8 +57,6 @@ class Andor_VI(VInst):
 		self.coolButt.clicked.connect(self.cooler) #implement
 		self.shutButt.clicked.connect(self.setShutter)
 		self.setParmsButt.clicked.connect(self.onSetParms) 
-		self.locButt.clicked.connect(self.onGetLoc)
-		self.saveButt.clicked.connect(lambda : self.saveData(self.nameEdit.text()))
 		self.loadRefButt.clicked.connect(self.loadRef)
 
 		
