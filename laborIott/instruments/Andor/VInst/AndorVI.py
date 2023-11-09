@@ -248,7 +248,12 @@ class Andor_VI(VInst):
 				try:
 					spc = pd.read_csv(fname, sep = '\t', header = None)
 					if spc.shape[1] == 2:
-						self.overlays[0].setData(spc[0],spc[1])
+						try:
+							scale = float(self.ovlScaleEdit.text())
+						except ValueError:
+							scale = 1.0
+
+						self.overlays[0].setData(spc[0],spc[1]*scale)
 						self.overlays[0].setPen('b')
 					else:
 						self.overlays[0].setPen(None)
