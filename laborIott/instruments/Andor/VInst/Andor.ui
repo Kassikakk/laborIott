@@ -521,6 +521,25 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QPushButton" name="loadOvlButt">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>180</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Load overlay</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -533,7 +552,7 @@
      <x>0</x>
      <y>0</y>
      <width>704</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

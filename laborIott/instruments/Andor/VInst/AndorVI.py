@@ -50,6 +50,9 @@ class Andor_VI(VInst):
 		self.plot = self.graphicsView.plot([self.xdata[0], self.xdata[-1]], [0, 1], pen = (255, 131, 0)) #fanta
 		#https://pyqtgraph.readthedocs.io/en/latest/api_reference/widgets/plotwidget.html
 
+		#TODO: move overlay handling to the spectrographVI main object
+		self.createOverlays(1)
+
 		
 		
 		#connect section
@@ -58,6 +61,7 @@ class Andor_VI(VInst):
 		self.shutButt.clicked.connect(self.setShutter)
 		self.setParmsButt.clicked.connect(self.onSetParms) 
 		self.loadRefButt.clicked.connect(self.loadRef)
+		self.loadOvlButt.clicked.connect(self.loadOverlay)
 
 		
 		#konnektid
@@ -71,6 +75,13 @@ class Andor_VI(VInst):
 		if adapter is None:
 			adapter = SDKAdapter(localPath("../Inst/atmcd32d_legacy"),False)
 		self.idus = IDus(adapter)
+
+	def createOverlays(self, noOverlays):
+		#TODO: move overlay handling to the spectrographVI main object
+		self.noOverlays = noOverlays
+		self.overlays = []
+		for i in range(self.noOverlays):
+			self.overlays += [self.graphicsView.plot(pen = None)]
 		
 		
 
@@ -230,6 +241,22 @@ class Andor_VI(VInst):
 
 			except:
 				print("Hmmm..can't open this")
+
+	def loadOverlay(self):
+			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Load overlay', self.saveLoc)[0]
+			if fname:
+				try:
+					spc = pd.read_csv(fname, sep = '\t', header = None)
+					if spc.shape[1] == 2:
+						self.overlays[0].setData(spc[0],spc[1])
+						self.overlays[0].setPen('b')
+					else:
+						self.overlays[0].setPen(None)
+						print("can't interpret overlay file")
+
+				except:
+					self.overlays[0].setPen(None)
+					print("Hmmm..can't open this")
 
 	def keyPressEvent(self, e):
 		#get autoRange setting [x,y]

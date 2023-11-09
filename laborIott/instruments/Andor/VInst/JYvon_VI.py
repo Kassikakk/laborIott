@@ -61,12 +61,8 @@ class JYvon_VI(Andor_VI):
 		#self.onCalcFromLimb(6259.0)
 
 		#create some overlays
-		self.noOverlays = 3
-		self.overlays = []
-		for i in range(self.noOverlays):
-			self.overlays += [self.graphicsView.plot(pen = None)]
-			#self.graphicsView.addItem(self.overlays[i])
-			#self.overlays[i].setPen(None)
+		self.createOverlays(3)
+		
 
 
 	def adjustNeLineMarker(self, i):

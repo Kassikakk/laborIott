@@ -184,3 +184,12 @@ Võibb-olla mingil hetkel võiks mõelda, et kuidas oleks parem foldrite süstee
 ## 230214
 
 Novot nüüd jälle probleem. Just et protseduuri osas. Tahaks mõõta Shamrockiga ja keerata Chirat, aga võimsusmõõtjat ei olekski nagu Vaja. Tegelikult veel sellise variandi peale võiks ju ka mõelda, et pole ka Chiratki, vaid näiteks Cäry tuleb sisse. Ja kuidas siis seljuhul aparaate valikuliselt välja jätta. Mul hetkel kohe see kõige üldisem versioon ei kerki silma ette, aga nagu eelpool mainitud, siis ilmselt mingi baasklass on jälle hea, aga siis peaks ka mingi .ini faili peale küllap mõtlema, à la nagu kunagi tegelikult juba tehtud saigi. Aga ok et võib-olla prooviks seda sinna sisse viia, et kõik jääb küll samaks, aga powerm ja tegelikult siis juba ka spectrom. võiksid Noned olla.
+
+## 231109
+
+Meenutuseks siin mingid asjad, millega tegelema peaks:
+
+* Baasklasside süsteem. Nüüd on mitmeid instrumente ja nende klasse meil juba tekkinud, muidki probleeme arutatud, saaks ehk mingeid üldistusi, mis üldisemad on, klassideks valada. (kohe laiendame)
+* Failide paigutumine. Lihtne install hõlmab põhiliselt py-faile, aga meil on siin ka muid näha(dll, ini, txt, ico, ui,...) nende kaasamine on ka küsimus. Kas tõesti pythoni enda installingus ja samuti site-päkitsites on ainult py-d?
+* state logimine
+* Just nimelt see ini failide süsteem, eriti protseduuride korral, seal on vahel vaja seadmeid valida või ka välja jätta.

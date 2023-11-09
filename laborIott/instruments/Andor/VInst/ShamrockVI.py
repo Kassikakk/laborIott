@@ -54,6 +54,7 @@ class IDusShamrock_VI(Andor_VI): #IDusShamrock or AndorShamrock? Can other camer
 		self.shamDlg.gratingCombo.currentIndexChanged.connect(self.setGrating)
 		self.shamDlg.flipperCombo.currentIndexChanged.connect(self.setFlipper)
 		#also override setShutter
+		
 
 
 	def setWlScale(self):
