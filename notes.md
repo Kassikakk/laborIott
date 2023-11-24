@@ -193,3 +193,42 @@ Meenutuseks siin mingid asjad, millega tegelema peaks:
 * Failide paigutumine. Lihtne install hõlmab põhiliselt py-faile, aga meil on siin ka muid näha(dll, ini, txt, ico, ui,...) nende kaasamine on ka küsimus. Kas tõesti pythoni enda installingus ja samuti site-päkitsites on ainult py-d?
 * state logimine
 * Just nimelt see ini failide süsteem, eriti protseduuride korral, seal on vahel vaja seadmeid valida või ka välja jätta.
+
+## 231124
+
+Leiutades foldrite süsteemi: 
+* instruments
+	* instrument.py
+	* derived_instrument.py  (0..mitu)
+	* manufacturer vms
+		* inst_name.py
+		* test.py
+    * .dll? - aga kui paneks need süsteemifailide juurde või mujale pathi peale; inst-s mainiks ära ja annaks ka errori, kui ei leia
+    * .ini (.conf, see on kalibratsioon, võib ka ümber teha) - osalt on neid vaja .dll jaoks, osalt instru
+* adapters
+	* adapter.py
+	* SDKAdapter.py
+	* ZMQAdapter.py
+	* SerialAdapter.py
+	* VeelMingiAdapter.py
+* servers
+  * (inst)Launcher.py
+  * ZMQServer.py
+* VInst
+  * VInst.py
+  * spectrograph_VInst.py
+  * lightsource_VInst.py
+  * manufacturer?
+    * instVI.py
+    * .ui, .ico, .png
+* procedures
+  * procedure.py?
+  * proc_name
+    * proc_name.py
+    * aux_proc.py
+    * .ui, ...
+* util
+  * fitter.py on siin praegu ainult
+
+https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+siin on tegelikult veidi huvitavat erinevate filede kohta. Kui on üldhuvipakkuvad ja üldjoontes read-only, siis võivad olla koos packagega samas directoris või siis on seal ainult näidis (kuigi ei tea, palju selliseid juhtumeid on). Kuigi, ka need failid, mis user dir lähevad, võivad põhimõtteliselt näidistatud olla.
