@@ -232,3 +232,13 @@ Leiutades foldrite süsteemi:
 
 https://setuptools.pypa.io/en/latest/userguide/datafiles.html
 siin on tegelikult veidi huvitavat erinevate filede kohta. Kui on üldhuvipakkuvad ja üldjoontes read-only, siis võivad olla koos packagega samas directoris või siis on seal ainult näidis (kuigi ei tea, palju selliseid juhtumeid on). Kuigi, ka need failid, mis user dir lähevad, võivad põhimõtteliselt näidistatud olla.
+
+## 231204 
+
+instrument:
+
+* connect
+* interact
+* disconnect
+
+Kuidas teha errorite logimine? Üldiselt võiks mingi terminaliekraan kuskil nähtaval olla, kuhu midagi saaks kuwada. Nii et siis kas print või mingi loggin ikkagi.
