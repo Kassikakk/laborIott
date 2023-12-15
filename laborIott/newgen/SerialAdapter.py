@@ -12,7 +12,7 @@ class SerialAdapter(Adapter):
 		self.port = port
 		#kwargs may contain arguments for opening the connection
 		#defaults are: baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=False, rtscts=False, dsrdtr=False
-		self portargs = kwargs #we should make sure that timeout is included
+		self.portargs = kwargs #we should make sure that timeout is included
 
 	def connect(self):
 		#avoid reopening
