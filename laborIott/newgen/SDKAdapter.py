@@ -1,6 +1,6 @@
 
 
-from laborIott.adapter import Adapter
+from laborIott.adapters.adapter import Adapter
 
 import platform
 import ctypes
