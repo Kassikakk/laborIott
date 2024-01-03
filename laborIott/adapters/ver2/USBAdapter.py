@@ -14,15 +14,15 @@ class USBAdapter(Adapter):
 
 	def connect(self):
 		self.conn = usb.core.find(idVendor = self.vid, idProduct = self.pid) 
-		#basically. Now if it doesn't find, it returns None, so that's ok.
+		return self.conn is not None
+	
 
 
 	def interact(self, command):
-		if self.conn is None:
-			return []
+
 		#command could be a list of [index, value] here?
 		#Then one could just
-		retval = self.conn.ctrl_transfer(0xc0, bReq, wVal, wIndex, len)
+		return self.conn.ctrl_transfer(0xc0, *command )#bReq, wVal, wIndex, len)
 		#well, ok maybe it gets a bit more complex, but not much 
 		#-when should one use 0x40?
 		#-it already returns a list, but it might need some rearrangement

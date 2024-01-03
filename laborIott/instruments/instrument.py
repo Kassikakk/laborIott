@@ -4,7 +4,7 @@ class Instrument(object):
 
 		self.name = name
 		self.adapter = adapter
-		self.connected = False
+		self.connected = False #does self.connected duplicate self.adapter.conn is not None? Whatabout ZMQAdapter?
 		self.connect(**kwargs)
 
 	def __del__(self):
