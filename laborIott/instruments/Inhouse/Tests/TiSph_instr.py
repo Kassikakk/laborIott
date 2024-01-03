@@ -4,5 +4,7 @@ from time import sleep
 
 tisph = TiSph(USBAdapter(0xcacc, 0x0002))
 tisph.shutter = 'open'
-tisph.disconnect()
+sleep(1)
+tisph.shutter = 'close'
+#tisph.disconnect()
 

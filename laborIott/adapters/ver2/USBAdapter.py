@@ -30,4 +30,4 @@ class USBAdapter(Adapter):
 	def disconnect(self):
 		if self.conn is None:
 			return
-		self.conn.close() #i don't think it exists. We may need to try what works
+		#self.conn.close() #i don't think it exists. We may need to try what works
