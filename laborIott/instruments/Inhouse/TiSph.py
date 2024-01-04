@@ -28,7 +28,8 @@ class TiSph(Instrument):
 
 	@property
 	def wavelength(self):
-		return self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 2])
+		ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 2])
+		return (ret[0] + 256 * ret[1])/100.0
 	
 	@wavelength.setter
 	def wavelength(self, value):
