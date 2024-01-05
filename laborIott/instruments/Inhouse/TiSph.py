@@ -1,4 +1,6 @@
 from laborIott.instruments.instrument import Instrument
+from threading import Thread,Event
+from time import sleep
 
 requests = { 'REQ_ECHO':0,'REQ_SET_SPEED' : 1, 'REQ_GET_SPEED' : 2, 'REQ_SET_DELTA' : 3, 
 'REQ_GET_DELTA' : 4, 'REQ_STOP' : 5, 'REQ_SET_RELEASE' : 6,'REQ_SET_DIGI_OUT': 7, 'REQ_GET_WAVELENGTH' : 8}
@@ -17,23 +19,60 @@ class TiSph(Instrument):
 		super().__init__(adapter, "TiSph", **kwargs)
 		#adapter will be USBAdapter in this case
 		self.shut = 0
+		self.prec = 0.05
+		self.nmperstep = 0.039
+		self.moving = Event()
+
 
 	#I would say mostly connect-disconnect should be fine from the base
 	#implement:
 	#getwl
 	#setwl
-	#ismoving - could also signal how the moving ended - if sufficient accuracy was obtained or the repetitions were used up
+	#status- could also signal how the moving ended - if sufficient accuracy was obtained or the repetitions were used up
+	#and when assigned - can force stop
 	#speed
 	#shutter
 
+	def move(self, value):
+		for i in range(self.noReps):
+			#find number of steps
+			diff = self.wavelength - value
+			if abs(diff) < self.prec:
+				break
+			steps = int(diff/self.nmperstep) #TODO: check sign
+			#maybe there could also be some sanity check if we are still too far after the first round?
+			#set the motion & wait
+			self.interact([requests['REQ_SET_DELTA'], steps, 0, 1])
+			while self.interact([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
+				if not self.moving.is_set():
+					break
+				sleep(0.2) #let's not cause a heavy traffic
+			if not self.moving.is_set():
+				#stop the motion here
+				self.interact([requests['REQ_STOP'], 0, 0, 1])
+				break
+		self.moving.clear()
+
+
 	@property
 	def wavelength(self):
+		#check here that nobody is accessing?
 		ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 2])
 		return (ret[0] + 256 * ret[1])/100.0
 	
 	@wavelength.setter
 	def wavelength(self, value):
-		pass
+		#if it is already moving, disregard
+		if self.moving.is_set():
+			return
+		#also if already there
+		if(abs(value - self.wavelength) < self.prec):
+			return
+		#first check if the current wl is already 
+		# within precision
+		self.moveThread  = Thread(target = self.move, args=(value,))
+		self.moving.set()
+		self.moveThread.start()
 	#if we deem the setting as 'slow', we'd probably need a different thread
 	# if we need continuous wavelength updates. However, the thread would need
 	# to call wavemeter, too. But possibly it can be arranged. So there are a couple of approaches how to solve it:
