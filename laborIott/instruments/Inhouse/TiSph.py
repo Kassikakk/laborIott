@@ -21,6 +21,7 @@ class TiSph(Instrument):
 		self.shut = 0
 		self.prec = 0.05
 		self.nmperstep = 0.039
+		self.noReps = 1
 		self.moving = Event()
 
 

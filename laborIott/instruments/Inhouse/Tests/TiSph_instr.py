@@ -5,6 +5,7 @@ from time import sleep
 tisph = TiSph(USBAdapter(0xcacc, 0x0002))
 tisph.shutter = 'open'
 sleep(1)
+tisph.wavelength = 790
 print(tisph.wavelength)
 tisph.shutter = 'closed'
 #tisph.disconnect()
