@@ -20,8 +20,8 @@ class TiSph(Instrument):
 		#adapter will be USBAdapter in this case
 		self.shut = 0
 		self.prec = 0.05
-		self.nmperstep = 0.039
-		self.noReps = 1
+		self.nmperstep = 0.0188 #0.039
+		self.noReps = 5
 		self.moving = Event()
 
 
@@ -41,25 +41,29 @@ class TiSph(Instrument):
 			if abs(diff) < self.prec:
 				break
 			steps = int(diff/self.nmperstep) #TODO: check sign
+			print(self.wavelength, diff, steps)
 			#maybe there could also be some sanity check if we are still too far after the first round?
 			#set the motion & wait
 			self.interact([requests['REQ_SET_DELTA'], steps, 0, 1])
 			while self.interact([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
 				if not self.moving.is_set():
 					break
+				if i>0:
+					print('boing')
 				sleep(0.2) #let's not cause a heavy traffic
 			if not self.moving.is_set():
 				#stop the motion here
 				self.interact([requests['REQ_STOP'], 0, 0, 1])
 				break
+		self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
 		self.moving.clear()
 
 
 	@property
 	def wavelength(self):
 		#check here that nobody is accessing?
-		ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 2])
-		return (ret[0] + 256 * ret[1])/100.0
+		ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
+		return (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
 	
 	@wavelength.setter
 	def wavelength(self, value):
@@ -100,6 +104,15 @@ class TiSph(Instrument):
 		#well it should in general return a list, right?
 		if ret is not None:
 			self.shut = ind
+
+	@property
+	def speed(self):
+		ret = self.interact([requests['REQ_GET_SPEED'], 0, 0, 2])
+		return ret[0] + 256 * ret[1]
+	
+	@speed.setter
+	def speed(self, value):
+		ret = self.interact([requests['REQ_SET_SPEED'], value, 0, 1])
 
 
 	

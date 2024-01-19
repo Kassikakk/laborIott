@@ -1,5 +1,6 @@
 from laborIott.adapters.adapter import Adapter
 import usb.core
+from threading import Lock
 
 class USBAdapter(Adapter):
 	""" Adapter class for using the direct USB connection (like V-USB)
@@ -10,6 +11,7 @@ class USBAdapter(Adapter):
 		super().__init__()
 		self.vid = vid
 		self.pid = pid
+		self.usblock = Lock()
 		#in principle, other ways (productname ... ) could be figured, too
 
 	def connect(self):
@@ -22,7 +24,10 @@ class USBAdapter(Adapter):
 
 		#command could be a list of [index, value] here?
 		#Then one could just
-		return self.conn.ctrl_transfer(0xc0, *command )#bReq, wVal, wIndex, len)
+		self.usblock.acquire(True)
+		ret = self.conn.ctrl_transfer(0xc0, *command )#bReq, wVal, wIndex, len)
+		self.usblock.release()
+		return ret
 		#well, ok maybe it gets a bit more complex, but not much 
 		#-when should one use 0x40?
 		#-it already returns a list, but it might need some rearrangement
