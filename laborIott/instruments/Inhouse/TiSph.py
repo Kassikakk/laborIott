@@ -20,8 +20,8 @@ class TiSph(Instrument):
 		#adapter will be USBAdapter in this case
 		self.shut = 0
 		self.prec = 0.05
-		self.nmperstep = 0.0188 #0.039
-		self.noReps = 5
+		self.nmperstep = 0.0205 #0.039
+		self.noReps = 10
 		self.moving = Event()
 
 
@@ -37,24 +37,24 @@ class TiSph(Instrument):
 	def move(self, value):
 		for i in range(self.noReps):
 			#find number of steps
-			diff = self.wavelength - value
+			wl = self.wavelength
+			diff = wl - value
 			if abs(diff) < self.prec:
 				break
 			steps = int(diff/self.nmperstep) #TODO: check sign
-			print(self.wavelength, diff, steps)
+			print(i, wl, diff, steps)
 			#maybe there could also be some sanity check if we are still too far after the first round?
 			#set the motion & wait
 			self.interact([requests['REQ_SET_DELTA'], steps, 0, 1])
 			while self.interact([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
 				if not self.moving.is_set():
 					break
-				if i>0:
-					print('boing')
 				sleep(0.2) #let's not cause a heavy traffic
 			if not self.moving.is_set():
 				#stop the motion here
 				self.interact([requests['REQ_STOP'], 0, 0, 1])
 				break
+			sleep(1) #We need time to let the wavemeter settle
 		self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
 		self.moving.clear()
 
@@ -114,5 +114,13 @@ class TiSph(Instrument):
 	def speed(self, value):
 		ret = self.interact([requests['REQ_SET_SPEED'], value, 0, 1])
 
+	@property
+	def status(self):
+		return 'moving' if self.moving.is_set() else 'stopped'
+	
+	@status.setter
+	def status(self, value):
+		if value == 'abort':
+			self.moving.clear()
 
 	

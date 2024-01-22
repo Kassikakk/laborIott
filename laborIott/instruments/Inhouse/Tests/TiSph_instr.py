@@ -6,10 +6,13 @@ tisph = TiSph(USBAdapter(0xcacc, 0x0002))
 print(tisph.wavelength)
 tisph.shutter = 'open'
 sleep(1)
-tisph.speed = 150
-tisph.wavelength = 760
-#print(tisph.wavelength)
+tisph.speed = 50
+tisph.wavelength = 850
+while tisph.status == 'moving':
+	print(tisph.wavelength)
+	sleep(0.5)
 tisph.shutter = 'closed'
+#700 nm on piir praegu - 940
 #tisph.disconnect()
 #730-744.4 = 767 steps
 
