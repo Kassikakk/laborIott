@@ -242,3 +242,13 @@ instrument:
 * disconnect
 
 Kuidas teha errorite logimine? Üldiselt võiks mingi terminaliekraan kuskil nähtaval olla, kuhu midagi saaks kuwada. Nii et siis kas print või mingi loggin ikkagi.
+
+## 240123
+
+TiSph uue süsteemi järgi tööle panek: Ühtlasi vaatame, kas siin on mingit alust valgusallika baasVI klassi jaoks. Ja mis on erinevused Chiraga, mis on hetkel nagu põhiline teine selline:
+
+* noh muidugi siin ei ole mõningaid parameetreid, nagu need temperatuurid ja ka bandwidth
+* küll aga on speed, mis tegelikult mingis mõttes on isegi baasikalisem
+* siis status (mineku olek) on chiral väljendatud stepsmissingu kaudu. See on ka tegelikult üsna baasikaline
+* siin see lainepikkuse lugemine taimeris: chiras on teda ainult vaja teha lainepikkusele jõudmisel, TiSph pidevalt (keegi võib ka käsitsi keerata). Aga siin tekib probleem, sest siis on mineku lainepikkus vaja kuhugi mujale kirjutada (ja selle võib labeliks muuta). Ehk siis üldiselt võikski label ja wlEdit ikka eraldi olla.
+* mis timeriga baasklassi puhul teha?
