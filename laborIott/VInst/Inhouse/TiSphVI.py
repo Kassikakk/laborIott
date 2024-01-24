@@ -2,7 +2,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
-from laborIott.VInst import VInst
+from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
 from laborIott.instruments.Inhouse.TiSph import TiSph
 import os
