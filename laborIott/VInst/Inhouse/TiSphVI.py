@@ -33,7 +33,7 @@ class TiSph_VI(VInst):
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
 		self.dsbl += [self.goWlButt, self.shutButt, self.setSpButt]
-		self.wlEdit.setText("{:.1f}".format(self.tisph.wavelength))
+		self.wlEdit.setText("{:.2f}".format(self.tisph.wavelength))
 		
 
 
@@ -49,7 +49,7 @@ class TiSph_VI(VInst):
 		
 	def onTimer(self):
 		#handle goingtoWL
-		self.wlLabel.setText("{:.1f}".format(self.tisph.wavelength))
+		self.wlLabel.setText("{:.2f}".format(self.tisph.wavelength))
 		if not self.WLreached.is_set():
 			#check arrival
 			self.wlLabel.setStyleSheet("color: red")
@@ -80,11 +80,11 @@ class TiSph_VI(VInst):
 	def setSpeed(self, newspeed):
 		#issue a warning if a too low number is entered
 		try:
-			newSp = float(newspeed)
+			newSp = int(newspeed)
 		except ValueError:
 			print("not floatable")
 			return #probably a messagebox should do here
-		self.tisph.speed = newspeed
+		self.tisph.speed = newSp
 		self.spEdit.setText("{:.1f}".format(self.tisph.speed))
 		
 

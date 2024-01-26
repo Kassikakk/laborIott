@@ -18,6 +18,7 @@ class USBAdapter(Adapter):
 
 	def connect(self):
 		self.conn = usb.core.find(idVendor = self.vid, idProduct = self.pid) 
+		print(self.conn)
 		return self.conn is not None
 	
 
@@ -29,6 +30,7 @@ class USBAdapter(Adapter):
 		#self.usblock.acquire(True)
 		self.connBusy.wait()
 		self.connBusy.clear()
+		#try for usb.core.USBError 
 		ret = self.conn.ctrl_transfer(0xc0, *command )#bReq, wVal, wIndex, len)
 		self.connBusy.set()
 		#self.usblock.release()
