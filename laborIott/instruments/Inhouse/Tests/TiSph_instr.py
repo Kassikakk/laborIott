@@ -7,11 +7,12 @@ print(tisph.wavelength)
 tisph.shutter = 'open'
 sleep(1)
 tisph.speed = 50
-tisph.wavelength = 850
+tisph.wavelength = 632.99
 while tisph.status == 'moving':
 	print(tisph.wavelength)
 	sleep(0.5)
 tisph.shutter = 'closed'
+tisph.status = 'release'
 #700 nm on piir praegu - 940
 #tisph.disconnect()
 #730-744.4 = 767 steps

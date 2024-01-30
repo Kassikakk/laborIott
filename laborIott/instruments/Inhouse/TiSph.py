@@ -122,5 +122,9 @@ class TiSph(Instrument):
 	def status(self, value):
 		if value == 'abort':
 			self.moving.clear()
+		elif value == 'release':
+			if not self.moving.is_set():
+				self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
+
 
 	

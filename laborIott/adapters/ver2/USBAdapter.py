@@ -18,7 +18,6 @@ class USBAdapter(Adapter):
 
 	def connect(self):
 		self.conn = usb.core.find(idVendor = self.vid, idProduct = self.pid) 
-		print(self.conn)
 		return self.conn is not None
 	
 
