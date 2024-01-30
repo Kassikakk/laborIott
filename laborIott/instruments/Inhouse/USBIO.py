@@ -14,7 +14,7 @@ class USBIO(Instrument):
 
 
 	def __init__(self, adapter, **kwargs):
-		super().__init__(adapter, "TiSph", **kwargs)
+		super().__init__(adapter, "USBIO", **kwargs)
 
 
 
@@ -23,3 +23,11 @@ class USBIO(Instrument):
 	#servo freq
 	#servo duty
 	#(servo release?)
+	
+	def getpin(self, pinno):
+		if (pinno >= 0) and (pinno < 11):
+			return self.interact([requests['REQ_GET_PINS'],0,pinno,1])[0]
+
+	def setpin(self, pinno, val):
+		if (pinno >= 0) and (pinno < 7):
+			return self.interact([requests['REQ_SET_PINS'],(val != 0),pinno,1])[0]
