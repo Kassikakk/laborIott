@@ -15,6 +15,10 @@ class USBIO(Instrument):
 
 	def __init__(self, adapter, **kwargs):
 		super().__init__(adapter, "USBIO", **kwargs)
+		#OD wheel servo constants
+		self.ODperDeg = 0.0148
+		self.degperProc = 28.0
+		self.msperDeg = 8.0
 
 
 
@@ -31,3 +35,49 @@ class USBIO(Instrument):
 	def setpin(self, pinno, val):
 		if (pinno >= 0) and (pinno < 7):
 			return self.interact([requests['REQ_SET_PINS'],(val != 0),pinno,1])[0]
+
+	@property
+	def freq1(self):
+		#freq1 is the frequency for PWM 0 and 1
+		return self.interact([requests['REQ_GET_PWM_FRQ'],0,1,1])[0]
+	
+	@freq1.setter
+	def freq1(self, value):
+		if value > 0:
+			return self.interact([requests['REQ_SET_PWM_FRQ'],value,1,1])[0]
+		else:
+			return -1
+
+	@property
+	def freq2(self):
+		#freq2 is the frequency for PWM 2
+		return self.interact([requests['REQ_GET_PWM_FRQ'],0,2,1])[0]
+	
+	@freq2.setter
+	def freq2(self, value):
+		if value > 0:
+			return self.interact([requests['REQ_SET_PWM_FRQ'],value,2,1])[0]
+		else:
+			return -1
+
+	@property
+	def duty1(self):
+		return self.interact([requests['REQ_GET_PWM_DUTY'],0,1,1])[0]
+	
+	@duty1.setter
+	def duty1(self, value):
+		if value > 0:
+			return self.interact([requests['REQ_SET_PWM_DUTY'],value,1,1])[0]
+		else:
+			return -1
+	
+	@property
+	def duty2(self):
+		return self.interact([requests['REQ_GET_PWM_DUTY'],0,2,1])[0]
+	
+	@duty2.setter
+	def duty2(self, value):
+		if value > 0:
+			return self.interact([requests['REQ_SET_PWM_DUTY'],value,2,1])[0]
+		else:
+			return -1
