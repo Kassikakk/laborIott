@@ -61,6 +61,17 @@ class USBIO(Instrument):
 			return -1
 
 	@property
+	def OD(self):
+		return self.interact([requests['REQ_GET_PWM_DUTY'],0,0,1])[0]
+	
+	@OD.setter
+	def OD(self, value):
+		if value > 0:
+			return self.interact([requests['REQ_SET_PWM_DUTY'],value,0,1])[0]
+		else:
+			return -1
+
+	@property
 	def duty1(self):
 		return self.interact([requests['REQ_GET_PWM_DUTY'],0,1,1])[0]
 	
