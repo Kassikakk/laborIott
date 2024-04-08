@@ -34,6 +34,7 @@ class USBIO_VI(VInst):
 		#konnektid
 		self.ODButt.clicked.connect(lambda: self.setOD(self.ODEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
+		self.usbio.freq1 = 100
 		
 		
 		self.timer = QtCore.QTimer()

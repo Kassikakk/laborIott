@@ -39,7 +39,8 @@ class USBIO(Instrument):
 	@property
 	def freq1(self):
 		#freq1 is the frequency for PWM 0 and 1
-		return self.interact([requests['REQ_GET_PWM_FRQ'],0,1,1])[0]
+		ret = self.interact([requests['REQ_GET_PWM_FRQ'],0,1,2])
+		return ret[0] + ret[1]*256
 	
 	@freq1.setter
 	def freq1(self, value):
@@ -51,7 +52,8 @@ class USBIO(Instrument):
 	@property
 	def freq2(self):
 		#freq2 is the frequency for PWM 2
-		return self.interact([requests['REQ_GET_PWM_FRQ'],0,2,1])[0]
+		ret = self.interact([requests['REQ_GET_PWM_FRQ'],0,2,2])
+		return ret[0] + ret[1]*256
 	
 	@freq2.setter
 	def freq2(self, value):
@@ -62,7 +64,8 @@ class USBIO(Instrument):
 
 	@property
 	def OD(self):
-		return self.interact([requests['REQ_GET_PWM_DUTY'],0,0,1])[0]
+		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,0,2])
+		return ret[0] + ret[1]*256
 	
 	@OD.setter
 	def OD(self, value):
@@ -73,7 +76,8 @@ class USBIO(Instrument):
 
 	@property
 	def duty1(self):
-		return self.interact([requests['REQ_GET_PWM_DUTY'],0,1,1])[0]
+		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,1,2])
+		return ret[0] + ret[1]*256
 	
 	@duty1.setter
 	def duty1(self, value):
@@ -84,7 +88,8 @@ class USBIO(Instrument):
 	
 	@property
 	def duty2(self):
-		return self.interact([requests['REQ_GET_PWM_DUTY'],0,2,1])[0]
+		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,2,2])
+		return ret[0] + ret[1]*256
 	
 	@duty2.setter
 	def duty2(self, value):

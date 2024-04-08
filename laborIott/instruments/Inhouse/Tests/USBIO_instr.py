@@ -20,8 +20,10 @@ sleep(1)
 usbio.duty1 = 2000
 #usbio.freq2 = 0
 '''
-usbio.freq1 = 100
-usbio.OD = 600
+usbio.freq1 = 300
+usbio.OD = 2000
 
 sleep(2)
+print(usbio.freq1)
 usbio.freq1 = 0
+
