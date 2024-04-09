@@ -52,7 +52,7 @@ class USBIO_VI(VInst):
 		self.usbio.OD = int(self.ODEdit.text())
 		
 	def setShutter(self, openit):
-		self.usbio.setpin(1,int(openit))
+		self.usbio.setpin(0,int(openit))
 		#self.tisph.shutter =  'open' if openit else 'closed'
 
 	
