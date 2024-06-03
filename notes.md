@@ -252,3 +252,7 @@ TiSph uue süsteemi järgi tööle panek: Ühtlasi vaatame, kas siin on mingit a
 * siis status (mineku olek) on chiral väljendatud stepsmissingu kaudu. See on ka tegelikult üsna baasikaline
 * siin see lainepikkuse lugemine taimeris: chiras on teda ainult vaja teha lainepikkusele jõudmisel, TiSph pidevalt (keegi võib ka käsitsi keerata). Aga siin tekib probleem, sest siis on mineku lainepikkus vaja kuhugi mujale kirjutada (ja selle võib labeliks muuta). Ehk siis üldiselt võikski label ja wlEdit ikka eraldi olla.
 * mis timeriga baasklassi puhul teha?
+
+## 240603
+
+Nüüd oleks mureks ZMQAdapter tööle saada uue süsteemiga. Kuidas vanaga käis? (tuleb lisada ka instrumendi aktiivsuse toetus). Paralleelselt tuleb siis ka serveriosa vaadata.
