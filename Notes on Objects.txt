@@ -13,7 +13,7 @@
 	-adapter also shouldn't have any internal parameters that are needed to be accessed directly from elsewhere (if only somehow through interact) because there may be no way to get to them in case of ZMQAdapter mediation.
 -Virtual Instrument
 -Server
-	-ZMQAdapter sends out the device ID, which is the device name (we might wanna add some enumerator to the end of it, to support multiple instances of the same device, but we just need it to be same on the server and ZMQAdapter), function code and whatever is given to the function as a parameter. The connect/disconnect functions don't have parameters and interact has a list, so this is standard. It would probably be logical to pass the code within the record part, so whydontwe e.g. pass it as a (id, params) or just add id in front of the (possible) params list
+	-ZMQAdapter sends out the device ID, which is the device name (we might wanna add some enumerator to the end of it, to support multiple instances of the same device, but we just need it to be same on the server and ZMQAdapter), function code and whatever is given to the function as a parameter. The connect/disconnect functions don't have parameters and interact has a list, so this is standard. It would probably be logical to pass the code within the record part, so whydontwe e.g. pass it as a (id, params) or just add id in front of the (possible) params list. We might also want to add the message counter, so [command_id, [params], counter]? And also add counter to the end of return so one can be sure this is the correct match?
 -Procedure
 	-A collection (one or more) of instruments or virtual instruments to perform a specific type of measurement or experiment in general.
 

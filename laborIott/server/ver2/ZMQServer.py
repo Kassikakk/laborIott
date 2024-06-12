@@ -1,6 +1,6 @@
 import zmq
 import pickle
-from laborIott.adapter.ver2 import RNDAdapter
+from laborIott.adapters.ver2.RNDAdapter import RNDAdapter
 
 '''
 Kuidas selle käivitamine siis hakkab käima?
@@ -12,7 +12,7 @@ svr = server.ZMQServer( devdict, inlist, outport)
 svr.run()
 
 '''
-comm = {'connect': 0, 'interact': 1, 'disconnect': 2}
+comm = {'connect': 0, 'interact': 1, 'disconnect': 2, 'echo': 3}
 
 
 class ZMQServer(object):
@@ -60,35 +60,27 @@ class ZMQServer(object):
 					topic, record = ch[0].recv_serialized(
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 
-					#now record[0] should have the operation code
-					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
+					#now record should be [operation code, params, counter]
+					if (topic in self.devdict) and (self.devdict[topic] is not None):
 						if record[0] == comm['connect']:
-							self.devdict[dev_id].connect()
+							print("callin connect")
+							retval = self.devdict[topic].connect()
 						elif record[0] == comm['interact']:
-							self.devdict[dev_id].interact(record[1])
+							print("callin interact")
+							retval = self.devdict[topic].interact(record[1])
 						elif record[0] == comm['disconnect']:
-							self.devdict[dev_id].disconnect()
+							retval = self.devdict[topic].disconnect()
+						elif record[0] == comm['echo']:
+							retval = record[1]
+						#send back [retval, counter]
+						self.socket.send_serialized([retval, record[2]],
+														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
 					
 					# some special topics? Like to stop or sth. Though who sends it?
-					dev_id, op = topic.split('.')[:2]
-					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
-						if op == "write":
-							self.devdict[dev_id].write(record)
-						elif op == "read":
-							record = self.devdict[dev_id].read()
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-						elif op == "values":
-							record = self.devdict[dev_id].values(record)
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-						elif op == "echo":
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-
+					
 # Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
 if __name__ == '__main__':
-	devdict = {"dummy": RNDAdapterAdapter()}
+	devdict = {"dummy": RNDAdapter()}
 	inlist = (("127.0.0.0", 5555),)
 	svr = ZMQServer(devdict, inlist, 5556)
 	svr.run()
