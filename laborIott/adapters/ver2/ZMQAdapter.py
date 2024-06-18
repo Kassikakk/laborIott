@@ -54,6 +54,7 @@ class ZMQAdapter(Adapter):
 		self.insock = zmq.Context().socket(zmq.SUB)
 		self.poller = zmq.Poller()
 		self.insock.connect("tcp://%s:%d" % (self.address, self.inport))
+		print("Listening to tcp://%s:%d" % (self.address, self.inport))
 		self.insock.setsockopt(zmq.SUBSCRIBE, b'')
 		self.poller.register(self.insock, zmq.POLLIN)
 		
@@ -63,13 +64,14 @@ class ZMQAdapter(Adapter):
 		#outward 
 		self.outsock = zmq.Context().socket(zmq.PUB)
 		self.outsock.bind("tcp://*:%d" % self.outport)
-		topic = self.id + ".connect"
+		print("Sending to tcp://*:%d" % self.outport)
 		#log.debug(topic + " : " + command)
 
 		# establish connection, deal with "slow start" effect
 		self.repeat = 2 #low number to speed up starting
 		while self.send_recv(self.id,[comm['echo'], []]) is None:
 			#log.info("Attempting connection {}".format(self.counter))
+			print("echo")
 			pass
 			#we could cut here according to self.counter value if no one comes online
 
@@ -91,7 +93,7 @@ class ZMQAdapter(Adapter):
 		performs (generally) a two-way interaction and should return a list of results
 		interpreting the list is up to the instrument
 		"""
-		ret = self.send_recv(self.id,[comm['disconnect'], command])
+		ret = self.send_recv(self.id,[comm['interact'], command])
 		if ret is None:
 			return []
 		return ret
@@ -123,6 +125,7 @@ class ZMQAdapter(Adapter):
 				#now record is the returned list, with [0] as the function return and [1] as the counter
 				if (topic1 == topic) and (record[1] == self.counter):
 					#log.debug(record)
+					print(record)
 					return record[0]
 				else:
 					#log.info("Mistopicd: " + topic1 + " in rsp to " + topic)
