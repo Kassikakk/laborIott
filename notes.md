@@ -260,3 +260,12 @@ Nüüd oleks mureks ZMQAdapter tööle saada uue süsteemiga. Kuidas vanaga käi
 Server nüüd modifitseeruks, sest suhtlus on standardiseeritud veidi teistmoodi, on ainult connect, disconnect ja interact. Mõte on, et panna connecti siis sisse ka ZMQ connectimine.
 
 Oota, kuidas ma nüüd teeks selle katsetuse? Ühes masinas tuleb siis panna tööle meil instrument, mis kasutab ZMQAdapterit adapterina. Mis instrument see on, vist ei kõlba oot Test alla siis midagi vist baasklass ei kõlba lihtsalt, seal peavad mingid parameetrid ikka olema. Serveris jällegi peaks nagu lihtsalt töötama adapter või no ma ei tea, see server võib ju ka ise vastata midagi. Siis võiks ju ka põhimõtteliselt mingi olemasoleva instrumendi tööle panna selle adaptriga, kusjuures server saadab mingit libadatat. Mingi hästi lihtne seade, millel pole palju parameetreid.
+
+## 240619
+
+Nii, nüüd ZMQAdapteri mock versioon esialgselt töötab, aga mõned küsimused:
+
+* mida teha, kui server tagant ära kukub, s.o. annab timeoudi? Kas siis peaks uuesti connectima? See ei pruugi alati hea mõte olla. 
+* See on tegelikult selles mõttes ka huvitav, et kas me saaks panna tööle kõigepealt instrumendi ja hiljem serveri? Noh, ütleme mingis sellises seisus, kus instrument saaks disconnected olekus kaua olla, nt. VI. Kas ta näiteks siis VI tasemel püüakski pidevalt reconnectida (nt. taimeri osas) või peaks seda mingi nupuga tegema? Või on vastavalt seadmele.
+
+

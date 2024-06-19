@@ -39,7 +39,9 @@ class ZMQAdapter(Adapter):
 		
 
 	def __del__(self):
-		self.disconnect()
+		#self.disconnect()
+		#Vot ma ei tea, siin tundub, et zmq kuidagi disconnectib ise juba ja siis enam ei tööta see
+		pass
 		
 	def connect(self, **kwargs):
 		"""

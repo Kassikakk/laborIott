@@ -6,3 +6,7 @@ from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 mock = Mock(ZMQAdapter("Mock", "localhost",5555,5556))
 for i in range(10):
 	print(mock.rndval)
+mock.disconnect()
+mock.connect()
+for i in range(10):
+	print(mock.rndval)
