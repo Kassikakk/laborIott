@@ -252,3 +252,20 @@ TiSph uue süsteemi järgi tööle panek: Ühtlasi vaatame, kas siin on mingit a
 * siis status (mineku olek) on chiral väljendatud stepsmissingu kaudu. See on ka tegelikult üsna baasikaline
 * siin see lainepikkuse lugemine taimeris: chiras on teda ainult vaja teha lainepikkusele jõudmisel, TiSph pidevalt (keegi võib ka käsitsi keerata). Aga siin tekib probleem, sest siis on mineku lainepikkus vaja kuhugi mujale kirjutada (ja selle võib labeliks muuta). Ehk siis üldiselt võikski label ja wlEdit ikka eraldi olla.
 * mis timeriga baasklassi puhul teha?
+
+## 240603
+
+Nüüd oleks mureks ZMQAdapter tööle saada uue süsteemiga. Kuidas vanaga käis? (tuleb lisada ka instrumendi aktiivsuse toetus ja siin tegelikult peaks ka ühenduse aktiivsuse toetus olema, kui neid saab eristada). Paralleelselt tuleb siis ka serveriosa vaadata. Vanal oli id (see võiks kuidagi algusest peale üks olla, aga kuidas on mitme analoogse seadme korraga toetamisega? Nagu üldse. aga siin vist tuleb see rohkem välja. Aga ok, vaatame järjest.) Prooviks mingi mocki tööle saada, ühesõnaga siis peaks olema server mingi mock adapter+instrumendiga.. oot see oli nii, et kas serveri pool peab olema ainult adapter või... jah, nii ta on, sest üldiselt see meie skeem on ju selline, et instrument ise mingit suhtlust ei alusta, ainult küsimise peale. Elik siis et kogu asünkroonsust peaks toimetama instrument (vist või). Ja erroorsust (näiteks, et ühendus on katkenud või aparaat läks hulluks) näitab siis kas timeoudi ületamine või ebaselge vastus. Ühesõnaga peaks mingi dead man's suhtlus aparaadiga ikka pidevalt käima, et aru saada, kui miski ei klapi. Ja siissed protseduurid tuleb ka täpsustada, et kas restart või mis. See võib-olla jääks VI kaela. Kas mock adapteri funktsiooni võiks täita baasklass?
+
+Server nüüd modifitseeruks, sest suhtlus on standardiseeritud veidi teistmoodi, on ainult connect, disconnect ja interact. Mõte on, et panna connecti siis sisse ka ZMQ connectimine.
+
+Oota, kuidas ma nüüd teeks selle katsetuse? Ühes masinas tuleb siis panna tööle meil instrument, mis kasutab ZMQAdapterit adapterina. Mis instrument see on, vist ei kõlba oot Test alla siis midagi vist baasklass ei kõlba lihtsalt, seal peavad mingid parameetrid ikka olema. Serveris jällegi peaks nagu lihtsalt töötama adapter või no ma ei tea, see server võib ju ka ise vastata midagi. Siis võiks ju ka põhimõtteliselt mingi olemasoleva instrumendi tööle panna selle adaptriga, kusjuures server saadab mingit libadatat. Mingi hästi lihtne seade, millel pole palju parameetreid.
+
+## 240619
+
+Nii, nüüd ZMQAdapteri mock versioon esialgselt töötab, aga mõned küsimused:
+
+* mida teha, kui server tagant ära kukub, s.o. annab timeoudi? Kas siis peaks uuesti connectima? See ei pruugi alati hea mõte olla. 
+* See on tegelikult selles mõttes ka huvitav, et kas me saaks panna tööle kõigepealt instrumendi ja hiljem serveri? Noh, ütleme mingis sellises seisus, kus instrument saaks disconnected olekus kaua olla, nt. VI. Kas ta näiteks siis VI tasemel püüakski pidevalt reconnectida (nt. taimeri osas) või peaks seda mingi nupuga tegema? Või on vastavalt seadmele.
+
+
