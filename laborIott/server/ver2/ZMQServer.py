@@ -63,10 +63,10 @@ class ZMQServer(object):
 					#now record should be [operation code, params, counter]
 					if (topic in self.devdict) and (self.devdict[topic] is not None):
 						if record[0] == comm['connect']:
-							print("callin connect")
+							#print("callin connect")
 							retval = self.devdict[topic].connect()
 						elif record[0] == comm['interact']:
-							print("callin interact")
+							#print("callin interact")
 							retval = self.devdict[topic].interact(record[1])
 						elif record[0] == comm['disconnect']:
 							retval = self.devdict[topic].disconnect()

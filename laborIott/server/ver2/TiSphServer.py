@@ -5,6 +5,6 @@ import os
 
 
 devdict = {"TiSph": USBAdapter(0xcacc, 0x0002)}
-inlist = (("localhost", 5556),)
+inlist = (("mikro-spektro", 5555),)
 svr = ZMQServer(devdict, inlist, 5555)
 svr.run()
