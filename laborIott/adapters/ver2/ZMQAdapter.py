@@ -127,7 +127,6 @@ class ZMQAdapter(Adapter):
 				#now record is the returned list, with [0] as the function return and [1] as the counter
 				if (topic1 == topic) and (record[1] == self.counter):
 					#log.debug(record)
-					print(record)
 					return record[0]
 				else:
 					#log.info("Mistopicd: " + topic1 + " in rsp to " + topic)
