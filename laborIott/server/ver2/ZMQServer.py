@@ -38,7 +38,7 @@ class ZMQServer(object):
 	def run(self):
 		#the infinite loop scanning for incoming messages
 		while True:
-			topic, record = ch[0].recv_serialized(
+			topic, record = self.socket.recv_serialized(
 						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
 			if record[0] == comm['connect']:
 				#print("callin connect")
@@ -56,7 +56,5 @@ class ZMQServer(object):
 					
 # Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
 if __name__ == '__main__':
-	devdict = {"dummy": RNDAdapter()}
-	inlist = (("127.0.0.0", 5555),)
-	svr = ZMQServer(devdict, inlist, 5556)
+	svr = ZMQServer(RNDAdapter())
 	svr.run()
