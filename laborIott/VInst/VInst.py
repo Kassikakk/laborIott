@@ -101,7 +101,8 @@ class VInst(QtWidgets.QMainWindow):
 		#else construct a ZMQAdapter
 		inport = zmqSection.getint('inport',5555)
 		outport = zmqSection.getint('outport',inport)
-		return ZMQAdapter(refname, address, inport, outport)
+		#return ZMQAdapter(refname, address, inport, outport)
+		return ZMQAdapter(address, inport) #uus ver
 
 	def setEnable(self, state):
 		#define separately so VInsts can use it
