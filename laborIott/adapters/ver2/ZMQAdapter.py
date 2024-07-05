@@ -20,15 +20,9 @@ class ZMQAdapter(Adapter):
 	def __init__(self, address, port = 5555):
 		super().__init__()
 
-		
-
 		self.server = "tcp://%s:%d" % (address, port)
-		
-		
-		
 		self.timeout = 200 # milliseconds for single poll
-		self.globtimeout = 5000 #global timeout to wait for response
-		self.repeat = int(self.globtimeout / self.timeout) 
+		self.repeat = 10 #reconnections before giving up
 		self.context = zmq.Context()
 		self.socket = None #set in the connect
 		
@@ -49,26 +43,18 @@ class ZMQAdapter(Adapter):
 		written into class variables
 		"""
 		#First establish the zmq connection
-		# inward
-		self.sock  = self.context.socket(zmq.REQ)
-		
-		self.sock.connect(self.server)
-		
 
+		accepted = False
 		# establish connection, deal with "slow start" effect
-		self.repeat = 2 #low number to speed up starting
-		while self.send_recv(self.id,[comm['echo'], []]) is None:
+		
+		while not accepted:
+			self.sock  = self.context.socket(zmq.REQ)
+			self.sock.connect(self.server)
+			accepted = (self.send_recv(comm['echo'], []) is not None)
 			#log.info("Attempting connection {}".format(self.counter))
-			print("echo")
-			pass
-			#we could cut here according to self.counter value if no one comes online
-
-		#set a longer global timeout
-		self.repeat = int(self.globtimeout / self.timeout) #global timeout / single shot timeout
-
-
-
-		ret = self.send_recv(self.id,[comm['connect'], []])
+			print("echo ok" if accepted else "no echo" )
+		
+		ret = self.send_recv(comm['connect'], [])
 		#The problem is that if that returns None, this basically means timeout or crossed messages
 		# so you still don't know if the device connected or not
 		if ret is None:
@@ -81,7 +67,7 @@ class ZMQAdapter(Adapter):
 		performs (generally) a two-way interaction and should return a list of results
 		interpreting the list is up to the instrument
 		"""
-		ret = self.send_recv(self.id,[comm['interact'], command])
+		ret = self.send_recv(comm['interact'], command)
 		if ret is None:
 			return []
 		return ret
@@ -92,33 +78,32 @@ class ZMQAdapter(Adapter):
 		"""
 
 		#Send the disconnect message and get the result
-		ret = self.send_recv(self.id,[comm['disconnect'], []])
-		#The problem is not that bad here, 
-		
-		self.poller.unregister(self.insock)
-		self.insock.close()
-		self.outsock.close()
+		ret = self.send_recv(comm['disconnect'], [])
+		#The problem is not that bad here, 		
+		self.sock.close()
 		return True
 
-	def send_recv(self, topic, record):
 
+	def send_recv(self, command, args):
 
+		request = [command, args]
+		counter = 0
 		while True:
 			self.sock.send_pyobj(request)
-			if (self.sock.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0:
+			if (self.sock.poll(self.timeout) & zmq.POLLIN) != 0:
             	#reply = socket.recv_serialized(deserialize=pickle.loads)
 				reply = self.sock.recv_pyobj()
 				#print(reply)
 				break
 
-			self.counter += 1
+			counter += 1
 			
 			self.sock.setsockopt(zmq.LINGER, 0)
 			self.sock.close()
-			if self.counter >= self.repeat:
+			if counter >= self.repeat:
 				reply = None
 				break
 			self.sock = self.context.socket(zmq.REQ)
-			self.sock.connect(server)
+			self.sock.connect(self.server)
 
 		return reply

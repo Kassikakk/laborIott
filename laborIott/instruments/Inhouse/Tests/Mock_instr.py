@@ -3,7 +3,7 @@ from laborIott.adapters.ver2.RNDAdapter import RNDAdapter
 from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 
 #mock = Mock(RNDAdapter())
-mock = Mock(ZMQAdapter("Mock", "localhost",5555,5556))
+mock = Mock(ZMQAdapter("localhost"))
 for i in range(10):
 	print(mock.rndval)
 mock.disconnect()

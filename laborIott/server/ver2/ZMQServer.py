@@ -31,27 +31,29 @@ class ZMQServer(object):
 		self.adapter = adapter
 		# outward
 		self.context = zmq.Context()
-		self.socket = self.context.socket(zmq.REP)
-		self.socket.bind("tcp://*:%d" % port)
+		self.sock = self.context.socket(zmq.REP)
+		self.sock.bind("tcp://*:%d" % port)
 
 
 	def run(self):
 		#the infinite loop scanning for incoming messages
 		while True:
-			topic, record = self.socket.recv_serialized(
-						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
-			if record[0] == comm['connect']:
+
+			request = self.sock.recv_pyobj()
+			if request[0] == comm['connect']:
 				#print("callin connect")
-				retval = self.adapter.connect()
-			elif record[0] == comm['interact']:
+				reply = self.adapter.connect()
+			elif request[0] == comm['interact']:
 				#print("callin interact")
-				retval = self.adapter.interact(record[1])
-			elif record[0] == comm['disconnect']:
-				retval = self.adapter.disconnect()
-			elif record[0] == comm['echo']:
-				retval = record[1]
-			self.socket.send_serialized([retval, record[2]],
-			serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+				reply = self.adapter.interact(request[1])
+			elif request[0] == comm['disconnect']:
+				reply = self.adapter.disconnect()
+			elif request[0] == comm['echo']:
+				reply = request[1]
+
+			self.sock.send_pyobj(reply)
+
+			
 
 					
 # Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
