@@ -4,7 +4,7 @@ import os
 
 
 
-devdict = {"TiSph": USBAdapter(0xcacc, 0x0002)}
-inlist = (("mikro-spektro", 5555),)
-svr = ZMQServer("mikro-spektro", 5555)
+#devdict = {"TiSph": USBAdapter(0xcacc, 0x0002)}
+#inlist = (("mikro-spektro", 5555),)
+svr = ZMQServer(USBAdapter(0xcacc, 0x0002))
 svr.run()
