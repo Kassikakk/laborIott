@@ -268,4 +268,36 @@ Nii, nüüd ZMQAdapteri mock versioon esialgselt töötab, aga mõned küsimused
 * mida teha, kui server tagant ära kukub, s.o. annab timeoudi? Kas siis peaks uuesti connectima? See ei pruugi alati hea mõte olla. 
 * See on tegelikult selles mõttes ka huvitav, et kas me saaks panna tööle kõigepealt instrumendi ja hiljem serveri? Noh, ütleme mingis sellises seisus, kus instrument saaks disconnected olekus kaua olla, nt. VI. Kas ta näiteks siis VI tasemel püüakski pidevalt reconnectida (nt. taimeri osas) või peaks seda mingi nupuga tegema? Või on vastavalt seadmele.
 
+## 240711 
+
+Panen siin ZMQ server-adapteri kaudu käima Ti-Sph laserit ja erroritel pole otsa. Em, no näiteks:
+
+* Midagi läheb siin risti wavelengthi muutmisel, aga ma isegi ei saagi hästi aru, kuidas on tagatud wavelengthi turvaline päring, kui liigutamisethread käib (äkki tsüklisse vahele mingi paus planeerida ja mingi evendiga võimaldada seda laiendada, kui vaja). Või ka muud asjad. Igatahes miski seal ei klapi. zmq ütleb nagu, et sendi ei saa saata, võib-olla ka seda tuleks uurida, et kas mingi thread ei või uuesti kutsuda, kuigi vastust pole veel saanud (äkki sinna see maandubki, kuigi probleem peaks olema ka ilma zmqta?)
+ File "c:\Users\Kristjan\Documents\laborIott\laborIott\VInst\Inhouse\TiSphVI.py", line 52, in onTimer      
+    self.wlLabel.setText("{:.2f}".format(self.tisph.wavelength))
+  File "C:\Users\Kristjan\Documents\laborIott\laborIott\instruments\Inhouse\TiSph.py", line 65, in wavelength
+    ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
+  File "C:\Users\Kristjan\Documents\laborIott\laborIott\instruments\instrument.py", line 22, in interact    
+    return self.adapter.interact(command, **kwargs)
+  File "C:\Users\Kristjan\Documents\laborIott\laborIott\adapters\ver2\ZMQAdapter.py", line 70, in interact  
+    ret = self.send_recv(comm['interact'], command)
+  File "C:\Users\Kristjan\Documents\laborIott\laborIott\adapters\ver2\ZMQAdapter.py", line 92, in send_recv 
+    self.sock.send_pyobj(request)
+  File "C:\Program Files (x86)\Python3\lib\site-packages\zmq\sugar\socket.py", line 873, in send_pyobj      
+    return self.send(msg, flags=flags, **kwargs)
+  File "C:\Program Files (x86)\Python3\lib\site-packages\zmq\sugar\socket.py", line 618, in send
+    return super().send(data, flags=flags, copy=copy, track=track)
+  File "zmq\backend\cython\socket.pyx", line 740, in zmq.backend.cython.socket.Socket.send
+  File "zmq\backend\cython\socket.pyx", line 787, in zmq.backend.cython.socket.Socket.send
+  File "zmq\backend\cython\socket.pyx", line 249, in zmq.backend.cython.socket._send_copy
+  File "zmq\backend\cython\socket.pyx", line 244, in zmq.backend.cython.socket._send_copy
+  File "zmq\backend\cython\checkrc.pxd", line 28, in zmq.backend.cython.checkrc._check_rc
+zmq.error.ZMQError: Operation cannot be accomplished in current state
+
+* Siis see, et instrumendis wavelength  return (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
+IndexError: array index out of range: seda tuleks kontrollida listi pikkuse jm suhtes
+* siis üldiselt tuleks kontrollida, et kas shutter on lahti enne liigutamist (võib-olla avada) 
+* Ja siis veel see, et kui tundub, et asi ei liigu paari korraga, siis võiks järele jätta, see vist tuleks ka mingil kujul implementeerida, muidu ketrab lolliks
+* no kuskil võiks ka mingid lainepikkuse limiidid kirjas olla, aga need kipuvad muutuma peeglite nihutamisel jne.
+
 
