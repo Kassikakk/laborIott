@@ -300,4 +300,19 @@ IndexError: array index out of range: seda tuleks kontrollida listi pikkuse jm s
 * Ja siis veel see, et kui tundub, et asi ei liigu paari korraga, siis võiks järele jätta, see vist tuleks ka mingil kujul implementeerida, muidu ketrab lolliks
 * no kuskil võiks ka mingid lainepikkuse limiidid kirjas olla, aga need kipuvad muutuma peeglite nihutamisel jne.
 
+* Selline USB viga tuli ka, oleks hea dis (re)connectida
+Traceback (most recent call last):
+  File "c:\Users\Admin\Documents\laborIott\laborIott\server\ver2\TiSphServer.py", line 10, in <module>
+    svr.run()
+  File "C:\Users\Admin\Documents\laborIott\laborIott\server\ver2\ZMQServer.py", line 48, in run       
+    reply = self.adapter.interact(request[1])
+    ret = self.conn.ctrl_transfer(0xc0, *command )#bReq, wVal, wIndex, len)
+  File "C:\Program Files (x86)\Python\lib\site-packages\usb\core.py", line 1082, in ctrl_transfer
+    ret = self._ctx.backend.ctrl_transfer(
+  File "C:\Program Files (x86)\Python\lib\site-packages\usb\backend\libusb0.py", line 601, in ctrl_transfer
+    return _check(_lib.usb_control_msg(
+  File "C:\Program Files (x86)\Python\lib\site-packages\usb\backend\libusb0.py", line 447, in _check
+    raise USBError(errmsg, ret)
+usb.core.USBError: [Errno None] b'libusb0-dll:err [control_msg] sending control message failed, win error: A device attached to the system is not functioning.\r\n\n'
+
 
