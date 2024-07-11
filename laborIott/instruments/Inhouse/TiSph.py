@@ -72,6 +72,8 @@ class TiSph(Instrument):
 			return
 		#also if already there
 		if(abs(value - self.wavelength) < self.prec):
+			print("release")
+			self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
 			return
 		#first check if the current wl is already 
 		# within precision
