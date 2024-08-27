@@ -76,7 +76,7 @@ class TiSph(Instrument):
 	def wavelength(self):
 		#check here that nobody is accessing?
 		ret = self.interwrap([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
-		return (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
+		return 0 if ret is None else (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
 	
 	@wavelength.setter
 	def wavelength(self, value):

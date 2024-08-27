@@ -102,6 +102,7 @@ class VInst(QtWidgets.QMainWindow):
 		inport = zmqSection.getint('inport',5555)
 		outport = zmqSection.getint('outport',inport)
 		#return ZMQAdapter(refname, address, inport, outport)
+		print(address, inport)
 		return ZMQAdapter(address, inport) #uus ver
 
 	def setEnable(self, state):

@@ -1,8 +1,10 @@
 from laborIott.instruments.Inhouse.TiSph import TiSph
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
+from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 from time import sleep
 
-tisph = TiSph(USBAdapter(0xcacc, 0x0002))
+#tisph = TiSph(USBAdapter(0xcacc, 0x0002))
+tisph = TiSph(ZMQAdapter('jobinyvon', 5555))
 print(tisph.wavelength)
 tisph.shutter = 'open'
 sleep(1)
