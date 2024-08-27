@@ -40,11 +40,12 @@ class TiSph(Instrument):
 		#try a wrapper to thread sync here
 		self.linefree.wait()
 		self.linefree.clear()
-		#print("entering", command)
-		self.interact(command)
-		#print("->exiting", command)
+		print("entering", command)
+		ret = self.interact(command)
+		print("->exiting", command)
 
 		self.linefree.set()
+		return ret
 
 	def move(self, value):
 		#thread function for moving
