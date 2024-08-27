@@ -23,6 +23,8 @@ class TiSph(Instrument):
 		self.nmperstep = 0.0205 #0.039
 		self.noReps = 10
 		self.moving = Event()
+		self.linefree = Event()
+		self.linefree.set()
 
 
 	#I would say mostly connect-disconnect should be fine from the base
@@ -34,7 +36,18 @@ class TiSph(Instrument):
 	#speed
 	#shutter
 
+	def interwrap(self, command):
+		#try a wrapper to thread sync here
+		self.linefree.wait()
+		self.linefree.clear()
+		#print("entering", command)
+		self.interact(command)
+		#print("->exiting", command)
+
+		self.linefree.set()
+
 	def move(self, value):
+		#thread function for moving
 		for i in range(self.noReps):
 			#find number of steps
 			wl = self.wavelength
@@ -45,24 +58,24 @@ class TiSph(Instrument):
 			print(i, wl, diff, steps)
 			#maybe there could also be some sanity check if we are still too far after the first round?
 			#set the motion & wait
-			self.interact([requests['REQ_SET_DELTA'], steps, 0, 1])
-			while self.interact([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
+			self.interwrap([requests['REQ_SET_DELTA'], steps, 0, 1])
+			while self.interwrap([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
 				if not self.moving.is_set():
 					break
 				sleep(0.2) #let's not cause a heavy traffic
 			if not self.moving.is_set():
 				#stop the motion here
-				self.interact([requests['REQ_STOP'], 0, 0, 1])
+				self.interwrap([requests['REQ_STOP'], 0, 0, 1])
 				break
 			sleep(1) #We need time to let the wavemeter settle
-		self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
+		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 		self.moving.clear()
 
 
 	@property
 	def wavelength(self):
 		#check here that nobody is accessing?
-		ret = self.interact([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
+		ret = self.interwrap([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
 		return (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
 	
 	@wavelength.setter
@@ -73,7 +86,7 @@ class TiSph(Instrument):
 		#also if already there
 		if(abs(value - self.wavelength) < self.prec):
 			print("release")
-			self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
+			self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 			return
 		#first check if the current wl is already 
 		# within precision
@@ -101,7 +114,7 @@ class TiSph(Instrument):
 			ind = ('closed','open').index(val)
 		except ValueError:
 			return
-		ret = self.interact([requests['REQ_SET_DIGI_OUT'], ind, 0, 1])
+		ret = self.interwrap([requests['REQ_SET_DIGI_OUT'], ind, 0, 1])
 		#think how to handle the ret value if not connected
 		#well it should in general return a list, right?
 		if ret is not None:
@@ -109,12 +122,12 @@ class TiSph(Instrument):
 
 	@property
 	def speed(self):
-		ret = self.interact([requests['REQ_GET_SPEED'], 0, 0, 2])
+		ret = self.interwrap([requests['REQ_GET_SPEED'], 0, 0, 2])
 		return ret[0] + 256 * ret[1]
 	
 	@speed.setter
 	def speed(self, value):
-		ret = self.interact([requests['REQ_SET_SPEED'], value, 0, 1])
+		ret = self.interwrap([requests['REQ_SET_SPEED'], value, 0, 1])
 
 	@property
 	def status(self):
@@ -126,7 +139,7 @@ class TiSph(Instrument):
 			self.moving.clear()
 		elif value == 'release':
 			if not self.moving.is_set():
-				self.interact([requests['REQ_SET_RELEASE'], 0, 0, 1])
+				self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 
 
 	

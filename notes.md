@@ -316,3 +316,12 @@ Traceback (most recent call last):
 usb.core.USBError: [Errno None] b'libusb0-dll:err [control_msg] sending control message failed, win error: A device attached to the system is not functioning.\r\n\n'
 
 
+## 240827
+
+See viga arvatavasti tuleb sellest, et instrument (TiSph) kasutab täiendavat threadi liigutamiseks ja see peab muidugi vahepeal wavelengthi querima. Samas teeb seda regulaarselt ka VI timer proc ja ilmselt nad aeg-ajalt lähevad konflikti. Äm..eks siis tuleb panna mingi thread sync mehhanism paika, näiteks üks Event, mida saab alati oodata, enne kui midagi usbist queerima hakata ja enne siis ta ka püsti panna + pärast maha võtta. Küsimus on siin ainult, et kui kaugele see sync element selles käsuliinis nihutada. Kus seda siis teha annaks:
+
+* konkreetse(te) parameetri(te) kontekstis: ümber iga self.interacti kutsumise, aga see tundub liiga spetsiifiline.
+* konkreetses instrumendis üldisemalt: wrapper ümber self.interacti. (kas connect-disconnect omavad siin mingit tähendust?)
+* (instrumendi baasklassis? - ma ei tea, kas selle kutsumine on kohustuslik ja isegi kui seda selliseks teha, siis vist seal on tegevusi enne ja pärast põhitegevust, kuidas seda rakendada?)
+* konkreetses adapteris - Oot seda ongi siin ju püütud teha, aga kas siin tekib mingi probleem seoses sellega, et adapter võib töötada teisel pool võrguühendust? Ehk siis, et ZMQAdapter ei ole sellise mehhanismiga ühilduv? Kas ikka on nii. Kuigi tundub imelik, et sel juhul asi jõuab ctrl_transferini ikkagi.
+* (adapteri baasklassis on vist sama probleem kui instrumendiga)
