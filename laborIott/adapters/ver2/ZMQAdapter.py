@@ -25,6 +25,9 @@ class ZMQAdapter(Adapter):
 		self.repeat = 10 #reconnections before giving up
 		self.context = zmq.Context()
 		self.socket = None #set in the connect
+		#We don't want to cross sendings from different threads possibly
+		self.clear_to_send = Event()
+		self.clear_to_send.set()
 		
 
 		
@@ -67,7 +70,11 @@ class ZMQAdapter(Adapter):
 		performs (generally) a two-way interaction and should return a list of results
 		interpreting the list is up to the instrument
 		"""
+		#take care to not cross the sendings
+		self.clear_to_send.wait()
+		self.clear_to_send.clear()
 		ret = self.send_recv(comm['interact'], command)
+		self.clear_to_send.set()
 		if ret is None:
 			return []
 		return ret

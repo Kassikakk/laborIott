@@ -38,11 +38,12 @@ class TiSph(Instrument):
 
 	def interwrap(self, command):
 		#try a wrapper to thread sync here
+		#we also try to do it in the adapter
 		self.linefree.wait()
 		self.linefree.clear()
-		print("entering", command)
+		#print("entering", command)
 		ret = self.interact(command)
-		print("->exiting", command)
+		#print("->exiting", command)
 
 		self.linefree.set()
 		return ret
@@ -68,6 +69,11 @@ class TiSph(Instrument):
 				#stop the motion here
 				self.interwrap([requests['REQ_STOP'], 0, 0, 1])
 				break
+			if i == 0:
+				#check if we actually moved at least more than half of what we should have
+				if abs(self.wavelength - value) > diff/2:
+					#something wrong here, let's not break the machinery
+					break
 			sleep(1) #We need time to let the wavemeter settle
 		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 		self.moving.clear()

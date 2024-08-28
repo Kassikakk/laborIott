@@ -32,15 +32,16 @@ class TiSph_VI(VInst):
 		
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
-		self.dsbl += [self.goWlButt, self.shutButt, self.setSpButt]
+		self.dsbl += [self.goWlButt, self.shutButt, self.setSpButt, self.motRelButt]
 		self.wlEdit.setText("{:.2f}".format(self.tisph.wavelength))
-		
+		self.shutButt.setChecked(self.tisph.shutter == 'open')
 
 
 		#konnektid
 		self.goWlButt.clicked.connect(lambda: self.gotoWL(self.wlEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
 		self.setSpButt.clicked.connect(lambda: self.setSpeed(self.spEdit.text()))
+		self.motRelButt.clicked.connect(self.releaseMotor)
 		
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.onTimer)
@@ -63,8 +64,16 @@ class TiSph_VI(VInst):
 	def gotoWL(self,newWL):
 		#oot aga nüüd ma mõtlen, et seda (vist) peaks saama ka väljast kutsuda, et kas siis anda talle optsionaalselt mingi pärameeter ka, et kui on, siis kasutatakse või.
 		if not self.WLreached.isSet(): #should be greyed, though
+			#we could develop a 'stop' routine here
 			return
 		#also, here the status of the shutter should be checked; if closed, we won't get any feedback so the process is doomed
+		if self.tisph.shutter == 'closed':
+			if (QtWidgets.QMessageBox.information(self, "NB!", "The shutter is closed. Open?",
+			QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel) == QtWidgets.QMessageBox.StandardButton.Ok):
+				self.tisph.shutter = 'open'
+				self.shutButt.setChecked(True)
+			else:
+				return
 		try:
 			newWL = float(newWL)
 		except ValueError:
@@ -86,6 +95,10 @@ class TiSph_VI(VInst):
 			return #probably a messagebox should do here
 		self.tisph.speed = newSp
 		self.spEdit.setText("{:.1f}".format(self.tisph.speed))
+	
+	def releaseMotor(self):
+		#force release motor (done automatically during normal ops)
+		self.tisph.status = 'release'
 		
 
 
