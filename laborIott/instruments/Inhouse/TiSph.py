@@ -71,8 +71,9 @@ class TiSph(Instrument):
 				break
 			if i == 0:
 				#check if we actually moved at least more than half of what we should have
-				if abs(self.wavelength - value) > diff/2:
+				if abs(self.wavelength - value) > abs(diff/2):
 					#something wrong here, let's not break the machinery
+					print("exit via ketrusprotect")
 					break
 			sleep(1) #We need time to let the wavemeter settle
 		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
@@ -112,7 +113,7 @@ class TiSph(Instrument):
 	@property
 	def shutter(self):
 		#we should get a GET_DIGI_OUT request, though.
-		return ('closed','open')[self.shut] if self.conn is not None  else None
+		return ('closed','open')[self.shut] if self.connected is not None  else None
 
 	@shutter.setter
 	def shutter(self, val):
