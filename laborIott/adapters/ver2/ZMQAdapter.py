@@ -1,6 +1,7 @@
 import pickle
 import zmq
 from laborIott.adapters.adapter import Adapter
+from threading import Event
 
 comm = {'connect': 0, 'interact': 1, 'disconnect': 2, 'echo': 3}
 
