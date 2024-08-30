@@ -325,3 +325,7 @@ See viga arvatavasti tuleb sellest, et instrument (TiSph) kasutab täiendavat th
 * (instrumendi baasklassis? - ma ei tea, kas selle kutsumine on kohustuslik ja isegi kui seda selliseks teha, siis vist seal on tegevusi enne ja pärast põhitegevust, kuidas seda rakendada?)
 * konkreetses adapteris - Oot seda ongi siin ju püütud teha, aga kas siin tekib mingi probleem seoses sellega, et adapter võib töötada teisel pool võrguühendust? Ehk siis, et ZMQAdapter ei ole sellise mehhanismiga ühilduv? Kas ikka on nii. Kuigi tundub imelik, et sel juhul asi jõuab ctrl_transferini ikkagi. Ei tegelikult vist see oli mingil muul hetkel, ZMQAdapteris tekkis mingi sendi probleem (arusaadav ka, sest sünkimata send ja receive lähevad seal risti). Kui seal üle teha, siis võib-olla võiks adapteri variant jäädagi?
 * (adapteri baasklassis on vist sama probleem kui instrumendiga)
+
+## 240830
+
+Heakene küll, aga nüüd peaks selle protseduuride tekitamise natuke paremini läbi mõtlema.
