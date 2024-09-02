@@ -328,4 +328,16 @@ See viga arvatavasti tuleb sellest, et instrument (TiSph) kasutab täiendavat th
 
 ## 240830
 
-Heakene küll, aga nüüd peaks selle protseduuride tekitamise natuke paremini läbi mõtlema.
+Heakene küll, aga nüüd peaks selle protseduuride tekitamise natuke paremini läbi mõtlema. Mis siin praegu õieti problemaatilist on?
+
+* Kuidagi see signaalide tekitamine on veidi random, aga ega siin head mõtet ka ei ole, kuidas seda teistmoodi teha
+* Baasklassi(de) peale võiks mõelda. Samas see protseduur võiks põhimõtteliselt ka olla midagi lihtsamat, mis alati ei kaasa threadi ja võib-olla ka dialoogi isegi.
+	* mõtle, mida baasklassis võiks teha? ini töötlemine ja vastavate importide ja võib-olla ka connectide tekitamine oleks ju küll kasulik
+* No tegelikult setup ja konfimine on midagi, mis võib-olla enim probleeme tekitab. Mingi ini fail ja siis sealt määrdub, kas ja mis tüüpi seadmeid kasutatakse. Selleks tuleks õieti kõik võimalikud seadmed välja mõelda ja nad siis niimoodi sisse kirjutada, et neid võib ka mitte olla. Muidugi võiks ka olla võimalus lisamiseks. Ja mingid muud parameetrid (arv, algseisund) ka muidugi.
+
+Üldiselt tuleks sellele Excit protseduurile nüüd üks paras overhaul teha, arvestades, et seal pole TiSph allikat, on uus standard jne, aga arvestades kogemuste teel kogunenud kogemust, et mida ja kuidas on vaja teha. Ja ehk  õnnestub ka main window enam-vähem samaks jätta.
+Ma ei tea, see protseduuride värk on alati üsna spetsiifiline, kas siin õnnestubki väga palju midagi standardiseerida? Salvestamine on siin üsna standard, kas sellest saaks midagi ühildada? Tegelikult saaks ilmselt seda VInst põhiklassi kasutada või siis see kaheks jaotada, seal on nii salvestamine kui ka ini parseldamine - tegelikult jah, ainult ZMQAdapteri valimine on seal hetkel päris mitterelevantne asi, muu ilmselt kulub ehk äragi, ini faili lokatsiooni võiks ehk täpsustada. Vaatame, kas on teda üldse vaja jaotada. Või siis folderstruktuuri mõttes?
+
+Vahepeal tuletan meelde ka parameetrite loggingut! Kusagil sai sellega juba algust tehtud.
+
+Kuidas siin minna, breagime down seda olemasolevat struktuuri:
