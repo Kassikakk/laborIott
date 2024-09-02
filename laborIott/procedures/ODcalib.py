@@ -15,12 +15,13 @@ import numpy as np
 from math import log10
 
 usbio = USBIO(USBAdapter(0xcacc, 0x0004))
-pwrmtr = Newport1830.Newport1830(SDKAdapter("../Inst/usbdll", False))
+pwrmtr = Newport1830.Newport1830(SDKAdapter("../Newport1830/Inst/usbdll", False)) #Miks ei leia System32st?
 
+pwrmtr.wl = 400
 usbio.freq1 = 300
-usbio.duty1 = 1500
+usbio.OD = 1500
 
-ref = measpwr()
+
 
 def measpwr():
 	pow = []
@@ -29,10 +30,12 @@ def measpwr():
 		sleep(0.05)
 	return np.mean(pow)
 
+ref = measpwr()
 
 for duty in range(1500,8000,500):
-	usbio.duty1 = duty
+	usbio.OD = duty
 	sleep(1)
 	sig = measpwr()
-	print('{}	{}	{}'.format(duty, sig, log10(sig/ref)))
+	print('{}	{}	{}'.format(duty, sig, log10(ref/sig)))
 
+usbio.OD = 1500
