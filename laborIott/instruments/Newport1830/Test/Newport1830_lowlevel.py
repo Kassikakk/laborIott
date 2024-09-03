@@ -2,6 +2,8 @@ from ctypes import windll, c_char_p, c_ulong, create_string_buffer, byref, c_dou
 
 
 dll = windll.LoadLibrary("../Inst/usbdll")
+#dll = windll.LoadLibrary("C:/Windows/System32/usbdll")
+#dll = windll.LoadLibrary("usbdll")
 buflen = 128 #sellest pikemaid stringe küll ei tule
 buf = create_string_buffer(buflen)
 bread = c_ulong()
