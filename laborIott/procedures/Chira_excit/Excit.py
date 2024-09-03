@@ -7,6 +7,7 @@ from time import sleep, time
 from scipy.interpolate import interp1d
 import numpy as np
 import pandas as pd
+import importlib as imlb
 
 from laborIott.procedures.VProc import VProc #või no tegelikult...
 
@@ -23,7 +24,12 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		super().__init__(localPath('Excit.ui'))
 
 		#parse ini file to define the instruments
-
+		instr_conf = self.getConfigSection("Instruments")
+		if "source" in instr_conf:
+			m = imlb.import_module(*instr_conf["source"]) #suppose it's a list of [location,module]
+			self.source = getattr()
+		self.spectrom = None
+		self.powerm = None
 
 
 		self.scanning = Event()
