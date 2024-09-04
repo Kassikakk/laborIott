@@ -25,11 +25,16 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 		#parse ini file to define the instruments
 		instr_conf = self.getConfigSection("Instruments")
-		if "source" in instr_conf:
-			m = imlb.import_module(*instr_conf["source"]) #suppose it's a list of [location,module]
-			self.source = getattr()
-		self.spectrom = None
-		self.powerm = None
+		instr_list = ['source','spectrom', 'powerm'] #and so on
+		for instr_name in instr_list:
+			if instr_name in instr_conf:
+				m = imlb.import_module('laborIott.instruments.'  + instr_conf[instr_name][0]) #suppose it's a list of [location,module]
+				astr  = "getattr(m,instr_conf['{}'][1])".format(instr_name)
+				#ka seda võiks try-da ja kui ei leia, siis None
+			else:
+				astr = 'None'
+			exec('self.{} = '.format(instr_name) + astr)
+		#we should now have self.source, self.spectrom and so on
 
 
 		self.scanning = Event()
@@ -46,7 +51,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 	def setEnable(self, state):
 		super().setEnable(state)
-		#do extra enablements according to what is present
+		#do extra enablements according to what is present + state
 		if not scanstate:
 			self.pwrTimeEdit.setEnabled(self.pwrChk.isChecked() and not self.spcChk.isChecked())
 			self.powerRefCur.setEnabled(self.pwrChk.isChecked())
@@ -54,3 +59,5 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerRefCur.setChecked(True)
 			if (not self.pwrChk.isChecked() and self.powerRefCur.isChecked()):
 				self.powerRefNone.setChecked(True)
+
+	
