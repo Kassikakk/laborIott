@@ -24,16 +24,23 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		super().__init__(localPath('Excit.ui'))
 
 		#parse ini file to define the instruments
-		instr_conf = self.getConfigSection("Instruments")
-		instr_list = ['source','spectrom', 'powerm'] #and so on
+		instr_conf = self.getConfigSection("VInst", "Excit")
+		instr_list = ['exsrc','spectrom', 'powerm','attnr','spectro2','positnr'] #and so on
 		for instr_name in instr_list:
-			if instr_name in instr_conf:
-				m = imlb.import_module('laborIott.instruments.'  + instr_conf[instr_name][0]) #suppose it's a list of [location,module]
-				astr  = "getattr(m,instr_conf['{}'][1])".format(instr_name)
-				#ka seda võiks try-da ja kui ei leia, siis None
-			else:
-				astr = 'None'
+			astr = 'None'
+			if instr_conf and (instr_name in instr_conf):
+				#we should have something comma separated here
+				module = instr_conf[instr_name].split(',')
+				if len(module) >= 2:
+					try:
+						m = imlb.import_module('laborIott.'  + module[0]) #suppose it's a list of [location,module]
+						astr  = "getattr(m,module[1])()"
+					except ModuleNotFoundError:
+						#pass # astr remains None if module not found
+						print('laborIott.'  + module[0])
 			exec('self.{} = '.format(instr_name) + astr)
+			if astr != 'None':
+				exec('self.{}.show()'.format(instr_name))
 		#we should now have self.source, self.spectrom and so on
 
 
@@ -52,7 +59,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 	def setEnable(self, state):
 		super().setEnable(state)
 		#do extra enablements according to what is present + state
-		if not scanstate:
+		if not state:
 			self.pwrTimeEdit.setEnabled(self.pwrChk.isChecked() and not self.spcChk.isChecked())
 			self.powerRefCur.setEnabled(self.pwrChk.isChecked())
 			if (self.pwrChk.isChecked() and self.powerRefNone.isChecked()):
@@ -61,3 +68,16 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerRefNone.setChecked(True)
 
 	
+
+
+
+
+if __name__ == '__main__':
+	if not QtWidgets.QApplication.instance():
+		app = QtWidgets.QApplication(sys.argv)
+	else:
+		app = QtWidgets.QApplication.instance()
+	
+	window = ExcitProc()
+	window.show()
+	sys.exit(app.exec_())

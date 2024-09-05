@@ -31,7 +31,7 @@ class Visual(QtWidgets.QMainWindow):
 	'''
 
 	def __init__(self, uifile):
-		super(VInst, self).__init__()
+		super().__init__()
 		uic.loadUi(uifile, self) #should we do localPath here or ?
 		#we can determine some widgets here
 		#probably zip will be added
