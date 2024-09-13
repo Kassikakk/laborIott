@@ -1,5 +1,6 @@
 from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 from laborIott.visual import Visual
+from PyQt6 import QtWidgets
 
 
 
@@ -17,6 +18,13 @@ class VInst(Visual):
 
 	def __init__(self, uifile):
 		super().__init__(uifile)
+
+		self.instrum = None #placeholder for the underlying instrument
+
+		self.connButt = self.findChild(QtWidgets.QPushButton, 'connButt')
+		if self.connButt is not None:
+			self.connButt.clicked.connect(self.onConn)
+			self.dsbl += [self.connButt]
 		
 
 	def getConfigSection(self, section, refname):
@@ -50,6 +58,18 @@ class VInst(Visual):
 		outport = zmqSection.getint('outport',inport)
 		
 		return ZMQAdapter(address, inport) #uus ver
+
+	def onConn(self):
+
+		if self.connButt.isChecked():
+			self.instrum.disconnect()
+		else:
+			self.instrum.connect()
+		self.setConnButtState()
+
+	def setConnButtState(self):
+		self.connButt.setChecked(self.instrum.connected)
+		self.connButt.setStyleSheet("color: red" if  self.instrum.connected else "color: black")
 
 
 

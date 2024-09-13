@@ -30,70 +30,65 @@ class USBIO(Instrument):
 	
 	def getpin(self, pinno):
 		if (pinno >= 0) and (pinno < 11):
-			return self.interact([requests['REQ_GET_PINS'],0,pinno,1])[0]
+			ret = self.interact([requests['REQ_GET_PINS'],0,pinno,1])
+			return -1 if ret is None else ret[0]
 
 	def setpin(self, pinno, val):
 		if (pinno >= 0) and (pinno < 7):
-			return self.interact([requests['REQ_SET_PINS'],(val != 0),pinno,1])[0]
+			self.interact([requests['REQ_SET_PINS'],(val != 0),pinno,1])
 
 	@property
 	def freq1(self):
 		#freq1 is the frequency for PWM 0 and 1
 		ret = self.interact([requests['REQ_GET_PWM_FRQ'],0,1,2])
-		return ret[0] + ret[1]*256
+		return -1 if ret is None else ret[0] + ret[1]*256
 	
 	@freq1.setter
 	def freq1(self, value):
 		if value > 0:
-			return self.interact([requests['REQ_SET_PWM_FRQ'],value,1,1])[0]
-		else:
-			return -1
+			self.interact([requests['REQ_SET_PWM_FRQ'],value,1,1])
+		
 
 	@property
 	def freq2(self):
 		#freq2 is the frequency for PWM 2
 		ret = self.interact([requests['REQ_GET_PWM_FRQ'],0,2,2])
-		return ret[0] + ret[1]*256
+		return -1 if ret is None else ret[0] + ret[1]*256
 	
 	@freq2.setter
 	def freq2(self, value):
 		if value > 0:
-			return self.interact([requests['REQ_SET_PWM_FRQ'],value,2,1])[0]
-		else:
-			return -1
+			self.interact([requests['REQ_SET_PWM_FRQ'],value,2,1])
+		
 
 	@property
 	def OD(self):
 		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,0,2])
-		return ret[0] + ret[1]*256
+		return -1 if ret is None else ret[0] + ret[1]*256
 	
 	@OD.setter
 	def OD(self, value):
 		if value > 0:
-			return self.interact([requests['REQ_SET_PWM_DUTY'],value,0,1])[0]
-		else:
-			return -1
+			self.interact([requests['REQ_SET_PWM_DUTY'],value,0,1])
+		
 
 	@property
 	def duty1(self):
 		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,1,2])
-		return ret[0] + ret[1]*256
+		return -1 if ret is None else ret[0] + ret[1]*256
 	
 	@duty1.setter
 	def duty1(self, value):
 		if value > 0:
-			return self.interact([requests['REQ_SET_PWM_DUTY'],value,1,1])[0]
-		else:
-			return -1
+			self.interact([requests['REQ_SET_PWM_DUTY'],value,1,1])
+		
 	
 	@property
 	def duty2(self):
 		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,2,2])
-		return ret[0] + ret[1]*256
+		return -1 if ret is None else ret[0] + ret[1]*256
 	
 	@duty2.setter
 	def duty2(self, value):
 		if value > 0:
-			return self.interact([requests['REQ_SET_PWM_DUTY'],value,2,1])[0]
-		else:
-			return -1
+			self.interact([requests['REQ_SET_PWM_DUTY'],value,2,1])

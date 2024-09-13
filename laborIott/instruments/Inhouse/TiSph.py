@@ -61,10 +61,13 @@ class TiSph(Instrument):
 			#maybe there could also be some sanity check if we are still too far after the first round?
 			#set the motion & wait
 			self.interwrap([requests['REQ_SET_DELTA'], steps, 0, 1])
-			while self.interwrap([requests['REQ_SET_DELTA'], 0, 0, 1])[0] ==1:
+			not_there = True
+			while not_there:
 				if not self.moving.is_set():
 					break
 				sleep(0.2) #let's not cause a heavy traffic
+				ret = self.interwrap([requests['REQ_SET_DELTA'], 0, 0, 1])
+				not_there = False if ret is None else (ret[0] == 1)
 			if not self.moving.is_set():
 				#stop the motion here
 				self.interwrap([requests['REQ_STOP'], 0, 0, 1])
@@ -131,7 +134,7 @@ class TiSph(Instrument):
 	@property
 	def speed(self):
 		ret = self.interwrap([requests['REQ_GET_SPEED'], 0, 0, 2])
-		return ret[0] + 256 * ret[1]
+		return -1 if ret is None else ret[0] + 256 * ret[1]
 	
 	@speed.setter
 	def speed(self, value):

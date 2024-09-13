@@ -1,6 +1,6 @@
 
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
@@ -22,7 +22,7 @@ class USBIO_VI(VInst):
 		adapter = self.getZMQAdapter('USBIO')
 		if adapter is None:
 			adapter = USBAdapter(0xcacc, 0x0004)
-		self.usbio = USBIO(adapter)
+		self.instrum = USBIO(adapter)
 		
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
@@ -34,7 +34,7 @@ class USBIO_VI(VInst):
 		#konnektid
 		self.ODButt.clicked.connect(lambda: self.setOD(self.ODEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
-		self.usbio.freq1 = 300
+		self.instrum.freq1 = 300
 		
 		
 		self.timer = QtCore.QTimer()
@@ -44,15 +44,21 @@ class USBIO_VI(VInst):
 		
 	def onTimer(self):
 		#handle goingtoWL
-		self.ODLabel.setText("{}".format(self.usbio.OD))
+		self.ODLabel.setText("{}".format(self.instrum.OD))
+		self.setConnButtState()
 
 						
 		
 	def setOD(self,newOD):
-		self.usbio.OD = int(self.ODEdit.text())
+		#siin nüüd teha midagi
+		try:
+			newOD = int(newOD)
+		except ValueError:
+			return
+		self.instrum.OD = int(newOD)
 		
 	def setShutter(self, openit):
-		self.usbio.setpin(0,int(openit))
+		self.instrum.setpin(0,int(openit))
 		#self.tisph.shutter =  'open' if openit else 'closed'
 
 	
@@ -70,4 +76,4 @@ if __name__ == '__main__':
 	#	
 	window = USBIO_VI()
 	window.show()
-	sys.exit(app.exec_())
+	sys.exit(app.exec())

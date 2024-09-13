@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic
 import pandas as pd
 import userpaths
 import configparser as cp

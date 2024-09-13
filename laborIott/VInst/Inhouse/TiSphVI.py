@@ -1,6 +1,6 @@
 
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt6 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
@@ -22,9 +22,9 @@ class TiSph_VI(VInst):
 		adapter = self.getZMQAdapter('TiSph')
 		if adapter is None:
 			adapter = USBAdapter(0xcacc, 0x0002)
-		self.tisph = TiSph(adapter)
+		self.instrum = TiSph(adapter)
 		
-		self.tisph.speed = 50
+		self.instrum.speed = 50
 
 		self.WLreached = Event()
 		self.WLreached.set()
@@ -33,8 +33,8 @@ class TiSph_VI(VInst):
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
 		self.dsbl += [self.goWlButt, self.shutButt, self.setSpButt, self.motRelButt]
-		self.wlEdit.setText("{:.2f}".format(self.tisph.wavelength))
-		self.shutButt.setChecked(self.tisph.shutter == 'open')
+		self.wlEdit.setText("{:.2f}".format(self.instrum.wavelength))
+		self.shutButt.setChecked(self.instrum.shutter == 'open')
 
 
 		#konnektid
@@ -50,11 +50,11 @@ class TiSph_VI(VInst):
 		
 	def onTimer(self):
 		#handle goingtoWL
-		self.wlLabel.setText("{:.2f}".format(self.tisph.wavelength))
+		self.wlLabel.setText("{:.2f}".format(self.instrum.wavelength))
 		if not self.WLreached.is_set():
 			#check arrival
 			self.wlLabel.setStyleSheet("color: red")
-			if self.tisph.status == 'stopped':
+			if self.instrum.status == 'stopped':
 				if not self.external:
 					self.setEnable(True)
 				self.WLreached.set()
@@ -67,10 +67,10 @@ class TiSph_VI(VInst):
 			#we could develop a 'stop' routine here
 			return
 		#also, here the status of the shutter should be checked; if closed, we won't get any feedback so the process is doomed
-		if self.tisph.shutter == 'closed':
+		if self.instrum.shutter == 'closed':
 			if (QtWidgets.QMessageBox.information(self, "NB!", "The shutter is closed. Open?",
 			QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel) == QtWidgets.QMessageBox.StandardButton.Ok):
-				self.tisph.shutter = 'open'
+				self.instrum.shutter = 'open'
 				self.shutButt.setChecked(True)
 			else:
 				return
@@ -80,11 +80,11 @@ class TiSph_VI(VInst):
 			print("not floatable")
 			return #TODO: nendega midagi
 		self.setEnable(False)
-		self.tisph.wavelength = newWL
+		self.instrum.wavelength = newWL
 		self.WLreached.clear()
 		
 	def setShutter(self, openit):
-		self.tisph.shutter =  'open' if openit else 'closed'
+		self.instrum.shutter =  'open' if openit else 'closed'
 
 	def setSpeed(self, newspeed):
 		#issue a warning if a too low number is entered
@@ -93,12 +93,12 @@ class TiSph_VI(VInst):
 		except ValueError:
 			print("not floatable")
 			return #probably a messagebox should do here
-		self.tisph.speed = newSp
-		self.spEdit.setText("{:.1f}".format(self.tisph.speed))
+		self.instrum.speed = newSp
+		self.spEdit.setText("{:.1f}".format(self.instrum.speed))
 	
 	def releaseMotor(self):
 		#force release motor (done automatically during normal ops)
-		self.tisph.status = 'release'
+		self.instrum.status = 'release'
 		
 
 
@@ -113,4 +113,4 @@ if __name__ == '__main__':
 	#	
 	window = TiSph_VI()
 	window.show()
-	sys.exit(app.exec_())
+	sys.exit(app.exec())

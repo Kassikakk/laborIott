@@ -1,6 +1,6 @@
 #Hakkame välja skemeerima üldisemat excitit
 import sys, os
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from threading import Thread, Event
 from time import sleep, time
@@ -11,7 +11,6 @@ import importlib as imlb
 
 from laborIott.procedures.VProc import VProc #või no tegelikult...
 
-#kuidagi tuleks siin see instrumentide eksport, aga see vist initis
 
 def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
@@ -80,4 +79,4 @@ if __name__ == '__main__':
 	
 	window = ExcitProc()
 	window.show()
-	sys.exit(app.exec_())
+	sys.exit(app.exec())
