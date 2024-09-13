@@ -1,6 +1,6 @@
 
 import sys
-from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
@@ -76,4 +76,4 @@ if __name__ == '__main__':
 	#	
 	window = USBIO_VI()
 	window.show()
-	sys.exit(app.exec())
+	sys.exit(app.exec_())

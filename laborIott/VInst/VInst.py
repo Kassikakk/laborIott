@@ -1,6 +1,6 @@
 from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 from laborIott.visual import Visual
-from PyQt6 import QtWidgets
+from PyQt5 import QtWidgets
 
 
 
@@ -62,9 +62,11 @@ class VInst(Visual):
 	def onConn(self):
 
 		if self.connButt.isChecked():
-			self.instrum.disconnect()
-		else:
 			self.instrum.connect()
+			print("DisConnecting")
+		else:
+			self.instrum.disconnect()
+			print("Connecting")
 		self.setConnButtState()
 
 	def setConnButtState(self):
