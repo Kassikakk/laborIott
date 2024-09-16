@@ -1,6 +1,6 @@
 #Hakkame välja skemeerima üldisemat excitit
 import sys, os
-from PyQt6 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from threading import Thread, Event
 from time import sleep, time
@@ -79,4 +79,4 @@ if __name__ == '__main__':
 	
 	window = ExcitProc()
 	window.show()
-	sys.exit(app.exec())
+	sys.exit(app.exec_())

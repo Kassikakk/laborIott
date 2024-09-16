@@ -1,6 +1,6 @@
 
 import sys
-from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
@@ -63,7 +63,7 @@ class TiSph_VI(VInst):
 		
 	def gotoWL(self,newWL):
 		#oot aga nüüd ma mõtlen, et seda (vist) peaks saama ka väljast kutsuda, et kas siis anda talle optsionaalselt mingi pärameeter ka, et kui on, siis kasutatakse või.
-		if not self.WLreached.isSet(): #should be greyed, though
+		if not self.WLreached.is_set(): #should be greyed, though
 			#we could develop a 'stop' routine here
 			return
 		#also, here the status of the shutter should be checked; if closed, we won't get any feedback so the process is doomed
@@ -113,4 +113,4 @@ if __name__ == '__main__':
 	#	
 	window = TiSph_VI()
 	window.show()
-	sys.exit(app.exec())
+	sys.exit(app.exec_())
