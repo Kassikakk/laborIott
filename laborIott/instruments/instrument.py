@@ -14,10 +14,11 @@ class Instrument(object):
 	def connect(self, **kwargs):
 		try:
 			self.connected = self.adapter.connect(**kwargs)
-		except:
+		except Exception as e:
+    		# Print the error message
+			print(f"An error occurred: {e}")
 			#TODO: log error message here
-			#do we have to return from here?
-			pass
+			
 		return self.connected
 		
 	def interact(self, command, **kwargs): #exchange?
@@ -25,10 +26,11 @@ class Instrument(object):
 		if self.connected:
 			try:
 				return self.adapter.interact(command, **kwargs)
-			except:
+			except Exception as e:
 				#there is a problem with the device, disconnect
 				#if there are some specific problems, solve them in the adapter
 				#TODO: log error message here
+				print(f"An interact error: {e}")
 				self.disconnect()
 				return None
 		else:

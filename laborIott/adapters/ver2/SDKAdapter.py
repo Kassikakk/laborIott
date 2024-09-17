@@ -20,7 +20,11 @@ class SDKAdapter(Adapter):
 		# Check operating system and load library
 		# the library should be on PATH or current dir 
 		# which is not well defined so PATH it is
-		try:
+
+		#we delegate the error handling to instrument base class
+		#to see if it looks fine
+		
+		#try:
 			if platform.system() == "Linux":
 				self.conn = ctypes.cdll.LoadLibrary(self.libname) #+'.so'?
 			elif platform.system() == "Windows":
@@ -29,14 +33,18 @@ class SDKAdapter(Adapter):
 				else:
 					self.conn = ctypes.windll.LoadLibrary(self.libname)
 			return True
+			'''
 		except Exception as e:
 			#enact the logging for str(e)
+			print(f"conn err {e}")
 			self.conn = None 
 			return False
+			'''
 
 	def interact(self, command):
 		if self.conn is None:
 			return []
+		#print(command)
 		command = command.replace('c_','ctypes.c_')
 		#find the (begin, end) of byref clauses
 		matches = [match.span() for match in re.finditer('byref\(.*?\)', command)]

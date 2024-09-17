@@ -18,21 +18,23 @@ class SerialAdapter(Adapter):
 		#avoid reopening
 		if isinstance(self.conn, serial.Serial) and self.conn.is_open:
 			return True
-		try:
+		#try:
 			
 			self.conn = serial.Serial(self.port, **self.portargs)
 			if self.conn.is_open:
 				return True
 			else:
-				print("Couldn't open connection")
+				#print("Couldn't open connection")
 				self.conn = None
 				return False
+			'''
 		except Exception as e:
 			#indicate an error
 			print(str(e))
 			self.conn = None
 			return False
-	
+			'''
+				
 	def interact(self,command, waitResponse = True, **kwargs):
 		if self.conn is None:
 			return []

@@ -21,34 +21,32 @@ class IDus(Instrument):
 	def connect(self):
 		if not super().connect():
 			return False
-		self.interact(["Initialize('')"])
-		self.interact(["SetPreAmpGain(1)"])#0 - 1x, 1 - 1.7x
-		self.interact(["SetVSSpeed(3)"]) #[8.25], 16.25, 32.25, 64.25 (usec/pel)
-		#self.interact(["SetFilterMode(0)"]) #0 - no filtering; 2 - cosmic ray removal
-		self.interact(["SetTriggerMode(0)"]) #0 Internal; 1 External; 2 External Start (Fast Kin)
-		self.interact(["SetReadMode(0)"]) #0 FVB; 1 Multi-Track; 2 Random-track; 3 Single-Track; 4 Image
+		self.interact("Initialize('')")
+		self.interact("SetPreAmpGain(1)")#0 - 1x, 1 - 1.7x
+		self.interact("SetVSSpeed(3)") #[8.25], 16.25, 32.25, 64.25 (usec/pel)
+		#self.interact("SetFilterMode(0)") #0 - no filtering; 2 - cosmic ray removal
+		self.interact("SetTriggerMode(0)") #0 Internal; 1 External; 2 External Start (Fast Kin)
+		self.interact("SetReadMode(0)") #0 FVB; 1 Multi-Track; 2 Random-track; 3 Single-Track; 4 Image
 		
 
 		
 	def __del__(self):
-		self.interact(["ShutDown()"])
+		self.interact("ShutDown()")
 		
-	@property
-	def wavelengths(self):
-		return range(1024) #?laiendame seda hiljem
 	
 	@property
 	def temperature(self):
-		ret =self.interact(["GetTemperature(byref(c_int))"])
-		return ["NotConn", -1] if ret is None else self.errors[ret[0]], ret[1]
+		ret =self.interact("GetTemperature(byref(c_int))")
+		print(ret)
+		return ["NotConn", -1] if ret is None else [self.errors[ret[0]], ret[1]]
 		
 	@temperature.setter
 	def temperature(self, value):
 		if value is None:
-			self.interact(["CoolerOFF()"])
+			self.interact("CoolerOFF()")
 		elif value > -80 and value < 0:
-			self.interact(["SetTemperature(%d)" % value])
-			self.interact(["CoolerON()"])
+			self.interact("SetTemperature(%d)" % value)
+			self.interact("CoolerON()")
 	
 	@property
 	def noAccum(self):
@@ -56,7 +54,7 @@ class IDus(Instrument):
 		
 	@noAccum.setter
 	def noAccum(self, value):
-		self.interact(["SetNumberAccumulations(%d)" % value])
+		self.interact("SetNumberAccumulations(%d)" % value)
 		#siin võiks, et kui on korras, siis...
 		if self.connected:
 			self.noAccval = value
@@ -67,16 +65,27 @@ class IDus(Instrument):
 		
 	@expTime.setter
 	def expTime(self, value):
-		self.interact(["SetExposureTime(c_float(%g))" % value])
+		self.interact("SetExposureTime(c_float(%g))" % value)
 		if self.connected:
 			self.expTimeval = value
 	
+	@property
+	def shutter(self):
+		return ""
+
+	@shutter.setter
+	def shutter(self, value):
+		if value =='open':
+			self.interact("SetShutter(1,1,0,0)")
+		elif value == 'closed':
+			self.interact("SetShutter(1,2,0,0)")
 	
+	'''
 	shutter = Instrument.setting("SetShutter(1,%d, 0, 0)", """Switch shutter on/off """,
 							  validator=strict_discrete_set,
 							  values={'open': 1, 'closed': 2}, map_values=True)
 	
-	'''
+	
 	acqmode = Instrument.setting("SetAcquisitionMode(%d)", """Set acquisition mode """,
 							  validator=strict_discrete_set,
 							  values={'single': 1, 'accum': 2, 'kinetics': 3, 'fastkin': 4, 'tillabort': 5}, map_values=True)
@@ -89,33 +98,33 @@ class IDus(Instrument):
 	
 	@acqmode.setter
 	def acqmode(self, value):
-		self.interact(["SetAcquisitionMode(%d)" % self.acqmodes[value]])
+		self.interact("SetAcquisitionMode(%d)" % self.acqmodes[value])
 		if value == 'single':
-			self.interact(["SetFilterMode(0)"])
+			self.interact("SetFilterMode(0)")
 		else: #not sure if always? (only single and accum modes are really tested)
-			self.interact(["SetFilterMode(2)"])
+			self.interact("SetFilterMode(2)")
 
 
 
 
 	@property
 	def status(self):
-		ret =self.interact(["GetStatus(byref(c_int))"])
+		ret =self.interact("GetStatus(byref(c_int))")
 		return "NotConn" if ret is None else self.errors[ret[1]]
 	
 	@status.setter
 	def status(self, value):
 		if value == 'start':
-			self.interact(["StartAcquisition()"])
+			self.interact("StartAcquisition()")
 		elif value == 'abort':
-			self.interact(["AbortAcquisition()"])
+			self.interact("AbortAcquisition()")
 			
 	@property
 	def data(self):
 		
 		#err, imno = self.interact(["GetTotalNumberImagesAcquired(byref(c_int))"]) #mis sellega oli?
 		#See tegelikult ei anna õiget, imno on accum * kin (kui aborditud, siis vähem); peab vaatama, kuidas see õigesti välja nuputada.
-		ret = self.interact(["GetAcquiredData(byref(c_int*%d), %d)" % (self.dim, self.dim)])
+		ret = self.interact("GetAcquiredData(byref(c_int*%d), %d)" % (self.dim, self.dim))
 		if ret is not None:
 			err, out = ret
 		else:

@@ -347,3 +347,15 @@ Siin on nüüd järgmine küsimus connectediga majandamise kohta. Kus sellega tu
 Üks test võiks olla see, et kui (V)instrument panna tööle arvutis, kus pole ei seadet ega mingit draiveritki, siis ei tohiks erroreid pilduda. No praegu mõnedki seadmed seda teevad. Ühesõnaga, kui interacti kutsutakse, siis peaks kindlaks tegema, et on connected enne kui midagi kutsuda - ei, aga see toimubki. Asi on returnis. Kui pole connected, siis tagastatakse None. Nüüd instrument tahab seda kohe indekseerima hakata ja sealt tulebki error. 
 
 Võib-olla siis nii. Instrumendi gettivad osad chekivad returni ja kui see on None, siis otsustatakse, mis default value saata (see võib ka None olla, aga pigem miski, mis vinsti ja protseduure hulluks ei aja, ehk siis võimalusel midagi samatüübilist kui peakski). Siis, instrument tryb adapteri calli ja vea ilmnedes kutsub disconnecti. See omakorda võtab connecti maha ja kutsub adapteri disconnecti, aga seda ka try-ga, lastes errorid üldiselt läbi, aga need võiks mingile log ekraanile siiski ilmuda. Kas see oleks normaalne? Ilmselt peaks try olema siis ka connectis kui sellises, et mingite driverite puudus vms. ei ajaks jällegi asja hulluks.
+
+# 240917
+
+Siin tekib jälle küsimusi üldiste standardite osas. 
+
+* kas interacti parameeter peab tingimata list olema, tegelikult ju igasugune objekt peaks sealt läbi minema?
+* kas võiks veel ühe parameetri panna dummy valueks, (defauldiga None), mille dikteeriks instrument ja mis vea tekkimisel teda (või VInsti näiteks) hulluks ei ajaks?
+* kas tegelikult oli veel kuskil mingeid parameetreid vaja panna (et tekitaks full **kwargsi toetuse) või on tegemist keerulisusega? SerialAdapteril oli, et kas oodata vastust või mitte.
+
+Asi see, et SDKAdapteri korral on parameetriks tavaliselt lihtsalt string. Ok las praegu olla siis list õmber, aga üldiselt võiks selle vist maha võtta.
+
+See ka, et äkki ei paneks siis adapterisse mingeid try:sid, vaid pigem laseks sellel instrumendi põhiklassis exceptida, oleks üks koht. --oot, aga kuidas see läbi ZMQAdapteri levib? Seda peab paremini mõtlema.
