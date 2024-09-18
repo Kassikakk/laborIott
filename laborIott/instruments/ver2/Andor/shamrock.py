@@ -18,21 +18,21 @@ class Shamrock(Instrument):
 		
 
 	def __del__(self):
-		self.interact(["ShamrockClose()"])
+		self.interact("ShamrockClose()")
 
 	def connect(self):
 		if not super().connect():
 			return False
 		
-		self.interact(["ShamrockInitialize('')"])
-		self.interact(["ShamrockSetPixelWidth({}, c_float({}))".format(self.device,pixelwidth)])
-		self.interact(["ShamrockSetNumberPixels({},{})".format(self.device, numpixels)])
+		self.interact("ShamrockInitialize('')")
+		self.interact("ShamrockSetPixelWidth({}, c_float({}))".format(self.device,self.pixelwidth))
+		self.interact("ShamrockSetNumberPixels({},{})".format(self.device, self.numpixels))
 		self.grating = self.grating #to set the limits
 
 
 	@property
 	def centerpos(self):
-		ret = self.interact(["ShamrockGetWavelength({}, byref(c_float))".format(self.device)])
+		ret = self.interact("ShamrockGetWavelength({}, byref(c_float))".format(self.device))
 		return -1 if (ret is None) or (ret[0] != success)  else ret[1]
 
 	@centerpos.setter
@@ -41,7 +41,7 @@ class Shamrock(Instrument):
 		if (val < self.wllimits[0]) or (val > self.wllimits[1]):
 			return
 		#it looks like set wl = 0 is equivalent to GotoZeroOrder so no reason to mess with that?
-		self.interact(["ShamrockSetWavelength({},c_float({}))".format(self.device, val)])
+		self.interact("ShamrockSetWavelength({},c_float({}))".format(self.device, val))
 
 	'''
 	Filter wavelength limits
@@ -53,7 +53,7 @@ class Shamrock(Instrument):
 	@property
 	def wavelengths(self):
 		#returns an array [numpixels] of wl values
-		ret =self.interact(["ShamrockGetCalibration({},byref(c_float*{}),{})".format(self.device,self.numpixels, self.numpixels)])
+		ret =self.interact("ShamrockGetCalibration({},byref(c_float*{}),{})".format(self.device,self.numpixels, self.numpixels))
 		return [0,1] if (ret is None) or (ret[0] != success)  else ret[1]
 
 	#wavelengths - OK
@@ -61,22 +61,22 @@ class Shamrock(Instrument):
 	
 	@property
 	def slit(self):
-		ret =self.interact(["ShamrockGetAutoSlitWidth({}, 1, byref(c_float))".format(self.device)])
+		ret =self.interact("ShamrockGetAutoSlitWidth({}, 1, byref(c_float))".format(self.device))
 		return -1 if (ret is None) or (ret[0] != success)  else ret[1]
 		
 
 	@slit.setter
 	def slit(self, val):
 		#we should check val limits here
-		self.interact(["ShamrockSetAutoSlitWidth({}, 1, c_float({}))".format(self.device, val)])
+		self.interact("ShamrockSetAutoSlitWidth({}, 1, c_float({}))".format(self.device, val))
 	
 	@property
 	def gratingdict(self):
 		dictout = {}
-		nofilts = self.interact(["ShamrockGetNumberGratings({}, byref(c_int))".format(self.device)])[1]
+		nofilts = self.interact("ShamrockGetNumberGratings({}, byref(c_int))".format(self.device))[1]
 		for i in range(nofilts):
 			#filter numbering is 1-based
-			ret = self.interact(["ShamrockGetGratingInfo({}, {},byref(c_float), byref(c_char*4), byref(c_int),byref(c_int))".format(self.device,i+1)])
+			ret = self.interact("ShamrockGetGratingInfo({}, {},byref(c_float), byref(c_char*4), byref(c_int),byref(c_int))".format(self.device,i+1))
 			desc = "{} l/mm ".format(int(ret[1] + 0.5))
 			#format the blaze value (max 4 chars) and add to the description
 			for s in ret[2]:
@@ -88,19 +88,19 @@ class Shamrock(Instrument):
 	
 	@property
 	def grating(self):
-		ret = self.interact(["ShamrockGetGrating({}, byref(c_int))".format(self.device)])
+		ret = self.interact("ShamrockGetGrating({}, byref(c_int))".format(self.device))
 		return ret[1] if ret[0] == success  else None
 
 	@grating.setter
 	def grating(self, val):
-		self.interact(["ShamrockSetGrating({}, {})".format(self.device, val)])
+		self.interact("ShamrockSetGrating({}, {})".format(self.device, val))
 		#set the limits
-		ret =self.interact(["ShamrockGetWavelengthLimits({},{},byref(c_float),byref(c_float))".format(self.device,val)])
+		ret =self.interact("ShamrockGetWavelengthLimits({},{},byref(c_float),byref(c_float))".format(self.device,val))
 		self.wllimits = [ret[1],ret[2]]
 
 	@property
 	def flipper(self):
-		ret = self.interact(["ShamrockGetFlipperMirror({}, 2, byref(c_int))".format(self.device)])
+		ret = self.interact("ShamrockGetFlipperMirror({}, 2, byref(c_int))".format(self.device))
 		return ('direct', 'side')[ret[1]] if ret[0] == success  else None
 
 	@flipper.setter
@@ -110,11 +110,11 @@ class Shamrock(Instrument):
 			ind = ('direct', 'side').index(val)
 		except ValueError:
 			return
-		self.interact(["ShamrockSetFlipperMirror({}, 2, {})".format(self.device, ind)])
+		self.interact("ShamrockSetFlipperMirror({}, 2, {})".format(self.device, ind))
 
 	@property
 	def shutter(self):
-		ret = self.interact(["ShamrockGetShutter({}, byref(c_int))".format(self.device)])
+		ret = self.interact("ShamrockGetShutter({}, byref(c_int))".format(self.device))
 		return ('closed','open')[ret[1]] if ret[0] == success  else None
 
 	@shutter.setter
@@ -124,5 +124,5 @@ class Shamrock(Instrument):
 			ind = ('closed','open').index(val)
 		except ValueError:
 			return
-		self.interact(["ShamrockSetShutter({}, {})".format(self.device, ind)])
+		self.interact("ShamrockSetShutter({}, {})".format(self.device, ind))
 

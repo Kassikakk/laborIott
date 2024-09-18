@@ -354,8 +354,13 @@ Siin tekib jälle küsimusi üldiste standardite osas.
 
 * kas interacti parameeter peab tingimata list olema, tegelikult ju igasugune objekt peaks sealt läbi minema?
 * kas võiks veel ühe parameetri panna dummy valueks, (defauldiga None), mille dikteeriks instrument ja mis vea tekkimisel teda (või VInsti näiteks) hulluks ei ajaks?
-* kas tegelikult oli veel kuskil mingeid parameetreid vaja panna (et tekitaks full **kwargsi toetuse) või on tegemist keerulisusega? SerialAdapteril oli, et kas oodata vastust või mitte.
+* kas tegelikult oli veel kuskil mingeid parameetreid vaja panna (et tekitaks full **kwargsi toetuse) või on tegemist keerulisusega? SerialAdapteril oli, et kas oodata vastust või mitte. Sel juhul võiks siis pigem gi kõik parameetrid listina vormistada.
+* kas siis nii, et esimene parameeter võib olla list (edastades sisuliselt mitu parameetrit) või ka mitte list ja adapter sordib ja siis on ka veel dummy parameeter, mida vist hästi ei saa sinna listi panna, s.m.e. ta võib defauldis ka None olla? Või siis diktsionaarium ikkagi, et siis saaks nii defaulte kui mitte panna või ajab ikka liiga keeruliseks? Muud saab veel mõelda, aga see, kas dummy tuleb või mitte? A ok, võibolla saab sedagi veel mõelda.
 
 Asi see, et SDKAdapteri korral on parameetriks tavaliselt lihtsalt string. Ok las praegu olla siis list õmber, aga üldiselt võiks selle vist maha võtta.
 
 See ka, et äkki ei paneks siis adapterisse mingeid try:sid, vaid pigem laseks sellel instrumendi põhiklassis exceptida, oleks üks koht. --oot, aga kuidas see läbi ZMQAdapteri levib? Seda peab paremini mõtlema.
+
+# 240918
+
+Väike märkus, et kuhu panna dll-e. Windowsi puhul, kui python ja dll on mõlemad 32bit, siis võib panna SysWOW64 folderisse. Kui on 64bit, siis System32. Ilmselt võib ta olla ka mujal pathi peal.

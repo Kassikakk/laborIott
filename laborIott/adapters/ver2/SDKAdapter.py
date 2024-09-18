@@ -85,12 +85,18 @@ class SDKAdapter(Adapter):
 		#This one is tricky. There is generally no "UnloadLibrary" function in ctypes.
 		#it is to be seen what works. The following has been suggested, but allegedly
 		#can also lead to all kinds of errors; also not sure if it works on all platforms
+		#well, it seems to depend on both the platform and the windll/cdll possibly? though not sure
+
+		'''
 		def ctypesCloseLibrary(lib):
-			dlclose_func = ctypes.CDLL(None).dlclose
+			dlclose_func = ctypes.WinDLL(None).dlclose
 			dlclose_func.argtypes = [ctypes.c_void_p]
 			dlclose_func.restype = ctypes.c_int
 			dlclose_func(lib._handle)
-			
+			'''
 		if self.conn is not None:
-			ctypesCloseLibrary(self.conn)
+			#ctypesCloseLibrary(self.conn)
+			handle = self.conn._handle
+			del self.conn
+			ctypes.windll.kernel32.FreeLibrary(handle)
 			self.conn = None
