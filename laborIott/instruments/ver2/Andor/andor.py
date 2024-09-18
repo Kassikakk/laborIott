@@ -32,6 +32,10 @@ class IDus(Instrument):
 		
 	def __del__(self):
 		self.interact("ShutDown()")
+
+	@property
+	def wavelengths(self):
+		return range(1024) 
 		
 	
 	@property

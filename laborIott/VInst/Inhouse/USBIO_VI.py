@@ -24,6 +24,7 @@ class USBIO_VI(VInst):
 			adapter = USBAdapter(0xcacc, 0x0004)
 		self.instrum = USBIO(adapter)
 		
+		
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
 		self.dsbl += [self.ODButt, self.shutButt]
