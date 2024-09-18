@@ -136,7 +136,7 @@ class Spectro_VI(VInst):
 				self.instrum.status = 'start'
 				#print("Sending start again")
 				self.setAcq(True)
-				
+		self.setConnButtState()
 		#display the temperature & status
 		temp = self.instrum.temperature
 		if(temp[1]): #if not acquiring

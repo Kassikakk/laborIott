@@ -41,7 +41,6 @@ class IDus(Instrument):
 	@property
 	def temperature(self):
 		ret =self.interact("GetTemperature(byref(c_int))")
-		print(ret)
 		return ["NotConn", -1] if ret is None else [self.errors[ret[0]], ret[1]]
 		
 	@temperature.setter
