@@ -30,8 +30,10 @@ class Instrument(object):
 	
 		if self.connected:
 			try:
+				#print(command)
 				return self.adapter.interact(command)
 				#we may have to use some method to check if the adapter's response is a normal one
+				
 			except Exception as e:
 				#there is a problem with the device, disconnect
 				#if there are some specific problems, solve them in the adapter

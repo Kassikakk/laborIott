@@ -1,13 +1,20 @@
 from laborIott.instruments.ver2.Andor.andor import IDus
 from laborIott.VInst.SpectroVI import Spectro_VI
 from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
-from PyQt5 import QtWidgets
-import sys
+from PyQt5 import QtWidgets, QtGui
+import os, sys
+
+def localPath(filename):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
 class iDus_VI(Spectro_VI):
 
 	def __init__(self, refname="iDus"):
 		super().__init__(refname)
+		self.setWindowIcon(QtGui.QIcon(localPath('Andor.ico')))
+		self.setWindowTitle("iDus camera")
+		self.elDarkChk.setVisible(False)
+
 
 
 	def connectInstr(self, refname):

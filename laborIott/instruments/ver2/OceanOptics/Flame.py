@@ -1,5 +1,5 @@
-from laborIott.instrument import Instrument
-from laborIott.validators import strict_discrete_set
+from laborIott.instruments.instrument import Instrument
+#from laborIott.validators import strict_discrete_set
 from ctypes import POINTER, Structure, c_int, c_double, addressof
 from threading import Thread, Event
 
@@ -24,22 +24,30 @@ class Flame(Instrument):
 			libcommon.so
 		for some strange reason, linux64 is not supported
 	some background installation may also be needed (?), refer to OmniDriver setup.
-	TODO: Can we determine data ready analogously to Andor?
 	TODO: Need to guard against asking (anything) during the acquiring?
 
 	'''
 
 	def __init__(self, adapter):
-		super().__init__(adapter, "Flame")
 		
-		self.handle = self.interact("Wrapper_Create()", [0])[0]
-		self.no = self.interact("Wrapper_openAllSpectrometers(%d)" % self.handle, [0])[0]
+		self.handle = 0
+		self.no = 0
 		#self.no == 0, siis pole midagi taga.
-		if self.no > 0:
-			self.minExpTime = self.interact("Wrapper_getMinimumIntegrationTime(%d, 0)" % self.handle,[0])[0]
+		self.minExpTime = 0
+		super().__init__(adapter, "Flame")
+		#TODO: Change this when we correct adapter error handling
 		self.spectrum = []
 		self.acquiring = Event()
 		self.dataReady = Event()
+
+	def connect(self):
+		if not super().connect():
+			return False
+		self.handle = self.interact("Wrapper_Create()", [0])[0]
+		self.no = self.interact("Wrapper_openAllSpectrometers(%d)" % self.handle, [0])[0]
+		self.minExpTime = self.interact("Wrapper_getMinimumIntegrationTime(%d, 0)" % self.handle,[0])[0]
+
+		
 
 	def __del__(self):
 		self.interact("Wrapper_closeAllSpectrometers(%d)" % self.handle)
@@ -87,21 +95,21 @@ class Flame(Instrument):
 		
 	@property
 	def wavelengths(self):
-		if self.no > 0:
-			darr = DblArr()
-			#TODO:what do we get here if success / not? Also in readData
-			self.interact("Wrapper_getWavelengths(%d,0,%d)" % (self.handle,addressof(darr)))
+		darr = DblArr()
+		#TODO:what do we get here if success / not? Also in readData
+		if self.interact("Wrapper_getWavelengths(%d,0,%d)" % (self.handle,addressof(darr)),[0])[0]:
 			return [darr.data[i] for i in range(darr.len)]
 		else:
-			return []
-			
+			return [0,1]
+	'''		
 	@property
 	def asyncready(self): #returns async properties ready to be read
 		return ['data'] if self.dataReady.isSet() else []
+	'''
 
 	@property
 	def status(self):
-		return 'Acqring' if self.acqring.isSet() else 'idle'
+		return 'Acqring' if self.acquiring.isSet() else 'idle'
 	
 	@status.setter
 	def status(self, value):

@@ -63,10 +63,10 @@ class VInst(Visual):
 
 		if self.connButt.isChecked():
 			self.instrum.connect()
-			print("DisConnecting")
+			print("Connecting")
 		else:
 			self.instrum.disconnect()
-			print("Connecting")
+			print("DisConnecting")
 		self.setConnButtState()
 
 	def setConnButtState(self):

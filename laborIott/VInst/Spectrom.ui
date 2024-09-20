@@ -565,6 +565,19 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QCheckBox" name="elDarkChk">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>200</y>
+           <width>131</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>El. dark correction</string>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
