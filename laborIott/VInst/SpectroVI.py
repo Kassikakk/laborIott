@@ -137,15 +137,18 @@ class Spectro_VI(VInst):
 				#print("Sending start again")
 				self.setAcq(True)
 		self.setConnButtState()
-		#display the temperature & status
-		temp = self.instrum.temperature
-		if(temp[1]): #if not acquiring
-			self.tempLabel.setText("{}°C / {}".format(temp[1], temp[0]))
+		self.showTemperature()
+		
 				
 	def setAcq(self, state):
 		self.acquiring = state
 		for wdg in [self.setParmsButt, self.saveButt]:
 			wdg.setEnabled(not state)
+
+	def showTemperature(self):
+		#virtual: self.tempLabel.setText("something")
+		#if the camera supports cooling
+		pass
 
 
 	def run(self):
@@ -192,19 +195,13 @@ class Spectro_VI(VInst):
 
 			
 	def setCooler(self):
-		if (self.coolButt.isChecked()):
-			try:
-				temp = int(self.tempEdit.text())
-			except ValueError:
-				self.tempEdit.setText("#err")
-				self.coolButt.setChecked(False)
-				return 
-			self.instrum.temperature = temp
-		else:
-			self.instrum.temperature =  None
+		#sets the cooler state according to self.coolButt state and self.tempEdit text if applicable
+		pass
 	
 	def setShutter(self):
-		self.instrum.shutter = 'open' if self.shutButt.isChecked() else 'closed'
+		#sets the shutter state according to self.shutButt if applicable
+		pass
+
 	
 	def getX(self):
 		return self.xdata

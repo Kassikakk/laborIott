@@ -21,20 +21,26 @@ class Instrument(object):
 			
 		return self.connected
 		
-	def interact(self, command, **kwargs): #exchange?
+	def interact(self, command, dummy = None): #exchange?
+		'''
+		command: a simple command or a list of many parameters, ready for the adapter to process
+		dummy: something to return if anything is wrong, to keep the instrument running, if needed
+
+		'''
 	
 		if self.connected:
 			try:
-				return self.adapter.interact(command, **kwargs)
+				return self.adapter.interact(command)
+				#we may have to use some method to check if the adapter's response is a normal one
 			except Exception as e:
 				#there is a problem with the device, disconnect
 				#if there are some specific problems, solve them in the adapter
 				#TODO: log error message here
 				print(f"An interact error: {e}")
 				self.disconnect()
-				return None
+				return dummy
 		else:
-			return None #or []?
+			return dummy
 			
 	def disconnect(self, **kwargs):
 		

@@ -18,8 +18,27 @@ class iDus_VI(Spectro_VI):
 
 
 
+	def showTemperature(self):
+		#display the temperature & status
+		temp = self.instrum.temperature
+		if(temp[1]): #if not acquiring
+			self.tempLabel.setText("{}°C / {}".format(temp[1], temp[0]))
 
+	def setCooler(self):
+		if (self.coolButt.isChecked()):
+			try:
+				temp = int(self.tempEdit.text())
+			except ValueError:
+				self.tempEdit.setText("#err")
+				self.coolButt.setChecked(False)
+				return 
+			self.instrum.temperature = temp
+		else:
+			self.instrum.temperature =  None
 
+	def setShutter(self):
+			#sets the shutter state according to self.shutButt
+			self.instrum.shutter = 'open' if self.shutButt.isChecked() else 'closed'
 
 
 
