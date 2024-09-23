@@ -23,7 +23,7 @@ class Flame_VI(Spectro_VI):
 	'''
 
 	def __init__(self, refname="Flame"):
-		super().__init__(refname)
+		super().__init__(refname, Flame,SDKAdapter("OmniDriver32",False))
 		self.setWindowIcon(QtGui.QIcon(localPath('Flame.png')))
 		self.setWindowTitle("Flame spectrometer")
 		self.coolButt.setVisible(False)
@@ -34,19 +34,15 @@ class Flame_VI(Spectro_VI):
 		self.elDarkChk.clicked.connect(self.setElDark)
 
 
-	def connectInstr(self, refname):
-		adapter = self.getZMQAdapter(refname)
-		if adapter is None:
-			adapter = SDKAdapter("OmniDriver32",False)
-		self.instrum = Flame(adapter)
-
 	def setElDark(self):
+		#TODO: direct UI dependency doesn't support external access
 		self.instrum.corrElDark = 'on' if self.elDarkChk.isChecked() else 'off'
 
-	def onConn(self):
-		super().onConn()
-		if self.connButt.isChecked():
+	def onReconnect(self):
+		super().onReconnect()
+		if self.instrum.connected:
 			self.xdata = self.instrum.wavelengths
+			self.setElDark()
 			#TODO: What else is needed here?
 		
 

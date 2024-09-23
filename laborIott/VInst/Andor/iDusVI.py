@@ -9,19 +9,12 @@ def localPath(filename):
 
 class iDus_VI(Spectro_VI):
 
-	def __init__(self, refname="iDus"):
-		super().__init__(refname)
+	def __init__(self, refname = "iDus", instrument = IDus, adapter = SDKAdapter("atmcd32d_legacy",False)):
+		super().__init__(refname, instrument, adapter)
 		self.setWindowIcon(QtGui.QIcon(localPath('Andor.ico')))
 		self.setWindowTitle("iDus camera")
 		self.elDarkChk.setVisible(False)
 
-
-
-	def connectInstr(self, refname):
-		adapter = self.getZMQAdapter(refname)
-		if adapter is None:
-			adapter = SDKAdapter("atmcd32d_legacy",False)
-		self.instrum = IDus(adapter)
 
 
 
@@ -43,9 +36,15 @@ class iDus_VI(Spectro_VI):
 		else:
 			self.instrum.temperature =  None
 
-	def setShutter(self):
+	def setShutter(self,state):
 			#sets the shutter state according to self.shutButt
-			self.instrum.shutter = 'open' if self.shutButt.isChecked() else 'closed'
+			self.instrum.shutter = 'open' if state else 'closed'
+
+	def onReconnect(self):
+		super().onReconnect()
+		if self.instrum.connected:
+			self.setShutter(self.shutButt.isChecked())
+			self.setCooler()
 
 
 

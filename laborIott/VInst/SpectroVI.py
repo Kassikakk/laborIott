@@ -16,8 +16,13 @@ from math import log10
 
 
 class Spectro_VI(VInst):
+	'''
+	Base class for spectrometer type VI-s
+	(Currently) doesn't run standalone (parameters must be supplied)
 
-	def __init__(self, refname = ""):
+	'''
+
+	def __init__(self, refname, instrument, adapter):
 
 		# the refname parameter is needed for derived classes which may want to define a different name
 		# to use different settings for connection
@@ -25,7 +30,7 @@ class Spectro_VI(VInst):
 
 
 		#connect instrument
-		self.connectInstr(refname)
+		self.connectInstr(refname, instrument, adapter)
 	
 		#parameetrid
 		self.ydata = []
@@ -55,7 +60,7 @@ class Spectro_VI(VInst):
 		#connect section
 		self.runButt.clicked.connect(self.run)
 		self.coolButt.clicked.connect(self.setCooler) #implement
-		self.shutButt.clicked.connect(self.setShutter)
+		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
 		self.setParmsButt.clicked.connect(self.onSetParms) 
 		self.loadRefButt.clicked.connect(self.loadRef)
 		self.loadOvlButt.clicked.connect(self.loadOverlay)
@@ -66,12 +71,7 @@ class Spectro_VI(VInst):
 		self.timer.timeout.connect(self.onTimer)
 		self.timer.start(200)
 
-	def connectInstr(self, refname):
-		#define as separate function so it can be overridden
-		#adapter = self.getZMQAdapter(refname)
-		#if adapter is None:
-		#	adapter = SDKAdapter(localPath("../Inst/atmcd32d_legacy"),False)
-		self.instrum = None
+	
 
 	def createOverlays(self, noOverlays):
 		#TODO: move overlay handling to the spectrographVI main object
@@ -79,7 +79,18 @@ class Spectro_VI(VInst):
 		self.overlays = []
 		for i in range(self.noOverlays):
 			self.overlays += [self.graphicsView.plot(pen = None)]
-		
+
+	
+	def onReconnect(self):
+		#attempt to stop if running if disconnecting
+		if not self.connButt.isChecked():
+			self.instrum.status = 'Abort'
+			self.runButt.setChecked(False)
+			self.setAcq(False)
+
+		super().onReconnect()
+		if self.instrum.connected:
+			self.onSetParms()
 		
 
 
@@ -198,7 +209,7 @@ class Spectro_VI(VInst):
 		#sets the cooler state according to self.coolButt state and self.tempEdit text if applicable
 		pass
 	
-	def setShutter(self):
+	def setShutter(self, state):
 		#sets the shutter state according to self.shutButt if applicable
 		pass
 
@@ -298,15 +309,3 @@ class Spectro_VI(VInst):
 
 		
 
-
-
-#needed for running from within Spyder etc.
-if __name__ == '__main__':
-	if not QtWidgets.QApplication.instance():
-		app = QtWidgets.QApplication(sys.argv)
-	else:
-		app = QtWidgets.QApplication.instance()
-		
-	window = Spectro_VI() #you may add a different refname as a parameter
-	window.show()
-	sys.exit(app.exec_())

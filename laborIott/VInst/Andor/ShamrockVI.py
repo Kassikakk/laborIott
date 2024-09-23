@@ -1,7 +1,7 @@
 from iDusVI import iDus_VI
-from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.instruments.Andor.Inst.shamrock import Shamrock
+from laborIott.instruments.ver2.Andor.shamrock import Shamrock
 from PyQt5 import QtWidgets
 from laborIott.instruments.Andor.VInst.ShamrockDlg import Ui_ShamrockDialog #pyuic5 generated dialog
 import os, sys
@@ -18,8 +18,15 @@ class IDusShamrock_VI(iDus_VI):
 	we'll see if we can handle this in the future.
 	'''
 
-	def __init__(self):
-		super( ).__init__(refname="Shamrock")
+	def __init__(self,refname="Shamrock"):
+		super( ).__init__(refname)
+
+		#not sure how this actually plays out for ZMQ
+		#we might need a different refname for Shamrock
+		adapter = self.getZMQAdapter(refname)
+		if adapter is None:
+			adapter = SDKAdapter("ShamrockCIF",False)
+		self.shrock = Shamrock(adapter, 26.0, 1024)
 
 		self.setWindowTitle("iDus / Shamrock spectrometer")
 		#prep the dialog
@@ -42,8 +49,9 @@ class IDusShamrock_VI(iDus_VI):
 			self.reverseChk.setChecked(True)
 		
 		gdict = self.shrock.gratingdict
-		self.shamDlg.gratingCombo.addItems(list(gdict.keys()))
-		self.shamDlg.gratingCombo.setCurrentText(list(gdict.keys())[list(gdict.values()).index(self.shrock.grating)])
+		if len(gdict) > 0:
+			self.shamDlg.gratingCombo.addItems(list(gdict.keys()))
+			self.shamDlg.gratingCombo.setCurrentText(list(gdict.keys())[list(gdict.values()).index(self.shrock.grating)])
 
 		self.spectromButt.setEnabled(True)
 		self.spectromButt.clicked.connect(self.dlg.show) #_exec annab modaalse
@@ -54,13 +62,6 @@ class IDusShamrock_VI(iDus_VI):
 		#also override setShutter
 
 
-	def connectInstr(self, refname):
-		super().connectInstr(refname)
-		adapter = self.getZMQAdapter(refname)
-		if adapter is None:
-			adapter = SDKAdapter("ShamrockCIF",False)
-		self.shrock = Shamrock(adapter, 26.0, 1024)
-		
 
 
 	def setWlScale(self):
@@ -106,8 +107,18 @@ class IDusShamrock_VI(iDus_VI):
 		#maybe something related to the camera change?
 
 	#now also the shutter thing needs to be overridden
-	def setShutter(self):
-		self.shrock.shutter = 'open' if self.shutButt.isChecked() else 'closed'
+	def setShutter(self, state):
+		#redirect shutter operation to Shamrock
+		self.shrock.shutter = 'open' if state else 'closed'
+
+	def onReconnect(self):
+		super().onReconnect()
+		#do the same with Shamrock
+		if self.connButt.isChecked():
+			self.shrock.connect()
+		else:
+			self.shrock.disconnect()
+
 
 
 

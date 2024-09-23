@@ -23,7 +23,7 @@ class VInst(Visual):
 
 		self.connButt = self.findChild(QtWidgets.QPushButton, 'connButt')
 		if self.connButt is not None:
-			self.connButt.clicked.connect(self.onConn)
+			self.connButt.clicked.connect(self.onReconnect)
 			self.dsbl += [self.connButt]
 		
 
@@ -59,7 +59,14 @@ class VInst(Visual):
 		
 		return ZMQAdapter(address, inport) #uus ver
 
-	def onConn(self):
+	def connectInstr(self,  refname, instrument, adapter):
+		#define as separate function so it can be overridden
+		Zadapter = self.getZMQAdapter(refname)
+		if Zadapter is not None:
+			adapter = Zadapter
+		self.instrum = instrument(adapter)
+
+	def onReconnect(self):
 
 		if self.connButt.isChecked():
 			self.instrum.connect()

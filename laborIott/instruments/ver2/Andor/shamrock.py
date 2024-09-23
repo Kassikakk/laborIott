@@ -4,13 +4,13 @@ success = 20202
 
 class Shamrock(Instrument):
 
-	def __init__(self, adapter, pixelwidth, numpixels, **kwargs):
+	def __init__(self, adapter, pixelwidth, numpixels):
 
 		self.device = 0 #if we only have one device
 		self.numpixels = numpixels
 		self.pixelwidth = pixelwidth
 		self.wllimits = [None, None]
-		super().__init__(adapter, "Shamrock", **kwargs)
+		super().__init__(adapter, "Shamrock")
 				
 		#or perhaps we should set pixelwidth and numpixels as properties
 		#seeing as we might want to use another camera as well
@@ -73,7 +73,7 @@ class Shamrock(Instrument):
 	@property
 	def gratingdict(self):
 		dictout = {}
-		nofilts = self.interact("ShamrockGetNumberGratings({}, byref(c_int))".format(self.device))[1]
+		nofilts = self.interact("ShamrockGetNumberGratings({}, byref(c_int))".format(self.device),[0,0])[1]
 		for i in range(nofilts):
 			#filter numbering is 1-based
 			ret = self.interact("ShamrockGetGratingInfo({}, {},byref(c_float), byref(c_char*4), byref(c_int),byref(c_int))".format(self.device,i+1))
@@ -88,7 +88,7 @@ class Shamrock(Instrument):
 	
 	@property
 	def grating(self):
-		ret = self.interact("ShamrockGetGrating({}, byref(c_int))".format(self.device))
+		ret = self.interact("ShamrockGetGrating({}, byref(c_int))".format(self.device),[0,0])
 		return ret[1] if ret[0] == success  else None
 
 	@grating.setter
@@ -100,7 +100,7 @@ class Shamrock(Instrument):
 
 	@property
 	def flipper(self):
-		ret = self.interact("ShamrockGetFlipperMirror({}, 2, byref(c_int))".format(self.device))
+		ret = self.interact("ShamrockGetFlipperMirror({}, 2, byref(c_int))".format(self.device),[0,0])
 		return ('direct', 'side')[ret[1]] if ret[0] == success  else None
 
 	@flipper.setter
@@ -114,7 +114,7 @@ class Shamrock(Instrument):
 
 	@property
 	def shutter(self):
-		ret = self.interact("ShamrockGetShutter({}, byref(c_int))".format(self.device))
+		ret = self.interact("ShamrockGetShutter({}, byref(c_int))".format(self.device),[0,0])
 		return ('closed','open')[ret[1]] if ret[0] == success  else None
 
 	@shutter.setter
