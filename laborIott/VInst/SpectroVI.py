@@ -26,11 +26,8 @@ class Spectro_VI(VInst):
 
 		# the refname parameter is needed for derived classes which may want to define a different name
 		# to use different settings for connection
-		super().__init__(localPath('Spectrom.ui'))
+		super().__init__(localPath('Spectrom.ui'),refname, instrument, adapter)
 
-
-		#connect instrument
-		self.connectInstr(refname, instrument, adapter)
 	
 		#parameetrid
 		self.ydata = []

@@ -27,22 +27,16 @@ class TiSph(Instrument):
 		self.linefree.set()
 
 
-	#I would say mostly connect-disconnect should be fine from the base
-	#implement:
-	#getwl
-	#setwl
-	#status- could also signal how the moving ended - if sufficient accuracy was obtained or the repetitions were used up
-	#and when assigned - can force stop
-	#speed
-	#shutter
+	#TODO: we should rethink if, where and how thread protection should be dealt with
+	#I mean ZMQAdapter now does it anyway
 
-	def interwrap(self, command):
+	def interwrap(self, command, dummy = None):
 		#try a wrapper to thread sync here
 		#we also try to do it in the adapter
 		self.linefree.wait()
 		self.linefree.clear()
 		#print("entering", command)
-		ret = self.interact(command)
+		ret = self.interact(command, dummy)
 		#print("->exiting", command)
 
 		self.linefree.set()
@@ -76,7 +70,7 @@ class TiSph(Instrument):
 				#check if we actually moved at least more than half of what we should have
 				if abs(self.wavelength - value) > abs(diff/2):
 					#something wrong here, let's not break the machinery
-					print("exit via ketrusprotect")
+					print("Ineffective moving detected")
 					break
 			sleep(1) #We need time to let the wavemeter settle
 		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
@@ -86,8 +80,8 @@ class TiSph(Instrument):
 	@property
 	def wavelength(self):
 		#check here that nobody is accessing?
-		ret = self.interwrap([requests['REQ_GET_WAVELENGTH'], 0, 0, 4])
-		return 0 if ret is None else (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
+		ret = self.interwrap([requests['REQ_GET_WAVELENGTH'], 0, 0, 4], [0,0,0])
+		return (ret[0] + 256 * ret[1] + 65536 * ret[2])/100.0
 	
 	@wavelength.setter
 	def wavelength(self, value):
@@ -133,8 +127,8 @@ class TiSph(Instrument):
 
 	@property
 	def speed(self):
-		ret = self.interwrap([requests['REQ_GET_SPEED'], 0, 0, 2])
-		return -1 if ret is None else ret[0] + 256 * ret[1]
+		ret = self.interwrap([requests['REQ_GET_SPEED'], 0, 0, 2], [-1,0])
+		return  ret[0] + 256 * ret[1]
 	
 	@speed.setter
 	def speed(self, value):

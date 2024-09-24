@@ -16,10 +16,12 @@ class VInst(Visual):
 
 	'''
 
-	def __init__(self, uifile):
+	def __init__(self, uifile, refname, instrument, adapter):
 		super().__init__(uifile)
 
 		self.instrum = None #placeholder for the underlying instrument
+		#connect instrument
+		self.connectInstr(refname, instrument, adapter)
 
 		self.connButt = self.findChild(QtWidgets.QPushButton, 'connButt')
 		if self.connButt is not None:

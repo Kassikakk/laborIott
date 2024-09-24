@@ -1,8 +1,8 @@
 
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from threading import Event
-from laborIott.VInst.VInst import VInst
+
+from laborIott.VInst.SourceVI import Source_VI
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
 from laborIott.instruments.Inhouse.TiSph import TiSph
 import os
@@ -12,58 +12,43 @@ def localPath(filename):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
 
 
-class TiSph_VI(VInst):
+class TiSph_VI(Source_VI):
 
 	def __init__(self):
-		super().__init__(localPath('TiSph.ui'))
-		#self.setupUi(self)
-
-		#how to make it a bit nicer?
-		adapter = self.getZMQAdapter('TiSph')
-		if adapter is None:
-			adapter = USBAdapter(0xcacc, 0x0002)
-		self.instrum = TiSph(adapter)
+		super().__init__('TiSph', TiSph, USBAdapter(0xcacc, 0x0002))
+		
 		
 		self.instrum.speed = 50
+		self.setWindowIcon(QtGui.QIcon(localPath('ap.ico')))
+		self.setWindowTitle("Ti-Sph laser")
+		#remove bandwidth widgets
+		self.bwLabel.setVisible(False)
+		self.bwEdit.setVisible(False)
+		self.setBwButt.setVisible(False)
 
-		self.WLreached = Event()
-		self.WLreached.set()
-		
+	
 		
 		#Get values and set fields
 		#Disabled in external mode and if not WLreached
-		self.dsbl += [self.goWlButt, self.shutButt, self.setSpButt, self.motRelButt]
-		self.wlEdit.setText("{:.2f}".format(self.instrum.wavelength))
+		self.motRelButt = QtWidgets.QPushButton("Mot.rel")
+		self.motRelButt.resize(70,20)
+		#self.dummyWidget.addWidget(self.motRelButt)
+		self.motRelButt.setParent(self.dummyWidget)
+		self.dsbl += [self.motRelButt]
 		self.shutButt.setChecked(self.instrum.shutter == 'open')
 
 
 		#konnektid
-		self.goWlButt.clicked.connect(lambda: self.gotoWL(self.wlEdit.text()))
-		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
+		
 		self.setSpButt.clicked.connect(lambda: self.setSpeed(self.spEdit.text()))
 		self.motRelButt.clicked.connect(self.releaseMotor)
 		
-		self.timer = QtCore.QTimer()
-		self.timer.timeout.connect(self.onTimer)
-		self.timer.start(200)
+	
 		
-		
-	def onTimer(self):
-		#handle goingtoWL
-		self.wlLabel.setText("{:.2f}".format(self.instrum.wavelength))
-		if not self.WLreached.is_set():
-			#check arrival
-			self.wlLabel.setStyleSheet("color: red")
-			if self.instrum.status == 'stopped':
-				if not self.external:
-					self.setEnable(True)
-				self.WLreached.set()
-				self.wlLabel.setStyleSheet("color: black")
-						
+	
 		
 	def gotoWL(self,newWL):
-		#oot aga nüüd ma mõtlen, et seda (vist) peaks saama ka väljast kutsuda, et kas siis anda talle optsionaalselt mingi pärameeter ka, et kui on, siis kasutatakse või.
-		if not self.WLreached.is_set(): #should be greyed, though
+		if not self.WLreached.is_set():
 			#we could develop a 'stop' routine here
 			return
 		#also, here the status of the shutter should be checked; if closed, we won't get any feedback so the process is doomed
@@ -74,14 +59,7 @@ class TiSph_VI(VInst):
 				self.shutButt.setChecked(True)
 			else:
 				return
-		try:
-			newWL = float(newWL)
-		except ValueError:
-			print("not floatable")
-			return #TODO: nendega midagi
-		self.setEnable(False)
-		self.instrum.wavelength = newWL
-		self.WLreached.clear()
+		super().gotoWL(newWL)
 		
 	def setShutter(self, openit):
 		self.instrum.shutter =  'open' if openit else 'closed'
