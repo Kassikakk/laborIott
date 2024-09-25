@@ -39,9 +39,6 @@ class Source_VI(VInst):
 		self.goWlButt.clicked.connect(lambda: self.gotoWL(self.wlEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
 
-		self.timer = QtCore.QTimer()
-		self.timer.timeout.connect(self.onTimer)
-		self.timer.start(200)
 
 	def onTimer(self):
 		#handle goingtoWL

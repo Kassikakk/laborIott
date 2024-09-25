@@ -1,6 +1,6 @@
 from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
 from laborIott.visual import Visual
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 
 
@@ -27,6 +27,13 @@ class VInst(Visual):
 		if self.connButt is not None:
 			self.connButt.clicked.connect(self.onReconnect)
 			self.dsbl += [self.connButt]
+		
+		self.timer = QtCore.QTimer()
+		self.timer.timeout.connect(self.onTimer)
+		self.timer.start(200)
+
+	def onTimer(self):
+		pass
 		
 
 	def getConfigSection(self, section, refname):

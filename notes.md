@@ -363,7 +363,7 @@ See ka, et äkki ei paneks siis adapterisse mingeid try:sid, vaid pigem laseks s
 
 # 240918
 
-Väike märkus, et kuhu panna dll-e. Windowsi puhul, kui python ja dll on mõlemad 32bit, siis võib panna SysWOW64 folderisse. Kui on 64bit, siis System32. Ilmselt võib ta olla ka mujal pathi peal. Mitte unustada ka sõltuvaid faile samasse panna.
+Väike märkus, et kuhu panna dll-e. Windowsi puhul, kui python ja dll on mõlemad 32bit, siis võib panna SysWOW64 folderisse. Kui on 64bit, siis System32. Ilmselt võib ta olla ka mujal pathi peal. Mitte unustada ka sõltuvaid faile samasse panna. VI kirjelduses ka mainida ehk, mida vaja.
 
 # 240923
 
@@ -371,3 +371,9 @@ Mõtted VI initsialiseerimisel: mida tuleks taaskonnektimisel uuesti teha ja kuh
 no siis üks võimalus on teha  nii, et onConnectis teeme connecti puhul alati uue objekti ja disconnecti puhul ta kuidagi destrueerime (või siis disconnect), aga esiteks, milleks siis connect käsku üldse vaja on ja teiseks, instrumendis sisalduda võivad erinevad andmed ka lähevad kaduma. Ehkki eelistatult võiks instrumendi propertid küsida andmeid seadmelt otse, mitte neid niiväga cachida, aga üht-teist seal siiski vist on. 
 Teine oleks siis see, et hoiame algkäivituse ja hilisema (dis)connecti siiski eraldi, põhimõtteliselt nagu ta praegu on ja siis mingi taaskäivitamisega seotud sättimise paneme sinna juurde.
 kompromissina võib ju ka uurida, et kas instrum on None ja vastavalt siis konstrueerida või connectida (võib seal põhimõtteliselt ka adaptriga tegeleda ja selle võib ka põhiklassi lükata, kui adapter siin klassimuutujaks teha ja siis tuleks refnimega sama teha - ei, aga seal meil pole ju instrumendi klassi - nojah), aga vaataks kõigepealt, et kas võib-olla on ka see andmestik piisavalt erinev, mida onConnectis tuleb ette anda
+
+# 240925
+
+* instrumentidel on praegu mingid eraldi refnamed võrreldes VI-dega, mis nendega?
+* kas usbadapterit kasutavatel (või isegi mitte just sellepärast) instrum. pole connecti?
+* miks reconnecti puhul pole näha SDKadapteri conn errorit, kui dlli pole? (aga võib-olla ei peagi)

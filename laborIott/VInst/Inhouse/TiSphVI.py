@@ -1,6 +1,6 @@
 
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtGui, QtWidgets
 
 from laborIott.VInst.SourceVI import Source_VI
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
@@ -44,7 +44,12 @@ class TiSph_VI(Source_VI):
 		self.motRelButt.clicked.connect(self.releaseMotor)
 		
 	
-		
+	#def onTimer(self): #seems not needed
+
+	def onReconnect(self):
+		super().onReconnect()
+		if self.instrum.connected:
+			self.setSpeed(self.spEdit.text())
 	
 		
 	def gotoWL(self,newWL):
