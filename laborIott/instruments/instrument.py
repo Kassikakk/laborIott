@@ -38,6 +38,7 @@ class Instrument(object):
 				#there is a problem with the device, disconnect
 				#if there are some specific problems, solve them in the adapter
 				#TODO: log error message here
+				print(command)
 				print(f"An interact error: {e}")
 				self.disconnect()
 				return dummy

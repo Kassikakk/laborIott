@@ -16,6 +16,9 @@ def localPath(filename):
 class Newport1830_VI(Powerm_VI):
 
 	'''
+	usbdll needed on path
+	Now problem: reconnect gives error on  self.devID = int(devinfo[:devinfo.find(b',')])
+	ValueError: invalid literal for int() with base 10: b"..."
 
 	'''
 

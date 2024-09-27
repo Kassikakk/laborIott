@@ -19,7 +19,7 @@ class Newport1830(Instrument):
 			return False
 		self.interact("newp_usb_init_system()")
 		self.interact("newp_usb_init_product(0xCEC7)")	
-		devinfo = self.interact("newp_usb_get_device_info(byref(c_char*%d))" % self.buflen, [0,""])[1] #self.buf.value
+		devinfo = self.interact("newp_usb_get_device_info(byref(c_char*%d))" % self.buflen, [0,[b""]])[1] #self.buf.value
 		devinfo = b"".join(devinfo) #muudame listi bytestringiks
 		
 		if len(devinfo) > 0: #siis midagi on taga
@@ -38,7 +38,7 @@ class Newport1830(Instrument):
 	def power(self):
 		if self.devID is not None:
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'D?'), c_ulong(2))" % self.devID)
-			pwr = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen), [0,"0\n"])[1]
+			pwr = self.interact(f"newp_usb_get_ascii({self.devID}, byref(c_char*{self.buflen}), {self.buflen}, byref(c_ulong))", [0,[b"0\n"]])[1]
 			pwr = b"".join(pwr)
 			try:
 				return float(pwr[:pwr.find(b'\n')]) #uW
@@ -51,7 +51,7 @@ class Newport1830(Instrument):
 	def wl(self):
 		if self.devID is not None:
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'W?'), c_ulong(2))" % self.devID)
-			wlr = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen),[0,"0\n"])[1]
+			wlr = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen),[0,[b"0\n"]])[1]
 			wlr = b"".join(wlr)
 			try:
 				return int(wlr[:wlr.find(b'\n')])
@@ -69,7 +69,7 @@ class Newport1830(Instrument):
 	def attenuator(self):
 		if self.devID is not None:
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'PM:ATT?'), c_ulong(7))" % self.devID)
-			wlr = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen, [0,"0\n"]))[1]
+			wlr = self.interact("newp_usb_get_ascii({}, byref(c_char*{}), {}, byref(c_ulong))".format(self.devID, self.buflen, self.buflen, [0,[b"0\n"]]))[1]
 			wlr = b"".join(wlr)
 			try:
 				return int(wlr[:wlr.find(b'\n')])
@@ -88,10 +88,10 @@ class Newport1830(Instrument):
 	def scale(self):
 		if self.devID is not None:
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'PM:AUTO?'), c_ulong(8))" % self.devID)
-			auto = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen), [0,"0\n"])[1]
+			auto = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen), [0,[b"0\n"]])[1]
 			auto = b"".join(auto)
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'PM:RANGE?'), c_ulong(9))" % self.devID)
-			rng = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen), [0,"0\n"])[1]
+			rng = self.interact("newp_usb_get_ascii(%d, byref(c_char*%d), %d, byref(c_ulong))" % (self.devID, self.buflen, self.buflen), [0,[b"0\n"]])[1]
 			rng = b"".join(rng)
 			try:
 				
