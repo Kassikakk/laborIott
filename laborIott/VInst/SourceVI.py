@@ -1,7 +1,5 @@
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-import pandas as pd
 from threading import Event
 from .VInst import VInst
 import os
@@ -41,6 +39,7 @@ class Source_VI(VInst):
 
 
 	def onTimer(self):
+		super().onTimer()
 		#handle goingtoWL
 		if self.continuousUpdate:
 			self.wlLabel.setText("{:.2f}".format(self.instrum.wavelength))

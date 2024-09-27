@@ -1,7 +1,6 @@
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-import pandas as pd
+from PyQt5 import QtCore, QtWidgets
 
 from .VInst import VInst
 import os
@@ -63,11 +62,7 @@ class Spectro_VI(VInst):
 		self.loadOvlButt.clicked.connect(self.loadOverlay)
 
 		
-		#konnektid
-		self.timer = QtCore.QTimer()
-		self.timer.timeout.connect(self.onTimer)
-		self.timer.start(200)
-
+		
 	
 
 	def createOverlays(self, noOverlays):

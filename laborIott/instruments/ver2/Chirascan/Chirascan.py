@@ -41,6 +41,7 @@ class ChiraScan(Instrument):
 		
 		#set wavelength which also sets bandwidth
 		self.wavelength = 1000.0
+		return True
 		
 	
 

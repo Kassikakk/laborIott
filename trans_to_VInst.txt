@@ -1,5 +1,7 @@
 import VInst
 derive inst from VInst
+
+
 add localPath('Your.ui') to super().__init__ call
 remove self.setupUI ?
 instrument def out of connectInstr and add self.getAdapter()

@@ -27,13 +27,16 @@ class VInst(Visual):
 		if self.connButt is not None:
 			self.connButt.clicked.connect(self.onReconnect)
 			self.dsbl += [self.connButt]
+		else:
+			#create a dummy conn button for the rare occasion that it's not present
+			self.connButt = QtWidgets.QPushButton()
 		
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.onTimer)
 		self.timer.start(200)
 
 	def onTimer(self):
-		pass
+		self.setConnButtState()
 		
 
 	def getConfigSection(self, section, refname):
@@ -74,6 +77,7 @@ class VInst(Visual):
 		if Zadapter is not None:
 			adapter = Zadapter
 		self.instrum = instrument(adapter)
+		print(self.instrum.connected)
 
 	def onReconnect(self):
 

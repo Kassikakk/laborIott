@@ -1,5 +1,5 @@
 -Instrument
-	-Base class defines three functions, connect, interact and disconnect. They basically call the corresponding adapter functions, with regard to the state of self.connected. On initialization, an attempt to connect is made, with self.connected variable indicating the result.
+	-Base class defines three functions, connect, interact and disconnect. They basically call the corresponding adapter functions, with regard to the state of self.connected. On initialization, an attempt to connect is made, with self.connected variable indicating the result. Derived classes should override connect (first calling the base) for anything needed for (re)connection.
 	-Connect should also try to reinstate all the initial parameters as well as those that are separately kept in the instrument (something to keep in mind generally). There is a concern what happens to parameters stored in the VInst, maybe a flag variable that reconnection has occurred would be necessary, but generally such redundant storage is probably better reduced.
 	-The idea of disconnect function is to return the device to a state from which a new connect would be possible. This may concern both the adapter and the instrument. Though for some adapters (notably USBAdapter and also SDKAdapter) such disconnection appears to be tricky if not impossible.
 	

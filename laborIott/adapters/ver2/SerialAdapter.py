@@ -18,7 +18,7 @@ class SerialAdapter(Adapter):
 		#avoid reopening
 		if isinstance(self.conn, serial.Serial) and self.conn.is_open:
 			return True
-		#try:
+		try:
 			
 			self.conn = serial.Serial(self.port, **self.portargs)
 			if self.conn.is_open:
@@ -27,18 +27,20 @@ class SerialAdapter(Adapter):
 				#print("Couldn't open connection")
 				self.conn = None
 				return False
-			'''
+			
 		except Exception as e:
 			#indicate an error
 			print(str(e))
 			self.conn = None
 			return False
-			'''
+			
 				
-	def interact(self,command, waitResponse = True, **kwargs):
+	def interact(self,command):
+		# command should be a list of [commandstring, waitResponse (bool)]
 		if self.conn is None:
 			return []
-		if len(command) > 0:
+		waitResponse = command[1]
+		if len(command[0]) > 0:
 			#write to port
 			self.conn.write(command.encode())
 		if waitResponse:
