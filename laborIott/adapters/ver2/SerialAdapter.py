@@ -42,12 +42,15 @@ class SerialAdapter(Adapter):
 		waitResponse = command[1]
 		if len(command[0]) > 0:
 			#write to port
-			self.conn.write(command.encode())
+			self.conn.write(command[0].encode())
 		if waitResponse:
 			#delay here needed?
 			self.conn.flush() #this should make sure all data is written
 			#note however that readlines() depends on timeout,
-			return list(map(lambda x: x.decode(),self.connection.readlines()))
+			lines = self.conn.readlines()
+			#print(len(lines) == 0) #means timeout
+			#TODO: maybe we should count consecutive timeouts and set a limit when to throw some exception
+			return [""] if len(lines) == 0 else list(map(lambda x: x.decode(),lines)) 
 		else:
 			return []
 

@@ -29,6 +29,7 @@ class Newport842(Instrument):
 		except ValueError:
 			self.wlval = 800
 			
+		print(sta)
 		try:	
 			self.attstate = self.parsestats(sta,("Attenuator", "\r"))=='On'
 			self.minwl = float(self.parsestats(sta,("Min Wavelength index", '\t')))
@@ -99,6 +100,7 @@ class Newport842(Instrument):
 		#assume string value -  accepts 'Auto' and scale strings
 		
 		ret = self.interact("*ssa {}\n".format(value), [""])[0]
+		print("*ssa {}\n".format(value), ret)
 		#if ret == "ACK\r\n":
 		#	pass
 		
