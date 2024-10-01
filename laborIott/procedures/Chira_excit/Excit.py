@@ -18,6 +18,7 @@ def localPath(filename):
 class ExcitProc(VProc): #(pole nimes veel kindel)
 
 #siin peaks nüüd olema see signaalide defineerimine
+#aga vist eriti neid ei tule või siis scanni lõpetus
 
 	def  __init__(self):
 		super().__init__(localPath('Excit.ui'))
@@ -52,7 +53,34 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.dsbl += [self.startEdit, self.stepEdit, self.stopEdit, self.spcChk, self.pwrChk, self.sxminEdit,
 					 self.sxmaxEdit, self.pwrRadioBox]
 		self.setEnable(False)
+		self.startButt.clicked.connect(self.onStart)
 
+	def onStart(self):
+		if self.scanning.is_set():
+			# end scanning
+			self.cleanScan()
+			self.scanThread.join()
+
+		else:
+			#siin on nüüd pooleli
+			try:
+				startwl = float(self.startEdit.text())
+				stopwl = float(self.stopEdit.text())
+				stepwl = float(self.stepEdit.text())
+			except ValueError:
+				QtWidgets.QMessageBox.information(self, "NB!", "Check start-stop-step fields")
+				return
+			nopoints = int((stopwl - startwl) / stepwl + 1)
+			pwrTime = float(self.pwrTimeEdit.text())
+			usePwr = self.pwrChk.isChecked() and self.powerm is not None
+			useSpc = self.spcChk.isChecked() and self.andor is not None
+			if self.andor is not None:
+				self.spectraX = self.andor.getX()  # update
+
+			if nopoints < 1:
+				QtWidgets.QMessageBox.information(self, "NB!", "The scan has just one point")
+				# kuigi tegelikult on ju üks punkt alati?
+				return
 
 
 	def setEnable(self, state):

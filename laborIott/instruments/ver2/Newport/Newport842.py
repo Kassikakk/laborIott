@@ -100,7 +100,7 @@ class Newport842(Instrument):
 		#assume string value -  accepts 'Auto' and scale strings
 		
 		ret = self.interact("*ssa {}\n".format(value), [""])[0]
-		print("*ssa {}\n".format(value), ret)
+		#print("*ssa {}\n".format(value), ret)
 		#if ret == "ACK\r\n":
 		#	pass
 		

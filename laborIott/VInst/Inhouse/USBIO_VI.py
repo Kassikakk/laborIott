@@ -15,14 +15,9 @@ def localPath(filename):
 class USBIO_VI(VInst):
 
 	def __init__(self):
-		super().__init__(localPath('USBIO.ui'))
+		super().__init__(localPath('USBIO.ui'),'USBIO', USBIO, USBAdapter(0xcacc, 0x0004))
 		#self.setupUi(self)
 
-		#how to make it a bit nicer?
-		adapter = self.getZMQAdapter('USBIO')
-		if adapter is None:
-			adapter = USBAdapter(0xcacc, 0x0004)
-		self.instrum = USBIO(adapter)
 		
 		
 		#Get values and set fields
@@ -36,17 +31,19 @@ class USBIO_VI(VInst):
 		self.ODButt.clicked.connect(lambda: self.setOD(self.ODEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
 		self.instrum.freq1 = 300
+		self.setOD(1500)
 		
 		
-		self.timer = QtCore.QTimer()
-		self.timer.timeout.connect(self.onTimer)
-		self.timer.start(200)
 		
+	#def onTimer(self):
+		#will be needed if there is a separate way to change OD
+		#super().onTimer()
 		
-	def onTimer(self):
-		#handle goingtoWL
-		self.ODLabel.setText("{}".format(self.instrum.OD))
-		self.setConnButtState()
+	def onReconnect(self):
+		super().onReconnect()
+		if self.instrum.connected:
+			self.instrum.freq1 = 300
+			#self.setOD(self.ODEdit.text()) #või midagi sellist
 
 						
 		
@@ -57,6 +54,7 @@ class USBIO_VI(VInst):
 		except ValueError:
 			return
 		self.instrum.OD = int(newOD)
+		self.ODLabel.setText("{}".format(self.instrum.OD))
 		
 	def setShutter(self, openit):
 		self.instrum.setpin(0,int(openit))

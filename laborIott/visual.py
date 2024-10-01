@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, QtCore, uic
 import pandas as pd
 import userpaths
 import configparser as cp
@@ -29,6 +29,7 @@ class Visual(QtWidgets.QMainWindow):
 	Note however that a vinst may have multiple instruments (->refnames).
 
 	'''
+	VIcommand = QtCore.pyqtSignal(dict)
 
 	def __init__(self, uifile):
 		super().__init__()
@@ -65,6 +66,15 @@ class Visual(QtWidgets.QMainWindow):
 		self.external = False
 
 		self.saveLoc = userpaths.get_my_documents()
+		self.VIcommand.connect(self.runCommand)
+
+
+	def runCommand(self, commdict):
+		for commstr in commdict:
+			par = commdict[commstr]
+			parstr = '(*par)' if type(par) == 'list' else '(par)'
+			exec('self.' + commstr + parstr)
+
 
 	def getConfigSection(self, section, refname):
 		conf_loc = userpaths.get_local_appdata()+ '/laborIott/'+refname + '.ini'
