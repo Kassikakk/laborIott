@@ -62,25 +62,77 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			self.scanThread.join()
 
 		else:
-			#siin on nüüd pooleli
+			#gather all worker thread params to one dict
+			wparms = dict()
 			try:
-				startwl = float(self.startEdit.text())
-				stopwl = float(self.stopEdit.text())
-				stepwl = float(self.stepEdit.text())
+				wparms['startwl'] = float(self.startEdit.text())
+				wparms['stopwl'] = float(self.stopEdit.text())
+				wparms['stepwl'] = float(self.stepEdit.text())
 			except ValueError:
 				QtWidgets.QMessageBox.information(self, "NB!", "Check start-stop-step fields")
 				return
-			nopoints = int((stopwl - startwl) / stepwl + 1)
-			pwrTime = float(self.pwrTimeEdit.text())
-			usePwr = self.pwrChk.isChecked() and self.powerm is not None
-			useSpc = self.spcChk.isChecked() and self.andor is not None
-			if self.andor is not None:
-				self.spectraX = self.andor.getX()  # update
+			wparms['nopoints'] = int((wparms['stopwl'] - wparms['startwl']) / wparms['stepwl'] + 1)
+			wparms['usePwr'] = self.pwrChk.isChecked() and self.powerm is not None
+			wparms['useSpc'] = self.spcChk.isChecked() and self.spectrom is not None
+			if wparms['usePwr'] and not wparms['useSpc']:
+				try:
+					wparms['pwrTime'] = float(self.pwrTimeEdit.text())
+				except ValueError:
+					QtWidgets.QMessageBox.information(self, "NB!", "Check power collection time")
+					return
+			if self.spectrom is not None:
+				self.spectraX = self.spectrom.getX()  # update
+				
 
-			if nopoints < 1:
+			if wparms['nopoints'] < 1:
 				QtWidgets.QMessageBox.information(self, "NB!", "The scan has just one point")
 				# kuigi tegelikult on ju üks punkt alati?
 				return
+			
+			#TODO: show checklist here
+
+			if self.autoFolderChk.isChecked():
+				#the current folder will serve as base
+				#find a previously non-existing folder
+				n = 0
+				while(True):
+					baseFolder = os.path.join(self.saveLoc, 'scan_%d' % n)
+					if not os.path.isdir(baseFolder):
+						break
+					n += 1
+				#now create three folders and set them as new bases
+				os.mkdir(baseFolder)
+				self.setSaveLoc(baseFolder)
+				if wparms['useSpc']:
+					spcFolder = os.path.join(baseFolder, 'spc')
+					os.mkdir(spcFolder)
+					#ToDO: turn this to setSaveLoc later
+					self.spectrom.saveLoc = spcFolder
+					self.spectrom.locLabel.setText(spcFolder)
+				if wparms['usePwr']:
+					pwrFolder = os.path.join(baseFolder, 'pwr')
+					os.mkdir(pwrFolder)
+					#ToDO: turn this to setSaveLoc later
+					self.powerm.saveLoc = pwrFolder
+					self.powerm.locLabel.setText(pwrFolder)
+
+
+
+			self.plotx[0] = np.array([wparms['startwl'] + i * wparms['stepwl'] for i in range(wparms['nopoints'])])
+			#self.plotx[0] = np.arange(wparms['startwl'],wparms['stopwl'],wparms['stepwl']) #is the same?
+			self.ploty[0] = np.zeros(wparms['nopoints'])
+			# open source shutter
+			if self.exsrc:
+				self.exsrc.setShutter('open')
+
+			self.setWidgetState(True)
+			self.scanThread = Thread(target=self.scanProc, args=(wparms))
+			self.startButt.setText("Stop")
+			self.setExternalMode.emit(True)
+			self.startTime = time()
+			self.scanning.set()
+			sleep(1) #make sure the shutter has opened
+			self.scanThread.start()
 
 
 	def setEnable(self, state):
