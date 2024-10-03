@@ -19,6 +19,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 #siin peaks nüüd olema see signaalide defineerimine
 #aga vist eriti neid ei tule või siis scanni lõpetus
+	setExternalMode = QtCore.pyqtSignal(bool)
 
 	def  __init__(self):
 		super().__init__(localPath('Excit.ui'))
@@ -41,6 +42,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			exec('self.{} = '.format(instr_name) + astr)
 			if astr != 'None':
 				exec('self.{}.show()'.format(instr_name))
+				exec('self.setExternalMode.connect(self.{}.setExternal)'.format(instr_name))
 		#we should now have self.source, self.spectrom and so on
 
 
@@ -128,11 +130,77 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			self.setWidgetState(True)
 			self.scanThread = Thread(target=self.scanProc, args=(wparms))
 			self.startButt.setText("Stop")
-			self.setExternalMode.emit(True)
+			self.setExternalMode.emit(True) 
 			self.startTime = time()
 			self.scanning.set()
 			sleep(1) #make sure the shutter has opened
 			self.scanThread.start()
+
+	
+	def scanProc(self, wparms):
+
+		curwl = wparms['startwl']
+		ind = 0
+		while np.sign(wparms['stepwl']) * curwl <= np.sign(wparms['stepwl']) * wparms['stopwl']:  # enable negative step
+
+			self.setChiraWL.emit(curwl)
+			while self.chira.WLreached.is_set(): #first wait for the motion to start
+				pass
+			self.chira.WLreached.wait() #then wait it to stop.
+			#looks like it also works if we're already there
+
+
+			if wparms['usePwr']:
+				# adjust powermeter wl
+				self.setpowerWL.emit(curwl)
+				# start powermeter series + reset previous
+				self.setPwrCollection.emit(True, True)
+
+			# wait a while
+			if wparms['useSpc']:  # Spectrometer determines the time
+				# idus shutter open?
+				self.startIdus.emit(True)  # reserve false for abort?
+				# wait for data arrival
+				while self.andor.dataQ.empty():
+					if not self.scanning.is_set():
+						return
+				# idus shutter close?
+				xData, spcData = self.andor.dataQ.get(False)
+			# aga kuidas siin selle x-skaalaga on?
+			else:
+				spcData = None
+				startTime = time()
+				while (time() < startTime + wparms['pwrTime']):
+					if not self.scanning.is_set():
+						return
+
+			if wparms['usePwr']:
+				# stop powermeter series, wait for data
+				self.setPwrCollection.emit(False, False)
+				self.getPwrData.emit(True)  # mean and dev only
+				while self.powerm.dataQ.empty():
+					if not self.scanning.is_set():
+						return
+				pwrData = self.powerm.dataQ.get(False)  # list
+				# order powerdata saving as needed (construct name)
+				self.savePwrData.emit("{:}nm.txt".format(curwl))
+			else:
+				pwrData = None
+
+			if wparms['useSpc']:  # save the spectral data
+				if wparms['usePwr']:
+					spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
+				else:
+					spcfilename = "{:}nm.txt".format(curwl)
+				self.saveSpcData.emit(spcfilename)
+
+			# calculate and emit (or Queue) results to main thread
+			self.updateData.emit((ind,) + (spcData,) + (pwrData,))
+			# note that saving could in principle be invoked from main thread as well
+			curwl += wparms['stepwl']
+			ind += 1
+		self.scanFinished.emit()
+
 
 
 	def setEnable(self, state):
