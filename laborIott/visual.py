@@ -72,7 +72,10 @@ class Visual(QtWidgets.QMainWindow):
 	def runCommand(self, commdict):
 		for commstr in commdict:
 			par = commdict[commstr]
-			parstr = '(*par)' if type(par) == 'list' else '(par)'
+			if par is None:
+				parstr = ''
+			else:
+				parstr = '(*par)' if type(par) == 'list' else '(par)'
 			exec('self.' + commstr + parstr)
 
 
@@ -112,11 +115,15 @@ class Visual(QtWidgets.QMainWindow):
 
 	def onGetLoc(self):
 		if(self.saveToZip.isChecked()):
-			self.saveLoc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")[0]
+			loc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")[0]
 		else:
-			self.saveLoc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
+			loc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
 								QtWidgets.QFileDialog.ShowDirsOnly
 								| QtWidgets.QFileDialog.DontResolveSymlinks)
+		self.setSaveLoc(loc)
+
+	def setSaveLoc(self, loc):
+		self.saveLoc = loc
 		if self.locLabel is not  None:
 			self.locLabel.setText(self.saveLoc)
 

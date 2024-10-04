@@ -26,8 +26,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 		#parse ini file to define the instruments
 		instr_conf = self.getConfigSection("VInst", "Excit")
-		instr_list = ['exsrc','spectrom', 'powerm','attnr','spectro2','positnr'] #and so on
-		for instr_name in instr_list:
+		self.instr_list = ['exsrc','spectrom', 'powerm','attnr','spectro2','positnr'] #and so on
+		for instr_name in self.instr_list:
 			astr = 'None'
 			if instr_conf and (instr_name in instr_conf):
 				#we should have something comma separated here
@@ -56,6 +56,12 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					 self.sxmaxEdit, self.pwrRadioBox]
 		self.setEnable(False)
 		self.startButt.clicked.connect(self.onStart)
+		self.setExternalMode.connect(self.setExternal)
+		self.spcChk.clicked.connect(lambda: self.setExternal(False))
+		self.pwrChk.clicked.connect(lambda: self.setExternal(False))
+		self.locButt.clicked.connect(self.onGetLoc)
+		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
+		self.powerRefFile.clicked.connect(self.getPowerData) #TODO: this needs a better approach
 
 	def onStart(self):
 		if self.scanning.is_set():
@@ -108,15 +114,16 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				if wparms['useSpc']:
 					spcFolder = os.path.join(baseFolder, 'spc')
 					os.mkdir(spcFolder)
-					#ToDO: turn this to setSaveLoc later
-					self.spectrom.saveLoc = spcFolder
-					self.spectrom.locLabel.setText(spcFolder)
+					self.spectrom.setSaveLoc(spcFolder)
 				if wparms['usePwr']:
 					pwrFolder = os.path.join(baseFolder, 'pwr')
 					os.mkdir(pwrFolder)
-					#ToDO: turn this to setSaveLoc later
-					self.powerm.saveLoc = pwrFolder
-					self.powerm.locLabel.setText(pwrFolder)
+					self.powerm.setSaveLoc(pwrFolder)
+				if self.spectro2 is not None: #also create spectro2 folders if needed
+					spcFolder = os.path.join(baseFolder, 'wl')
+					os.mkdir(spcFolder)
+					self.spectro2.setSaveLoc(spcFolder)
+				
 
 
 
@@ -124,10 +131,9 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			#self.plotx[0] = np.arange(wparms['startwl'],wparms['stopwl'],wparms['stepwl']) #is the same?
 			self.ploty[0] = np.zeros(wparms['nopoints'])
 			# open source shutter
-			if self.exsrc:
+			if self.exsrc is not None:
 				self.exsrc.setShutter('open')
 
-			self.setWidgetState(True)
 			self.scanThread = Thread(target=self.scanProc, args=(wparms))
 			self.startButt.setText("Stop")
 			self.setExternalMode.emit(True) 
@@ -139,34 +145,51 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 	
 	def scanProc(self, wparms):
 
+		'''
+		Worker thread routine
+		use thread-safe methods:
+		-access external functions via signals, e.g. VIcommand mechanisms (important if functions access UI elements)
+		-get data via queue
+		-observe states via events
+
+
+		'''
+
 		curwl = wparms['startwl']
 		ind = 0
 		while np.sign(wparms['stepwl']) * curwl <= np.sign(wparms['stepwl']) * wparms['stopwl']:  # enable negative step
 
-			self.setChiraWL.emit(curwl)
-			while self.chira.WLreached.is_set(): #first wait for the motion to start
-				pass
-			self.chira.WLreached.wait() #then wait it to stop.
-			#looks like it also works if we're already there
+			if self.exsrc is not None:
+				self.exsrc.VIcommand.emit({'gotoWL':curwl})
+				while self.exsrc.WLreached.is_set(): #first wait for the motion to start
+					pass
+				self.exsrc.WLreached.wait() #then wait it to stop.
+				#looks like it also works if we're already there
+
+			#open the ODshutter here
 
 
 			if wparms['usePwr']:
 				# adjust powermeter wl
-				self.setpowerWL.emit(curwl)
+				self.powerm.VIcommand.emit({'setPwrWL':curwl})
 				# start powermeter series + reset previous
-				self.setPwrCollection.emit(True, True)
+				self.powerm.VIcommand.emit({'setCollect':[True, True]})
+
 
 			# wait a while
+			if self.spectro2 is not None:
+				self.spectro2.VIcommand.emit({'run':None})
+
 			if wparms['useSpc']:  # Spectrometer determines the time
 				# idus shutter open?
-				self.startIdus.emit(True)  # reserve false for abort?
+				
+				self.spectrom.VIcommand.emit({'run':None})
 				# wait for data arrival
-				while self.andor.dataQ.empty():
+				while self.spectrom.dataQ.empty():
 					if not self.scanning.is_set():
 						return
 				# idus shutter close?
-				xData, spcData = self.andor.dataQ.get(False)
-			# aga kuidas siin selle x-skaalaga on?
+				xData, spcData = self.spectrom.dataQ.get(False)
 			else:
 				spcData = None
 				startTime = time()
@@ -174,16 +197,21 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					if not self.scanning.is_set():
 						return
 
+			if spectro2 is not None:
+				while self.spectro2.dataQ.empty(): #also check that spectro2 has finished
+					if not self.scanning.is_set():
+						return
+
 			if wparms['usePwr']:
 				# stop powermeter series, wait for data
-				self.setPwrCollection.emit(False, False)
-				self.getPwrData.emit(True)  # mean and dev only
+				self.powerm.VIcommand.emit({'setCollect':[False, False]})
+				self.powerm.VIcommand.emit({'getData':True}) # mean and dev only 
 				while self.powerm.dataQ.empty():
 					if not self.scanning.is_set():
 						return
 				pwrData = self.powerm.dataQ.get(False)  # list
 				# order powerdata saving as needed (construct name)
-				self.savePwrData.emit("{:}nm.txt".format(curwl))
+				self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
 			else:
 				pwrData = None
 
@@ -192,15 +220,55 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
 				else:
 					spcfilename = "{:}nm.txt".format(curwl)
-				self.saveSpcData.emit(spcfilename)
+				self.spectrom.VIcommand.emit({'saveData':spcfilename})
+			
+			if self.spectro2 is not None:
+				self.spectro2.VIcommand.emit({'saveData':spcfilename})
 
 			# calculate and emit (or Queue) results to main thread
-			self.updateData.emit((ind,) + (spcData,) + (pwrData,))
+			self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
 			# note that saving could in principle be invoked from main thread as well
 			curwl += wparms['stepwl']
 			ind += 1
-		self.scanFinished.emit()
+		self.VIcommand.emit({'cleanScan':None})
 
+	def cleanScan(self):
+		self.scanning.clear()
+		self.startButt.setText("Start")
+		if self.exsrc is not None:
+				self.exsrc.setShutter('closed')
+		self.scanProgBar.setValue(0)
+		self.scanProgBar.setFormat("0%%")
+		self.setExternalMode.emit(False)
+		self.saveData(self.nameEdit.text())
+		if self.autoFolderChk.isChecked():
+			#go back to parent folder
+			self.setSaveLoc(os.path.dirname(self.saveLoc))
+
+	def update(self, data):
+		# supposedly called while scanning only
+		index, spcData, pwrData = data
+
+		if spcData is not None:
+			spsum = self.getSum(self.spectraX, spcData)
+			# figure out power
+			power = self.getPwr(1.0 if pwrData is None else pwrData[0], self.plotx[0][index])
+			# see what's power & calc excit
+			# put into plot
+			self.ploty[0][index] = spsum / power
+		elif pwrData is not None:
+			self.ploty[0][index] = pwrData[0]
+		self.plot.setData(self.plotx[0], self.ploty[0])
+		self.saveData(self.nameEdit.text())
+
+		# progress
+		# fractional progress
+		prg = (index + 1) / len(self.plotx[0])
+		progress = int(prg * 100)
+		# estimation by time spent
+		remmin = int((1 / prg - 1.0) * (time() - self.startTime) / 60)
+		self.scanProgBar.setValue(progress)
+		self.scanProgBar.setFormat("%d%% (%d min)" % (progress, remmin))
 
 
 	def setEnable(self, state):
@@ -214,7 +282,58 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if (not self.pwrChk.isChecked() and self.powerRefCur.isChecked()):
 				self.powerRefNone.setChecked(True)
 
-	
+	def getSum(self, x, y):
+		# sum y-s from the x values given by fields
+		minind = 0
+		maxind = len(x)
+		min1 = float(self.sxminEdit.text())
+		max1 = float(self.sxmaxEdit.text())
+		# both need to be between limits and min < max
+		# TODO: check this for +-1's here or there
+		if (min1 > x[0]) and (max1 < x[-1]) and (min1 < max1):
+			step = (x[-1] - x[0]) / (len(x) - 1)
+			minind = int((min1 - x[0]) / step)
+			maxind = int((max1 - x[0]) / step)
+		return sum(y[minind:maxind])
+
+	def getPwr(self, defaultval, wavelen = None):
+		if self.powerRefFile.isChecked() and wavelen is not None:  # there may be no power data
+			try:
+				pwr = interp1d(self.extPwrData[0], self.extPwrData[1])(wavelen)
+			except ValueError:  # out of limits
+				print("powerref out of limits at {}?".format(wavelen))
+				pwr = 1.0
+			return pwr
+		elif self.powerRefCur.isChecked() and defaultval is not None:
+			return defaultval
+		else:
+			return 1.0
+		return pwr
+
+	def getPowerData(self):
+		# read external power data file into self.extPwrData
+		if self.powerRefFile.isChecked():
+			allok = True
+			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Power data file')[0]
+			# try:
+			data = pd.read_csv(fname, sep='\t', header=None)
+			if len(data.columns) == 2:
+				self.extPwrData = data
+			else:
+				allok = False
+			# except:
+			#	allok = False
+			if not allok:
+				self.powerRefNone.setChecked(True)
+
+	def closeEvent(self, event):
+		# close subwins and see that no threads are running
+		if self.scanning.is_set():
+			self.scanning.clear()
+			self.scanThread.join(timeout=10)
+		for instr_name in self.instr_list:
+			exec('if self.{} is not None: self.{}.close()'.format(instr_name,instr_name))
+		event.accept()
 
 
 
