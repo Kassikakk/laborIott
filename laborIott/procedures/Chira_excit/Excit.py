@@ -43,6 +43,9 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if astr != 'None':
 				exec('self.{}.show()'.format(instr_name))
 				exec('self.setExternalMode.connect(self.{}.setExternal)'.format(instr_name))
+				exec('self.show_{}Butt.clicked.connect(self.{}.show)'.format(instr_name, instr_name))
+			else:
+				exec('self.show_{}Butt.setEnabled(False)'.format(instr_name))
 		#we should now have self.source, self.spectrom and so on
 
 
@@ -160,13 +163,34 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		while np.sign(wparms['stepwl']) * curwl <= np.sign(wparms['stepwl']) * wparms['stopwl']:  # enable negative step
 
 			if self.exsrc is not None:
+
 				self.exsrc.VIcommand.emit({'gotoWL':curwl})
 				while self.exsrc.WLreached.is_set(): #first wait for the motion to start
 					pass
-				self.exsrc.WLreached.wait() #then wait it to stop.
+				while not self.exsrc.WLreached.is_set(): #then wait it to stop.
+					if not self.scanning.is_set():
+						return
 				#looks like it also works if we're already there
 
-			#open the ODshutter here
+			'''
+			#if we are taking reference spectra or pow value from a different position (location, cuvette angle)
+			#refpos, sigpos - relevant position values; takeref - switch, self.positnr
+			for i,pos in enumerate([refpos, sigpos]):
+				#do refpos first, then sigpos can be used to level-check
+				if wparms['takeref']: #kas on vaja võtta ka ref?
+					self.positnr.VIcommand.emit({'goto':pos})#what if position already?
+					while self.positnr.goingtoPos.is_Set():
+						if not self.scanning.is_Set():
+							return
+				else:
+					if i == 0: #muidu ainult signal point (ja ei mingit käsku liigutamiseks)
+						continue
+				#indent the rest, too
+
+				'''
+
+			#open the ODshutter here (and other shutters if needed)
+			#we also should have wparms['keepShutterOpen'] if the wl change is quick
 
 
 			if wparms['usePwr']:
@@ -211,11 +235,13 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						return
 				pwrData = self.powerm.dataQ.get(False)  # list
 				# order powerdata saving as needed (construct name)
+				#also take into account ref or sig, if needed
 				self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
 			else:
 				pwrData = None
 
 			if wparms['useSpc']:  # save the spectral data
+				#also take into account ref or sig, if needed
 				if wparms['usePwr']:
 					spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
 				else:
@@ -227,7 +253,49 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 			# calculate and emit (or Queue) results to main thread
 			self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
-			# note that saving could in principle be invoked from main thread as well
+			#now the OD correction should happen here
+
+			'''
+			#level checking part
+			#if we want this to be interactive we need an external function to send some data
+			#what we need: current OD; levelchk on/off, max/min, what position to check
+			#question is how much to do here and how much outside the thread
+			self.VIcommand.emit({'getLevelData':None})
+			while self.scandataQ.empty():
+				if not self.scanning.is_set():
+						return
+			ldict = self.scandataQ.get(False) 
+			repeatwl = False
+			if ldict['lvlChkActive']: #and we are measuring signal, not ref (but ref needs to be retaken as well) 
+				if ldict['xval'] is not None:
+					#find index where abs(ldict['xval'] - x[i]) is minimal
+				else:
+					#default to where the signal is max
+				if (ctrlval  < minval) and OD > 0.04: #can be adjusted lower
+					rel = 0.8*maxval / ctrlval
+					if(rel > 0):
+						OD -= log10(rel)
+						if OD < 0.04:
+							OD = 0.04
+						print("adjusting  to {}".format(OD))
+					else:
+						print("Signal below minimum")
+					repeatwl = True
+				elif (ctrlval  > maxval) and OD < 4: #can be adjusted higher
+					rel = ctrlval/(0.8*maxval)
+					if (rel > 0):
+						OD += log10(rel)
+						if OD > 4:
+							OD = 4
+						print("adjusting higher to {}".format(OD))
+					else:
+						print("Signal over maximum")
+					repeatwl = True
+
+			'''
+
+
+
 			curwl += wparms['stepwl']
 			ind += 1
 		self.VIcommand.emit({'cleanScan':None})
@@ -281,6 +349,28 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerRefCur.setChecked(True)
 			if (not self.pwrChk.isChecked() and self.powerRefCur.isChecked()):
 				self.powerRefNone.setChecked(True)
+
+	def getLevelData(self):
+		#prepare data for level checking
+		ldict = dict()
+		#current OD; levelchk on/off, max/min, what position to check
+		ldict['lvlChkActive'] = self.levelCheck.isChecked() and self.attnr is not None
+		if ldict['lvlChkActive']:
+			ldict['curOD'] = self.attnr.OD
+			try:
+				ldict['minLvl'] = float(self.lvlMinEdit.text())
+			except ValueError:
+				ldict['minLvl'] = None
+			try:
+				ldict['maxLvl'] = float(self.lvlMaxEdit.text())
+			except ValueError:
+				ldict['maxLvl'] = None
+			try:
+				ldict['xval'] = float(self.lvlXEdit.text())
+			except ValueError:
+				ldict['xval'] = None
+		return ldict
+			
 
 	def getSum(self, x, y):
 		# sum y-s from the x values given by fields
