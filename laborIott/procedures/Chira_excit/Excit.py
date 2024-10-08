@@ -2,7 +2,7 @@
 import sys, os
 from PyQt5 import QtCore, QtWidgets
 
-from threading import Thread, Event
+from threading import Thread, Event, Queue
 from time import sleep, time
 from scipy.interpolate import interp1d
 import numpy as np
@@ -51,6 +51,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 		self.scanning = Event()
 		self.scanThread = None
+		self.scandataQ = Queue()
 		self.plot = self.graphicsView.plot([0, 1], [0, 0], pen=(255, 131, 0))  # fanta
 		self.plotx = [[0, 1]]
 		self.ploty = [[0, 0]]
@@ -255,44 +256,24 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
 			#now the OD correction should happen here
 
-			'''
-			#level checking part
-			#if we want this to be interactive we need an external function to send some data
-			#what we need: current OD; levelchk on/off, max/min, what position to check
-			#question is how much to do here and how much outside the thread
-			self.VIcommand.emit({'getLevelData':None})
+			#I would like to do something like:
+			#but only if we are on a signal measurement!
 			while self.scandataQ.empty():
 				if not self.scanning.is_set():
 						return
-			ldict = self.scandataQ.get(False) 
-			repeatwl = False
-			if ldict['lvlChkActive']: #and we are measuring signal, not ref (but ref needs to be retaken as well) 
-				if ldict['xval'] is not None:
-					#find index where abs(ldict['xval'] - x[i]) is minimal
-				else:
-					#default to where the signal is max
-				if (ctrlval  < minval) and OD > 0.04: #can be adjusted lower
-					rel = 0.8*maxval / ctrlval
-					if(rel > 0):
-						OD -= log10(rel)
-						if OD < 0.04:
-							OD = 0.04
-						print("adjusting  to {}".format(OD))
-					else:
-						print("Signal below minimum")
-					repeatwl = True
-				elif (ctrlval  > maxval) and OD < 4: #can be adjusted higher
-					rel = ctrlval/(0.8*maxval)
-					if (rel > 0):
-						OD += log10(rel)
-						if OD > 4:
-							OD = 4
-						print("adjusting higher to {}".format(OD))
-					else:
-						print("Signal over maximum")
-					repeatwl = True
+			newOD = self.scandataQ.get(False) 
+			if newOD is not None:
+				#adjust the OD
+				self.attnr.VIcommand({'setOD':newOD})
+				while not self.attnr.ODreached.is_set(): #wait for the disk to turn
+					if not self.scanning.is_set():
+						return
+			else:
+				#move on
+				curwl += wparms['stepwl']
+				ind += 1
 
-			'''
+
 
 
 
@@ -315,7 +296,9 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 	def update(self, data):
 		# supposedly called while scanning only
+		#TODO: we need to add ref data handling here in case of ref measuring
 		index, spcData, pwrData = data
+		newOD = None #may be needed for level checking
 
 		if spcData is not None:
 			spsum = self.getSum(self.spectraX, spcData)
@@ -324,8 +307,21 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			# see what's power & calc excit
 			# put into plot
 			self.ploty[0][index] = spsum / power
+
+			#do level check if needed
+			if self.levelCheck.isChecked() and self.attnr is not None:
+				try:
+					xval = float(self.lvlXEdit.text())
+					ctrlval = spcData[np.abs(self.spectraX - xval).argmin()]
+				except ValueError:
+					#print("Levelcheck: xval not applicable, using total max")
+					ctrlval = max(spcData)
+				newOD = getODCorr(ctrlval)
+	
 		elif pwrData is not None:
 			self.ploty[0][index] = pwrData[0]
+
+		self.scandataQ.put(newOD)
 		self.plot.setData(self.plotx[0], self.ploty[0])
 		self.saveData(self.nameEdit.text())
 
@@ -350,26 +346,42 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if (not self.pwrChk.isChecked() and self.powerRefCur.isChecked()):
 				self.powerRefNone.setChecked(True)
 
-	def getLevelData(self):
-		#prepare data for level checking
-		ldict = dict()
-		#current OD; levelchk on/off, max/min, what position to check
-		ldict['lvlChkActive'] = self.levelCheck.isChecked() and self.attnr is not None
-		if ldict['lvlChkActive']:
-			ldict['curOD'] = self.attnr.OD
-			try:
-				ldict['minLvl'] = float(self.lvlMinEdit.text())
-			except ValueError:
-				ldict['minLvl'] = None
-			try:
-				ldict['maxLvl'] = float(self.lvlMaxEdit.text())
-			except ValueError:
-				ldict['maxLvl'] = None
-			try:
-				ldict['xval'] = float(self.lvlXEdit.text())
-			except ValueError:
-				ldict['xval'] = None
-		return ldict
+	def getODCorr(self, ctrlval):
+		#determine new OD for level checking
+		#or None if no need to change or not able to determine
+		
+		OD = self.attnr.instrum.OD
+		try:
+			minval = float(self.lvlMinEdit.text())
+			maxval = float(self.lvlMaxEdit.text())
+		except ValueError:
+			print("Levelcheck: Check min max fields")
+			return None
+		if minval >= maxval:
+			print("Levelcheck: min > max?")
+			return None
+		if (ctrlval  < minval) and OD > 0.04: #can be adjusted lower
+			rel = 0.8*maxval / ctrlval
+			if(rel > 0):
+				OD -= log10(rel)
+				if OD < 0.04:
+					OD = 0.04
+				print("adjusting lower to {}".format(OD))
+				return OD
+			else:
+				return None
+		elif (ctrlval  > maxval) and OD < 4: #can be adjusted higher
+			rel = ctrlval/(0.8*maxval)
+			if (rel > 0):
+				OD += log10(rel)
+				if OD > 4:
+					OD = 4
+				print("adjusting higher to {}".format(OD))
+				return OD
+			else:
+				return None
+			
+		return None
 			
 
 	def getSum(self, x, y):

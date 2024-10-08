@@ -24,6 +24,8 @@ class USBIO_VI(VInst):
 		#Disabled in external mode and if not WLreached
 		self.dsbl += [self.ODButt, self.shutButt]
 		#self.wlEdit.setText("{:.2f}".format(self.tisph.wavelength))
+		self.ODreached = Event()
+		self.ODreached.set()
 		
 
 
@@ -53,8 +55,11 @@ class USBIO_VI(VInst):
 			newOD = int(newOD)
 		except ValueError:
 			return
+		self.ODreached.clear()
 		self.instrum.OD = int(newOD)
 		self.ODLabel.setText("{}".format(self.instrum.OD))
+		self.ODreached.set()
+		#who should do the waiting and for how long?
 		
 	def setShutter(self, openit):
 		self.instrum.setpin(0,int(openit))

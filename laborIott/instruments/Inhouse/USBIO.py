@@ -60,14 +60,24 @@ class USBIO(Instrument):
 		if value > 0:
 			self.interact([requests['REQ_SET_PWM_FRQ'],value,2,1])
 		
-
 	@property
-	def OD(self):
+	def freq0(self):
 		ret = self.interact([requests['REQ_GET_PWM_DUTY'],0,0,2])
 		return -1 if ret is None else ret[0] + ret[1]*256
 	
+	@freq0.setter
+	def freq0(self, value):
+		if value > 0:
+			self.interact([requests['REQ_SET_PWM_DUTY'],value,0,1])
+
+	@property
+	def OD(self):
+		ret = self.freq0
+		return ret
+	
 	@OD.setter
 	def OD(self, value):
+		#do the calcs
 		if value > 0:
 			self.interact([requests['REQ_SET_PWM_DUTY'],value,0,1])
 		
