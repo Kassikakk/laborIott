@@ -10,14 +10,15 @@ from laborIott.adapters.ver2.USBAdapter import USBAdapter
 #from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.instruments.Newport1830.Inst import Newport1830  
 from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
-from laborIott.instruments.Newport1830 import Newport1830  
+from laborIott.instruments.ver2.Newport.Newport1830 import Newport1830
+import random
 
 from time import sleep
 import numpy as np
 from math import log10
 
 usbio = USBIO(USBAdapter(0xcacc, 0x0004))
-pwrmtr = Newport1830.Newport1830(SDKAdapter("../Newport1830/Inst/usbdll", False)) #Miks ei leia System32st?
+pwrmtr = Newport1830(SDKAdapter("usbdll", False)) 
 #pwrmtr = Newport1830.Newport1830(SDKAdapter("C:/Windows/System32/usbdll", False)) #Miks ei leia System32st?
 #"../Newport1830/Inst/usbdll"
 #"C:/Windows/System32/usbdll"
@@ -32,12 +33,15 @@ def measpwr():
 	pow = []
 	for i in range(20):
 		pow.append(pwrmtr.power)
-		sleep(0.05)
+		sleep(0.2)
 	return np.mean(pow)
 
 ref = measpwr()
 
-for duty in range(7500,1500,-100):
+#for duty in range(1500,7500,100):
+for i in range(20):
+	#duty = random.randrange(1500,7500)
+	duty = [1500,4500,7500,4500][i%4]
 	usbio.OD = duty
 	sleep(1)
 	sig = measpwr()
