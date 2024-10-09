@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>USBIO device</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="ODLabel">
@@ -72,7 +72,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Set</string>
+     <string>Set OD</string>
     </property>
     <property name="checkable">
      <bool>false</bool>
@@ -94,6 +94,25 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>31</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>OD:</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -101,7 +120,7 @@
      <x>0</x>
      <y>0</y>
      <width>328</width>
-     <height>30</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

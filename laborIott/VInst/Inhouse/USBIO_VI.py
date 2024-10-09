@@ -5,6 +5,7 @@ from threading import Event
 from laborIott.VInst.VInst import VInst
 from laborIott.adapters.ver2.USBAdapter import USBAdapter
 from laborIott.instruments.Inhouse.USBIO import USBIO
+from time import sleep
 import os
 
 
@@ -33,7 +34,7 @@ class USBIO_VI(VInst):
 		self.ODButt.clicked.connect(lambda: self.setOD(self.ODEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
 		self.instrum.freq1 = 300
-		self.setOD(1500)
+		self.setOD(0.05)
 		
 		
 		
@@ -52,12 +53,15 @@ class USBIO_VI(VInst):
 	def setOD(self,newOD):
 		#siin nüüd teha midagi
 		try:
-			newOD = int(newOD)
+			newOD = float(newOD)
 		except ValueError:
 			return
 		self.ODreached.clear()
-		self.instrum.OD = int(newOD)
-		self.ODLabel.setText("{}".format(self.instrum.OD))
+		#we go about 3 OD units in 1.2s, so 0.4s per unit
+		dOD = abs(newOD - self.instrum.OD)
+		self.instrum.OD = newOD
+		sleep(0.5*dOD) #let's put 0.5s just in case
+		self.ODLabel.setText("{:.2f}".format(self.instrum.OD))
 		self.ODreached.set()
 		#who should do the waiting and for how long?
 		

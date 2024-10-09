@@ -1,4 +1,4 @@
-from iDusVI import iDus_VI
+from .iDusVI import iDus_VI
 from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.instruments.ver2.Andor.shamrock import Shamrock

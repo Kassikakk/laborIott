@@ -2,7 +2,8 @@
 import sys, os
 from PyQt5 import QtCore, QtWidgets
 
-from threading import Thread, Event, Queue
+from threading import Thread, Event
+from queue import Queue
 from time import sleep, time
 from scipy.interpolate import interp1d
 import numpy as np
@@ -38,7 +39,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						astr  = "getattr(m,module[1])()"
 					except ModuleNotFoundError:
 						#pass # astr remains None if module not found
-						print('laborIott.'  + module[0])
+						print('Module not found: laborIott.'  + module[0])
+						
 			exec('self.{} = '.format(instr_name) + astr)
 			if astr != 'None':
 				exec('self.{}.show()'.format(instr_name))
@@ -58,7 +60,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.extPwrData = None  # external powerdata
 		self.dsbl += [self.startEdit, self.stepEdit, self.stopEdit, self.spcChk, self.pwrChk, self.sxminEdit,
 					 self.sxmaxEdit, self.pwrRadioBox]
-		self.setEnable(False)
+		self.setEnable(True)
 		self.startButt.clicked.connect(self.onStart)
 		self.setExternalMode.connect(self.setExternal)
 		self.spcChk.clicked.connect(lambda: self.setExternal(False))
@@ -138,7 +140,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if self.exsrc is not None:
 				self.exsrc.setShutter('open')
 
-			self.scanThread = Thread(target=self.scanProc, args=(wparms))
+			self.scanThread = Thread(target=self.scanProc, args= (wparms,))
 			self.startButt.setText("Stop")
 			self.setExternalMode.emit(True) 
 			self.startTime = time()
@@ -164,7 +166,6 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		while np.sign(wparms['stepwl']) * curwl <= np.sign(wparms['stepwl']) * wparms['stopwl']:  # enable negative step
 
 			if self.exsrc is not None:
-
 				self.exsrc.VIcommand.emit({'gotoWL':curwl})
 				while self.exsrc.WLreached.is_set(): #first wait for the motion to start
 					pass
@@ -207,7 +208,6 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 			if wparms['useSpc']:  # Spectrometer determines the time
 				# idus shutter open?
-				
 				self.spectrom.VIcommand.emit({'run':None})
 				# wait for data arrival
 				while self.spectrom.dataQ.empty():
@@ -215,6 +215,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						return
 				# idus shutter close?
 				xData, spcData = self.spectrom.dataQ.get(False)
+				print(len(spcData))
 			else:
 				spcData = None
 				startTime = time()
@@ -222,7 +223,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					if not self.scanning.is_set():
 						return
 
-			if spectro2 is not None:
+			if self.spectro2 is not None:
 				while self.spectro2.dataQ.empty(): #also check that spectro2 has finished
 					if not self.scanning.is_set():
 						return
@@ -273,12 +274,6 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				curwl += wparms['stepwl']
 				ind += 1
 
-
-
-
-
-			curwl += wparms['stepwl']
-			ind += 1
 		self.VIcommand.emit({'cleanScan':None})
 
 	def cleanScan(self):
@@ -316,7 +311,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				except ValueError:
 					#print("Levelcheck: xval not applicable, using total max")
 					ctrlval = max(spcData)
-				newOD = getODCorr(ctrlval)
+				newOD = self.getODCorr(ctrlval)
 	
 		elif pwrData is not None:
 			self.ploty[0][index] = pwrData[0]
@@ -360,22 +355,24 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		if minval >= maxval:
 			print("Levelcheck: min > max?")
 			return None
-		if (ctrlval  < minval) and OD > 0.04: #can be adjusted lower
+		#get applicable OD limits	
+		minOD, maxOD = self.attnr.instrum.ODlimits
+		if (ctrlval  < minval) and OD > minOD: #can be adjusted lower
 			rel = 0.8*maxval / ctrlval
 			if(rel > 0):
 				OD -= log10(rel)
-				if OD < 0.04:
-					OD = 0.04
+				if OD < minOD:
+					OD = minOD
 				print("adjusting lower to {}".format(OD))
 				return OD
 			else:
 				return None
-		elif (ctrlval  > maxval) and OD < 4: #can be adjusted higher
+		elif (ctrlval  > maxval) and OD < maxOD: #can be adjusted higher
 			rel = ctrlval/(0.8*maxval)
 			if (rel > 0):
 				OD += log10(rel)
-				if OD > 4:
-					OD = 4
+				if OD > maxOD:
+					OD = maxOD
 				print("adjusting higher to {}".format(OD))
 				return OD
 			else:

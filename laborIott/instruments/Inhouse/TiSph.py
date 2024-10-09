@@ -51,7 +51,7 @@ class TiSph(Instrument):
 			if abs(diff) < self.prec:
 				break
 			steps = int(diff/self.nmperstep) #TODO: check sign
-			print(i, wl, diff, steps)
+			#print(i, wl, diff, steps)
 			#maybe there could also be some sanity check if we are still too far after the first round?
 			#set the motion & wait
 			self.interwrap([requests['REQ_SET_DELTA'], steps, 0, 1])
@@ -90,7 +90,6 @@ class TiSph(Instrument):
 			return
 		#also if already there
 		if(abs(value - self.wavelength) < self.prec):
-			print("release")
 			self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 			return
 		#first check if the current wl is already 

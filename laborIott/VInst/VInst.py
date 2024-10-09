@@ -77,7 +77,6 @@ class VInst(Visual):
 		if Zadapter is not None:
 			adapter = Zadapter
 		self.instrum = instrument(adapter)
-		print(self.instrum.connected)
 
 	def onReconnect(self):
 

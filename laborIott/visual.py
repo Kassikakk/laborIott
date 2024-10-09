@@ -73,7 +73,7 @@ class Visual(QtWidgets.QMainWindow):
 		for commstr in commdict:
 			par = commdict[commstr]
 			if par is None:
-				parstr = ''
+				parstr = '()'
 			else:
 				parstr = '(*par)' if type(par) == 'list' else '(par)'
 			exec('self.' + commstr + parstr)

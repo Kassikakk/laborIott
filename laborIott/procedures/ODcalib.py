@@ -25,7 +25,7 @@ pwrmtr = Newport1830(SDKAdapter("usbdll", False))
 
 pwrmtr.wl = 400
 usbio.freq1 = 300
-usbio.OD = 1500
+usbio.duty0 = 1500
 
 
 
@@ -38,13 +38,15 @@ def measpwr():
 
 ref = measpwr()
 
-#for duty in range(1500,7500,100):
-for i in range(20):
+for duty in range(7500,1500,-100):
+#for i in range(20):
 	#duty = random.randrange(1500,7500)
-	duty = [1500,4500,7500,4500][i%4]
-	usbio.OD = duty
+	#duty = [3000,4500,6000,4500][i%4]
+	#usbio.duty0 = duty-200
+	#sleep(1)
+	usbio.duty0 = duty
 	sleep(1)
 	sig = measpwr()
 	print('{}	{}'.format(duty, log10(ref/sig)))
 
-usbio.OD = 1500
+usbio.duty0 = 1500
