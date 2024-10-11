@@ -23,7 +23,7 @@ pwrmtr = Newport1830(SDKAdapter("usbdll", False))
 #"../Newport1830/Inst/usbdll"
 #"C:/Windows/System32/usbdll"
 
-pwrmtr.wl = 400
+pwrmtr.wl = 900
 usbio.freq1 = 300
 usbio.duty0 = 1500
 
@@ -38,7 +38,7 @@ def measpwr():
 
 ref = measpwr()
 
-for duty in range(7500,1500,-100):
+for duty in range(1500,7500,100):
 #for i in range(20):
 	#duty = random.randrange(1500,7500)
 	#duty = [3000,4500,6000,4500][i%4]

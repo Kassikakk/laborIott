@@ -66,10 +66,10 @@ class VInst(Visual):
 		#print("address ok")
 		
 		#else construct a ZMQAdapter
-		inport = zmqSection.getint('inport',5555)
-		outport = zmqSection.getint('outport',inport)
+		port = zmqSection.getint('port',5555)
+		#outport = zmqSection.getint('outport',port)
 		
-		return ZMQAdapter(address, inport) #uus ver
+		return ZMQAdapter(address, port) #uus ver
 
 	def connectInstr(self,  refname, instrument, adapter):
 		#define as separate function so it can be overridden
