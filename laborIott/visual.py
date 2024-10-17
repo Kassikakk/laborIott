@@ -59,7 +59,7 @@ class Visual(QtWidgets.QMainWindow):
 		if self.useXYFormat is not None:
 			self.dsbl += [self.useXYFormat]
 		#account for the possibility of no x-data (but we should have y)
-		self.xdata = None
+		self.xdata = []
 		self.ydata = []
 
 		#should we use an event here?
@@ -133,11 +133,11 @@ class Visual(QtWidgets.QMainWindow):
 		# also if we have any data
 		if len(name) == 0:
 			return
-
+		
 		#Let's use X data if it's there (in equal amount to Y data) and not explicitly excluded
-		useX = self.xdata is not None
+		useX = len(self.xdata) > 0
 		useX &= (self.useXYFormat is None or self.useXYFormat.isChecked())
-
+		print("Save by {} ylen {} usex {}".format(os.path.join(self.saveLoc, name), len(self.ydata), useX))
 		if useX and (len(self.xdata) != len(self.ydata)):
 			return
 		

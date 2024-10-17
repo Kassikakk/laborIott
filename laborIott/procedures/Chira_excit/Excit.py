@@ -172,6 +172,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				while not self.exsrc.WLreached.is_set(): #then wait it to stop.
 					if not self.scanning.is_set():
 						return
+				print("WL reached", curwl)
 				#looks like it also works if we're already there
 
 			'''
@@ -200,6 +201,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerm.VIcommand.emit({'setPwrWL':curwl})
 				# start powermeter series + reset previous
 				self.powerm.VIcommand.emit({'setCollect':[True, True]})
+				print("Starting powercollect")
 
 
 			# wait a while
@@ -215,7 +217,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						return
 				# idus shutter close?
 				xData, spcData = self.spectrom.dataQ.get(False)
-				print(len(spcData))
+				print("Got spcdata",len(spcData))
 			else:
 				spcData = None
 				startTime = time()
@@ -236,6 +238,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					if not self.scanning.is_set():
 						return
 				pwrData = self.powerm.dataQ.get(False)  # list
+				print("Powerdata received")
 				# order powerdata saving as needed (construct name)
 				#also take into account ref or sig, if needed
 				self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
@@ -263,6 +266,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				if not self.scanning.is_set():
 						return
 			newOD = self.scandataQ.get(False) 
+			print("NewOD=",newOD)
 			if newOD is not None:
 				#adjust the OD
 				self.attnr.VIcommand({'setOD':newOD})
@@ -301,7 +305,10 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			power = self.getPwr(1.0 if pwrData is None else pwrData[0], self.plotx[0][index])
 			# see what's power & calc excit
 			# put into plot
-			self.ploty[0][index] = spsum / power
+			excit = spsum / power
+			self.ploty[0][index] = excit
+			self.xdata += [index]
+			self.ydata += [excit]
 
 			#do level check if needed
 			if self.levelCheck.isChecked() and self.attnr is not None:
@@ -315,6 +322,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 	
 		elif pwrData is not None:
 			self.ploty[0][index] = pwrData[0]
+			#Here also add ydata
 
 		self.scandataQ.put(newOD)
 		self.plot.setData(self.plotx[0], self.ploty[0])
