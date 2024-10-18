@@ -387,3 +387,10 @@ Kas ma saan aru, et signaali võib phm. defineda nii protseduuri kui VI pool? co
 # 201017 
 
 Praegu vaatan nii, et kui instrument kutsub connecti, siis adapteriga ühendamine on superiga try:tud, aga sealt edasi on avatud erroritele. No nt. SDKadapteri puhul adapter läheb kenasti käima ka siis, kui aparaat pole sisse lülitatud. Saab muidugi ühekaupa instrumentides eraldi try:da, aga kas mingit ühist lahendust ei ole välja mõeldamas?
+
+18, aga paneme edasi. Praegu oleks mõtteid:
+* x skaala ei tule korralikul läbi
+* siis katikud tuleks panna kontrolli alla
+* siis mingi signaali vähenemine ikka toimub, peaks vist mõtlema aluse liigutamisele ka.
+* kuidagi võiks neid aknaid veidi rohkem laiali paisata, et skriini peale ära mahuks. Siin on präägu 1280x1024, sellest võiks suurem muidugi olla?
+* noh muidugi logging, checklist, state log, (kas kuidagi seda saaks ka hiljem meelde tuletada? automaatselt avamisel)

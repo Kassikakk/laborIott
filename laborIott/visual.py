@@ -137,7 +137,7 @@ class Visual(QtWidgets.QMainWindow):
 		#Let's use X data if it's there (in equal amount to Y data) and not explicitly excluded
 		useX = len(self.xdata) > 0
 		useX &= (self.useXYFormat is None or self.useXYFormat.isChecked())
-		print("Save by {} ylen {} usex {}".format(os.path.join(self.saveLoc, name), len(self.ydata), useX))
+		#print("Save by {} ylen {} usex {}".format(os.path.join(self.saveLoc, name), len(self.ydata), useX))
 		if useX and (len(self.xdata) != len(self.ydata)):
 			return
 		
