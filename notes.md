@@ -394,3 +394,7 @@ Praegu vaatan nii, et kui instrument kutsub connecti, siis adapteriga ühendamin
 * siis mingi signaali vähenemine ikka toimub, peaks vist mõtlema aluse liigutamisele ka.
 * kuidagi võiks neid aknaid veidi rohkem laiali paisata, et skriini peale ära mahuks. Siin on präägu 1280x1024, sellest võiks suurem muidugi olla?
 * noh muidugi logging, checklist, state log, (kas kuidagi seda saaks ka hiljem meelde tuletada? automaatselt avamisel)
+
+#  241022
+
+Vot nüüd ei saa küll jälle aru, mis trianglit teeb see ZMQ adapter koostöös TiSph-ga. Ühesõnaga, annab teine interact error: Operation cannot be accomplished in current state, ja ta jookseb lihtsalt kinni. Mis ilmselt siis peab tähendama, et vaatamata igasugu abinõudele kuidagi siiski satub keegi requestima enne kui reply on tagasi tulnud. Siin küll on nüüd jah võistlemas onTimer, instrumendi thread ja protseduuri thread, aga sellegipoolest ei kujuta ette, kuidas selline olukord tekkida saaks. Ja kuidas diagnoosida? Mingi logimise peaks ilmselt siis tegema, aga see vist oleks üsna verbaalne, hea, kui saaks kuidagi hiljem teda sisse lülitada. Käsud, mille peale see rakendus, viimati oli [6, 0, 0, 1] ehk siis req_set_release ja kuidagi oli get_wavelength saanud vist mingi pooliku vastuse, igatahes väitis, et array index out of range.

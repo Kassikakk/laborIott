@@ -76,6 +76,10 @@ class Chira_VI(Source_VI):
 			return #probably a messagebox should do here
 		self.instrum.bandwidth = newBW
 		self.bwEdit.setText("{:.1f}".format(self.instrum.bandwidth))
+
+	def setShutter(self,state):
+			#sets the shutter state according to self.shutButt
+			self.instrum.shutter = 'open' if state else 'closed'
 		
 
 

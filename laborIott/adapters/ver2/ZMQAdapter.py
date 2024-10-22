@@ -72,7 +72,9 @@ class ZMQAdapter(Adapter):
 		interpreting the list is up to the instrument
 		"""
 		#take care to not cross the sendings
-		self.clear_to_send.wait()
+		if not self.clear_to_send.is_set():
+			print("waiting for ZMQ clearance")
+			self.clear_to_send.wait()
 		self.clear_to_send.clear()
 		ret = self.send_recv(comm['interact'], command)
 		self.clear_to_send.set()

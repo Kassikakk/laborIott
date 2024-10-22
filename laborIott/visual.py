@@ -75,7 +75,7 @@ class Visual(QtWidgets.QMainWindow):
 			if par is None:
 				parstr = '()'
 			else:
-				parstr = '(*par)' if type(par) == 'list' else '(par)'
+				parstr = '(*par)' if type(par) == list else '(par)'
 			exec('self.' + commstr + parstr)
 
 

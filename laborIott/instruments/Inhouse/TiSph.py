@@ -70,7 +70,7 @@ class TiSph(Instrument):
 				#check if we actually moved at least more than half of what we should have
 				if abs(self.wavelength - value) > abs(diff/2):
 					#something wrong here, let's not break the machinery
-					print("Ineffective moving detected")
+					print("Ineffective moving detected ({}->{} got {})".format(value + diff, value,self.wavelength))
 					break
 			sleep(1) #We need time to let the wavemeter settle
 		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
