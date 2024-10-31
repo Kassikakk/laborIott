@@ -1,7 +1,7 @@
 import pickle
 import zmq
 from laborIott.adapters.adapter import Adapter
-from threading import Event
+from threading import Event, Lock
 
 comm = {'connect': 0, 'interact': 1, 'disconnect': 2, 'echo': 3}
 
@@ -27,8 +27,8 @@ class ZMQAdapter(Adapter):
 		self.context = zmq.Context()
 		self.socket = None #set in the connect
 		#We don't want to cross sendings from different threads possibly
-		self.clear_to_send = Event()
-		self.clear_to_send.set()
+		self.lock = Lock()
+
 		
 
 		
@@ -71,13 +71,7 @@ class ZMQAdapter(Adapter):
 		performs (generally) a two-way interaction and should return a list of results
 		interpreting the list is up to the instrument
 		"""
-		#take care to not cross the sendings
-		if not self.clear_to_send.is_set():
-			print("waiting for ZMQ clearance")
-			self.clear_to_send.wait()
-		self.clear_to_send.clear()
 		ret = self.send_recv(comm['interact'], command)
-		self.clear_to_send.set()
 		if ret is None:
 			return []
 		return ret
@@ -99,14 +93,18 @@ class ZMQAdapter(Adapter):
 		request = [command, args]
 		counter = 0
 		while True:
-			self.sock.send_pyobj(request)
-			if (self.sock.poll(self.timeout) & zmq.POLLIN) != 0:
-            	#reply = socket.recv_serialized(deserialize=pickle.loads)
-				reply = self.sock.recv_pyobj()
-				#print(reply)
-				break
+			#print("Sending ",request,self.clear_to_send.is_set())
+			with self.lock:
+				self.sock.send_pyobj(request)
+				if (self.sock.poll(self.timeout) & zmq.POLLIN) != 0:
+					#reply = socket.recv_serialized(deserialize=pickle.loads)
+					reply = self.sock.recv_pyobj()
+					#print("	Recving ",request, reply)
+					#print(reply)
+					break
 
 			counter += 1
+			print("going for reconn ", counter)
 			
 			self.sock.setsockopt(zmq.LINGER, 0)
 			self.sock.close()
