@@ -114,7 +114,7 @@ class Visual(QtWidgets.QMainWindow):
 
 
 	def onGetLoc(self):
-		if(self.saveToZip.isChecked()):
+		if(self.saveToZip is not None and self.saveToZip.isChecked()):
 			loc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")[0]
 		else:
 			loc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
