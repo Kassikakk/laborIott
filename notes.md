@@ -398,3 +398,9 @@ Praegu vaatan nii, et kui instrument kutsub connecti, siis adapteriga ühendamin
 #  241022
 
 Vot nüüd ei saa küll jälle aru, mis trianglit teeb see ZMQ adapter koostöös TiSph-ga. Ühesõnaga, annab teine interact error: Operation cannot be accomplished in current state, ja ta jookseb lihtsalt kinni. Mis ilmselt siis peab tähendama, et vaatamata igasugu abinõudele kuidagi siiski satub keegi requestima enne kui reply on tagasi tulnud. Siin küll on nüüd jah võistlemas onTimer, instrumendi thread ja protseduuri thread, aga sellegipoolest ei kujuta ette, kuidas selline olukord tekkida saaks. Ja kuidas diagnoosida? Mingi logimise peaks ilmselt siis tegema, aga see vist oleks üsna verbaalne, hea, kui saaks kuidagi hiljem teda sisse lülitada. Käsud, mille peale see rakendus, viimati oli [6, 0, 0, 1] ehk siis req_set_release ja kuidagi oli get_wavelength saanud vist mingi pooliku vastuse, igatahes väitis, et array index out of range.
+
+No seal oli lock vist lihtsalt vaja õigesti rakendada.
+
+# 242211
+
+Peaks siis nüüd õigeajastuma see ver2 tähistus ära koristada ja see väljendub siis adapters, instruments, server vastavate folderite likvideerimises, vanade failide väljaselektimises ja siis ka importides ver2 s
