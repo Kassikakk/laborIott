@@ -1,5 +1,5 @@
 from laborIott.instruments.instrument import Instrument
-from laborIott.validators import strict_discrete_set
+#from laborIott.validators import strict_discrete_set
 
 class IDus(Instrument):
 	'''

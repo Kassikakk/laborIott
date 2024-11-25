@@ -20,12 +20,19 @@ class Newport1830(Instrument):
 		self.interact("newp_usb_init_system()")
 		self.interact("newp_usb_init_product(0xCEC7)")	
 		devinfo = self.interact("newp_usb_get_device_info(byref(c_char*%d))" % self.buflen, [0,[b""]])[1] #self.buf.value
-		devinfo = b"".join(devinfo) #muudame listi bytestringiks
 		
-		if len(devinfo) > 0: #siis midagi on taga
+		devinfo = b"".join(devinfo) #muudame listi bytestringiks
+
+		
+		if len(devinfo) > 0 and devinfo[0] != 0: #siis midagi on taga
+			#kuigi len(devinfo) kipub igal juhul 128 olema
 			#Leiame ID, millega edasisi toiminguid teha
 			self.devID = int(devinfo[:devinfo.find(b',')])
-		return True
+			return True
+		else:
+			return False
+
+
 
 			
 		
