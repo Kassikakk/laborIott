@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets, QtGui
 
 from laborIott.VInst.PowermVI import Powerm_VI
 
-from laborIott.adapters.ver2.SerialAdapter import SerialAdapter
-from laborIott.instruments.ver2.Newport.Newport842 import Newport842
+from laborIott.adapters.SerialAdapter import SerialAdapter
+from laborIott.instruments.Newport.Newport842 import Newport842
 import os
 
 

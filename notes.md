@@ -403,4 +403,4 @@ No seal oli lock vist lihtsalt vaja õigesti rakendada.
 
 # 242211
 
-Peaks siis nüüd õigeajastuma see ver2 tähistus ära koristada ja see väljendub siis adapters, instruments, server vastavate folderite likvideerimises, vanade failide väljaselektimises ja siis ka importides ver2 s
+Peaks siis nüüd õigeajastuma see ver2 tähistus ära koristada ja see väljendub siis adapters, instruments, server vastavate folderite likvideerimises, vanade failide väljaselektimises ja siis ka importides ver2 likvideerimises. ok proovime seda teha.

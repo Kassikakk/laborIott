@@ -3,7 +3,7 @@ import sys
 from PyQt5 import QtGui, QtWidgets
 
 from laborIott.VInst.SourceVI import Source_VI
-from laborIott.adapters.ver2.USBAdapter import USBAdapter
+from laborIott.adapters.USBAdapter import USBAdapter
 from laborIott.instruments.Inhouse.TiSph import TiSph
 import os
 

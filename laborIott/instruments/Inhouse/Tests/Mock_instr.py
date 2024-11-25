@@ -1,6 +1,6 @@
 from laborIott.instruments.Inhouse.Mock import Mock
-from laborIott.adapters.ver2.RNDAdapter import RNDAdapter
-from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
+from laborIott.adapters.RNDAdapter import RNDAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
 #mock = Mock(RNDAdapter())
 mock = Mock(ZMQAdapter("localhost"))

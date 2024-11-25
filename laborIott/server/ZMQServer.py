@@ -1,6 +1,6 @@
 import zmq
 import pickle
-from laborIott.adapter import DummyAdapter
+from laborIott.adapters.RNDAdapter import RNDAdapter
 
 '''
 Kuidas selle käivitamine siis hakkab käima?
@@ -8,68 +8,55 @@ import server
 devdict = {"dev1":Adapter(...),
          "dev2":Adapter(...)}
 inlist = (("addr1", port1),("addr2", port2))
-svr = server.LabServer( devdict, inlist, outport)
+svr = server.ZMQServer( devdict, inlist, outport)
 svr.run()
 
+Oot leiutame nüüd uue asja, lihtsam server
+võtame üks seade korraga
+Siis vist adapter, aadress, port ja phm polegi muud vaja?
+Ja sõnum on command ja sisendlist
+tagasi läheb list või none? 
+Hakkame otsast proovima
+
 '''
+comm = {'connect': 0, 'interact': 1, 'disconnect': 2, 'echo': 3}
 
 
 class ZMQServer(object):
-	def __init__(self, devdict: dict, inlist: tuple, outport: int) -> object:
-		# actual server
-		# it could be beneficial to make a base class + specifics
-		# but let's see
-		# there should be a dict of devices, "dev_id":adapter
-		# None can fytify that the device is not present
+	def __init__(self, adapter, port = 5555) -> object:
+		'''
+		This server is very simple, just a layer between the actual adapter and the zmq network
 
-		self.devdict = devdict
-		self.timeout = 10
-
-		# list of listened channels
-		self.ch_list = []
-		for inn in inlist:
-			# siin tuleb uurida, mispidi töötab
-			self.ch_list += [[zmq.Context().socket(zmq.SUB), zmq.Poller()]]
-			sock, poll = self.ch_list[-1]
-			sock.connect("tcp://%s:%d" % inn)
-			sock.setsockopt(zmq.SUBSCRIBE, b'')
-			poll.register(sock, zmq.POLLIN)
-
+		'''
+		self.adapter = adapter
 		# outward
-		self.socket = zmq.Context().socket(zmq.PUB)
-		self.socket.bind("tcp://*:%d" % outport)
+		self.context = zmq.Context()
+		self.sock = self.context.socket(zmq.REP)
+		self.sock.bind("tcp://*:%d" % port)
 
-	# let's put this into some run() or something
+
 	def run(self):
+		#the infinite loop scanning for incoming messages
 		while True:
 
-			# cycle over some channels that we are listening
-			#how can something go cross here?
-			for ch in self.ch_list:
-				# check if something arrived:
-				if ch[1].poll(self.timeout):
-					topic, record = ch[0].recv_serialized(
-						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
-					# some special topics? Like to stop or sth. Though who sends it?
-					dev_id, op = topic.split('.')[:2]
-					if (dev_id in self.devdict) and (self.devdict[dev_id] is not None):
-						if op == "write":
-							self.devdict[dev_id].write(record)
-						elif op == "read":
-							record = self.devdict[dev_id].read()
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-						elif op == "values":
-							record = self.devdict[dev_id].values(record)
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-						elif op == "echo":
-							self.socket.send_serialized(record,
-														serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+			request = self.sock.recv_pyobj()
+			if request[0] == comm['connect']:
+				#print("callin connect")
+				reply = self.adapter.connect()
+			elif request[0] == comm['interact']:
+				#print("callin interact")
+				reply = self.adapter.interact(request[1])
+			elif request[0] == comm['disconnect']:
+				reply = self.adapter.disconnect()
+			elif request[0] == comm['echo']:
+				reply = request[1]
 
+			self.sock.send_pyobj(reply)
+
+			
+
+					
 # Peaks siin mingi dummy serveri käima laskma, selleks mingi special adapter? Ja aadress localhost:5555 ilmselt.
 if __name__ == '__main__':
-	devdict = {"dummy": DummyAdapter()}
-	inlist = (("127.0.0.0", 5555),)
-	svr = ZMQServer(devdict, inlist, 5556)
+	svr = ZMQServer(RNDAdapter())
 	svr.run()

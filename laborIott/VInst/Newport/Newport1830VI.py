@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets, QtGui
 
 from laborIott.VInst.PowermVI import Powerm_VI
 
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
-from laborIott.instruments.ver2.Newport.Newport1830 import Newport1830
+from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.instruments.Newport.Newport1830 import Newport1830
 import os
 
 

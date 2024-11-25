@@ -1,7 +1,7 @@
 from .iDusVI import iDus_VI
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
+from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.instruments.ver2.Andor.shamrock import Shamrock
+from laborIott.instruments.Andor.shamrock import Shamrock
 from PyQt5 import QtWidgets
 from laborIott.instruments.Andor.VInst.ShamrockDlg import Ui_ShamrockDialog #pyuic5 generated dialog
 import os, sys

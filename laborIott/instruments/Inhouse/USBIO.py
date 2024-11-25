@@ -14,7 +14,7 @@ requests = { 'REQ_ECHO':0,'REQ_SET_PINS' : 1, 'REQ_GET_PINS' : 2, 'REQ_SET_PWM_F
 
 class USBIO(Instrument):
 	'''
-	This ver2 class refers to V-USB connected USBIO, connecting
+	This class refers to V-USB connected USBIO, connecting
 
 	'''
 

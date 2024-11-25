@@ -5,9 +5,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from laborIott.VInst.SourceVI import Source_VI
 
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
+from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.instruments.ver2.Chirascan.Chirascan import ChiraScan
+from laborIott.instruments.Chirascan.Chirascan import ChiraScan
 import os
 
 

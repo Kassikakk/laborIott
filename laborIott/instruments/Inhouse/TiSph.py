@@ -8,7 +8,7 @@ requests = { 'REQ_ECHO':0,'REQ_SET_SPEED' : 1, 'REQ_GET_SPEED' : 2, 'REQ_SET_DEL
 
 class TiSph(Instrument):
 	'''
-	This ver2 class refers to V-USB connected complete TiSph instrument
+	This class refers to V-USB connected complete TiSph instrument
 	(turning + wavemeter + shutter). We might need separate classes for
 	wavemeter, V-USB turning (+ shutter) or COM port turning alone.
 

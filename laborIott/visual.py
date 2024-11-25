@@ -8,7 +8,7 @@ from zipfile import ZipFile
 import struct
 
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
 import os
 def localPath(filename):

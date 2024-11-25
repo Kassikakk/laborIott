@@ -6,11 +6,11 @@ We may later include TiSph, but first letäs use a lamp
 '''
 
 from laborIott.instruments.Inhouse.USBIO import USBIO
-from laborIott.adapters.ver2.USBAdapter import USBAdapter
+from laborIott.adapters.USBAdapter import USBAdapter
 #from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.instruments.Newport1830.Inst import Newport1830  
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
-from laborIott.instruments.ver2.Newport.Newport1830 import Newport1830
+from laborIott.adapters.SDKAdapter import SDKAdapter
+from laborIott.instruments.Newport.Newport1830 import Newport1830
 import random
 
 from time import sleep
