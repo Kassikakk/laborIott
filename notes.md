@@ -404,3 +404,14 @@ No seal oli lock vist lihtsalt vaja õigesti rakendada.
 # 242211
 
 Peaks siis nüüd õigeajastuma see ver2 tähistus ära koristada ja see väljendub siis adapters, instruments, server vastavate folderite likvideerimises, vanade failide väljaselektimises ja siis ka importides ver2 likvideerimises. ok proovime seda teha.
+
+# 241126 
+
+Peaks kirja panema, et kuidas pythoni pathi on saadud täpsustada VSCod(ium)is. Vaata settings.json-i , seal on "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}${env:PYTHONPATH}"} ja sama võib ka windowsi jaoks olla. Nüüd nende kahe asja vahel oli varem semikoolon, aga nüüd vähemalt linuxis on juhtunud, et see tuli ära koristada, sest ta ilmselt kuidagi liitus selle workspaceFolderi lõppu ja siis sealt enam asju üles ei leitud. Windowsi kohta hetkel ei tea. Õieti on .config/VSCodium/User/settings.json ja siis on lokaalne .vscode/settings.json, ilmselt siis viimane võtab pretsedentsi. 
+		Windowsis näikse semikoolon veel töötavat ja seal oligi ainult selles samas foldris olevas settings.jsonis.
+
+Mis ka tuleks joonde ajada, on see, et kuidas VI käimapanekul täpsemalt saab minna mittekonnekted seisundisse, kuidas ta täpselt üritab rekonnekteeruda ja mida jälgida, et ta mittekonnekted seisundis mingit jama ei saaks tekitada mingite nuppude vajutamisel näiteks.
+
+
+

@@ -112,6 +112,6 @@ class Newport1830(Instrument):
 	@scale.setter
 	def scale(self, value):
 		#assume string value -  accepts 'Auto' for now
-		if (value == 'Auto'):
+		if (value == 'Auto' and self.devID is not None):
 			self.interact("newp_usb_send_ascii(%d, c_char_p(b'PM:AUTO 1'), c_ulong(9))" % self.devID)
 
