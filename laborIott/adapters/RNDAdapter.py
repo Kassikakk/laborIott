@@ -14,4 +14,4 @@ class RNDAdapter(Adapter):
 		elif valrng[0] == 1:
 			return [randrange(*(valrng[1:]))]
 		else:
-			return []
+			return None

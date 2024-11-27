@@ -413,5 +413,7 @@ Peaks kirja panema, et kuidas pythoni pathi on saadud täpsustada VSCod(ium)is. 
 
 Mis ka tuleks joonde ajada, on see, et kuidas VI käimapanekul täpsemalt saab minna mittekonnekted seisundisse, kuidas ta täpselt üritab rekonnekteeruda ja mida jälgida, et ta mittekonnekted seisundis mingit jama ei saaks tekitada mingite nuppude vajutamisel näiteks.
 
+# 241127 
 
+Ja veel nüüd ka, et Serialiga ei taha käivituda üle ZMQ meil ühendus, justkui keegi ei kutsukski ZMQadapteri connecti. Vaatame, kes seda siis kutsuma õieti peaks. VInsti __init__is on connectInstrument, mis selgitab adapteri ja siis tekitab sellega instrumendi. Edasi siis instrumendi __init__ kutsub instrumendi connecti, mis kõigepealt kutsub prototüübi connecti, mis peamiselt koosneb adapteri connectist ja siis, kui sealt tuleb ok, siis läheb edasi instrumendi enda asjadega. Nonii, aga kus siin siis nüüd probleem tekib? 
 

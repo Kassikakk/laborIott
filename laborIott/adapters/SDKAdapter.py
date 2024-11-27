@@ -43,7 +43,7 @@ class SDKAdapter(Adapter):
 
 	def interact(self, command):
 		if self.conn is None:
-			return []
+			return None
 		#print(command)
 		command = command.replace('c_','ctypes.c_')
 		#find the (begin, end) of byref clauses
@@ -79,7 +79,7 @@ class SDKAdapter(Adapter):
 					r += [[k for k in s]] #flip around to "normal" Python values (What in case of float?)
 				except TypeError:
 					r += [s.value]
-		return r
+		return r #maybe [] can be legal here?
 
 	def disconnect(self):
 		#This one is tricky. There is generally no "UnloadLibrary" function in ctypes.

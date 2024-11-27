@@ -47,6 +47,7 @@ class ZMQAdapter(Adapter):
 		written into class variables
 		"""
 		#First establish the zmq connection
+		print("connecting ZMQ")
 
 		accepted = False
 		# establish connection, deal with "slow start" effect
@@ -54,6 +55,7 @@ class ZMQAdapter(Adapter):
 		while not accepted:
 			self.sock  = self.context.socket(zmq.REQ)
 			self.sock.connect(self.server)
+			print(self.server)
 			accepted = (self.send_recv(comm['echo'], []) is not None)
 			#log.info("Attempting connection {}".format(self.counter))
 			print("echo ok" if accepted else "no echo" )
@@ -63,6 +65,8 @@ class ZMQAdapter(Adapter):
 		# so you still don't know if the device connected or not
 		if ret is None:
 			return False
+		else:
+			print("connect ok")
 		
 		return ret
 		
@@ -72,8 +76,6 @@ class ZMQAdapter(Adapter):
 		interpreting the list is up to the instrument
 		"""
 		ret = self.send_recv(comm['interact'], command)
-		if ret is None:
-			return []
 		return ret
 			
 	def disconnect(self, **kwargs):

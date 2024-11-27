@@ -38,7 +38,7 @@ class SerialAdapter(Adapter):
 	def interact(self,command):
 		# command should be a list of [commandstring, waitResponse (bool)]
 		if self.conn is None:
-			return []
+			return None
 		waitResponse = command[1]
 		if len(command[0]) > 0:
 			#write to port
@@ -52,7 +52,7 @@ class SerialAdapter(Adapter):
 			#TODO: maybe we should count consecutive timeouts and set a limit when to throw some exception
 			return [""] if len(lines) == 0 else list(map(lambda x: x.decode(),lines)) 
 		else:
-			return []
+			return None
 
 
 	def disconnect(self):
