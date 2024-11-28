@@ -29,7 +29,6 @@ class Newport842(Instrument):
 		except ValueError:
 			self.wlval = 800
 			
-		print(sta)
 		try:	
 			self.attstate = self.parsestats(sta,("Attenuator", "\r"))=='On'
 			self.minwl = float(self.parsestats(sta,("Min Wavelength index", '\t')))

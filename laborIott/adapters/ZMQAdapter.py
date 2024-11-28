@@ -22,7 +22,7 @@ class ZMQAdapter(Adapter):
 		super().__init__()
 
 		self.server = "tcp://%s:%d" % (address, port)
-		self.timeout = 200 # milliseconds for single poll
+		self.timeout = 300 # milliseconds for single poll
 		self.repeat = 10 #reconnections before giving up
 		self.context = zmq.Context()
 		self.socket = None #set in the connect
@@ -47,15 +47,14 @@ class ZMQAdapter(Adapter):
 		written into class variables
 		"""
 		#First establish the zmq connection
-		print("connecting ZMQ")
-
+		
 		accepted = False
 		# establish connection, deal with "slow start" effect
 		
 		while not accepted:
 			self.sock  = self.context.socket(zmq.REQ)
 			self.sock.connect(self.server)
-			print(self.server)
+			#print(self.server) #can check if 
 			accepted = (self.send_recv(comm['echo'], []) is not None)
 			#log.info("Attempting connection {}".format(self.counter))
 			print("echo ok" if accepted else "no echo" )
