@@ -22,7 +22,7 @@ class ZMQAdapter(Adapter):
 		super().__init__()
 
 		self.server = "tcp://%s:%d" % (address, port)
-		self.timeout = 300 # milliseconds for single poll
+		self.timeout = 500 # milliseconds for single poll
 		self.repeat = 10 #reconnections before giving up
 		self.context = zmq.Context()
 		self.socket = None #set in the connect
