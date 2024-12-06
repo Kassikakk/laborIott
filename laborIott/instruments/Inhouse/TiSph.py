@@ -29,6 +29,8 @@ class TiSph(Instrument):
 
 	#TODO: we should rethink if, where and how thread protection should be dealt with
 	#I mean ZMQAdapter now does it anyway
+	#and besides, this wait+clear event pattern isn't fully safe anyway
+	#lock should be used
 
 	def interwrap(self, command, dummy = None):
 		#try a wrapper to thread sync here
