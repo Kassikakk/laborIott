@@ -6,6 +6,7 @@ from threading import Thread, Event
 from queue import Queue
 from time import sleep, time
 from scipy.interpolate import interp1d
+from math import log10
 import numpy as np
 import pandas as pd
 import importlib as imlb
@@ -88,6 +89,10 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			wparms['nopoints'] = int((wparms['stopwl'] - wparms['startwl']) / wparms['stepwl'] + 1)
 			wparms['usePwr'] = self.pwrChk.isChecked() and self.powerm is not None
 			wparms['useSpc'] = self.spcChk.isChecked() and self.spectrom is not None
+			wparms['attnShut'] = self.attnShutChk.isChecked() and self.attnr is not None
+			wparms['spcShut'] = self.spcShutChk.isChecked() and self.spectrom is not None
+			wparms['srcShut'] = self.srcShutChk.isChecked() and self.exsrc is not None
+
 			if wparms['usePwr'] and not wparms['useSpc']:
 				try:
 					wparms['pwrTime'] = float(self.pwrTimeEdit.text())
@@ -142,6 +147,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 			self.scanThread = Thread(target=self.scanProc, args= (wparms,))
 			self.startButt.setText("Stop")
+			self.xdata = []
+			self.ydata = []
 			self.setExternalMode.emit(True) 
 			self.startTime = time()
 			self.scanning.set()
@@ -172,6 +179,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				while not self.exsrc.WLreached.is_set(): #then wait it to stop.
 					if not self.scanning.is_set():
 						return
+				#print("WL reached", curwl)
 				#looks like it also works if we're already there
 
 			'''
@@ -193,6 +201,14 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 			#open the ODshutter here (and other shutters if needed)
 			#we also should have wparms['keepShutterOpen'] if the wl change is quick
+			if wparms['attnShut']:
+				self.attnr.VIcommand.emit({'setShutter':1})
+			
+			if wparms['spcShut']:
+				self.spectrom.VIcommand.emit({'setShutter':1})
+
+			if wparms['srcShut']:
+				self.exsrc.VIcommand.emit({'setShutter':1})
 
 
 			if wparms['usePwr']:
@@ -200,6 +216,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerm.VIcommand.emit({'setPwrWL':curwl})
 				# start powermeter series + reset previous
 				self.powerm.VIcommand.emit({'setCollect':[True, True]})
+
 
 
 			# wait a while
@@ -215,7 +232,6 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						return
 				# idus shutter close?
 				xData, spcData = self.spectrom.dataQ.get(False)
-				print(len(spcData))
 			else:
 				spcData = None
 				startTime = time()
@@ -236,11 +252,22 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					if not self.scanning.is_set():
 						return
 				pwrData = self.powerm.dataQ.get(False)  # list
+				#print("Powerdata received")
 				# order powerdata saving as needed (construct name)
 				#also take into account ref or sig, if needed
 				self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
 			else:
 				pwrData = None
+
+			#close shutters here
+			if wparms['attnShut']:
+				self.attnr.VIcommand.emit({'setShutter':0})
+			
+			if wparms['spcShut']:
+				self.spectrom.VIcommand.emit({'setShutter':0})
+
+			if wparms['srcShut']:
+				self.exsrc.VIcommand.emit({'setShutter':0})
 
 			if wparms['useSpc']:  # save the spectral data
 				#also take into account ref or sig, if needed
@@ -263,9 +290,10 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				if not self.scanning.is_set():
 						return
 			newOD = self.scandataQ.get(False) 
+			#print("NewOD=",newOD)
 			if newOD is not None:
 				#adjust the OD
-				self.attnr.VIcommand({'setOD':newOD})
+				self.attnr.VIcommand.emit({'setOD':newOD})
 				while not self.attnr.ODreached.is_set(): #wait for the disk to turn
 					if not self.scanning.is_set():
 						return
@@ -301,20 +329,24 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			power = self.getPwr(1.0 if pwrData is None else pwrData[0], self.plotx[0][index])
 			# see what's power & calc excit
 			# put into plot
-			self.ploty[0][index] = spsum / power
+			excit = spsum / power
+			self.ploty[0][index] = excit
+			self.xdata += [self.plotx[0][index]]
+			self.ydata += [excit]
 
 			#do level check if needed
 			if self.levelCheck.isChecked() and self.attnr is not None:
 				try:
 					xval = float(self.lvlXEdit.text())
-					ctrlval = spcData[np.abs(self.spectraX - xval).argmin()]
+					ctrlval = spcData[np.abs(np.array(self.spectraX) - xval).argmin()]
 				except ValueError:
-					#print("Levelcheck: xval not applicable, using total max")
+					print("Levelcheck: xval not applicable, using total max")
 					ctrlval = max(spcData)
 				newOD = self.getODCorr(ctrlval)
 	
 		elif pwrData is not None:
 			self.ploty[0][index] = pwrData[0]
+			#Here also add ydata
 
 		self.scandataQ.put(newOD)
 		self.plot.setData(self.plotx[0], self.ploty[0])

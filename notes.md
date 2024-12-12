@@ -383,3 +383,37 @@ kompromissina võib ju ka uurida, et kas instrum on None ja vastavalt siis konst
 Järgmine küsimus nüüd on, et kuidas organiseerida andmevahetust protseduuri ja VI-de vahel. Siin poleks muidu mingit erilist küsimust, võiks lihtsalt VI protseduure välja kutsuda, kui seda poleks aeg-ajalt vaja teha eraldi threadist. Mistõttu pole see safe, sest samal ajal võib olla ka nende mujalt kutsumist (näiteks VI timerist). Safe meetodid on siis signalid, evendid ja queued. Samas ei tahaks ka seda signaaliparve väga suureks ja kirjuks ajada, vaid hea oleks mingi ühtlustatud süsteem. Kui protseduuri õnnestuks nii teha, et ka seal töötab ainult timer, siis vist küll poleks signaalimist nii väga vaja, aga seda on enamasti veidi ebamugav teha. Nüd sellest threadist signaali emittida saab hästi, aga tagasi tuleks info saada siis queue (kui on andmeid vaja) või evendiga (kui on ainult vaja teadet, et võib edasi minna.). 
 
 Kas ma saan aru, et signaali võib phm. defineda nii protseduuri kui VI pool? connectimine... nojah see on ka äkki nii või naa. Hiline konnektimine peaks protseduuris käima, aga võib-olla võib ka nii, et on VI-s juba ära definetud ja konnektitud, nii kui emititakse, siis kohe Vis midagi tehakse. Et siis kui panna VI maini (või isegi visual maini) mingi signaal (parameetriks näiteks dict) ja see ühendada kohe mingi dispatcher funktsiooniga ja oletame, et see dict on selline, et key on olemasoleva funktsiooni nimi ja sisu on parameetrite list (või üks parameeter) (teoreetiliselt võiks ta ju olla ka string kogu käsuga) ja sealt saaks siis exec'iga seda kutsuda - ühesõnaga, thread-safe wrapper lihtsalt kutsumisele. Tagasitulevad andmed pannakse siis queuesse (dataQ) ja sealt lugemist võib siis thread ka muude funnidega koordineerida, et kas loeb ja tühjendab või jätab teistele ka.. Huvitav, kas selline asi tuleks kõne alla? No proovime.
+
+# 201017 
+
+Praegu vaatan nii, et kui instrument kutsub connecti, siis adapteriga ühendamine on superiga try:tud, aga sealt edasi on avatud erroritele. No nt. SDKadapteri puhul adapter läheb kenasti käima ka siis, kui aparaat pole sisse lülitatud. Saab muidugi ühekaupa instrumentides eraldi try:da, aga kas mingit ühist lahendust ei ole välja mõeldamas?
+
+18, aga paneme edasi. Praegu oleks mõtteid:
+* x skaala ei tule korralikul läbi
+* siis katikud tuleks panna kontrolli alla
+* siis mingi signaali vähenemine ikka toimub, peaks vist mõtlema aluse liigutamisele ka.
+* kuidagi võiks neid aknaid veidi rohkem laiali paisata, et skriini peale ära mahuks. Siin on präägu 1280x1024, sellest võiks suurem muidugi olla?
+* noh muidugi logging, checklist, state log, (kas kuidagi seda saaks ka hiljem meelde tuletada? automaatselt avamisel)
+
+#  241022
+
+Vot nüüd ei saa küll jälle aru, mis trianglit teeb see ZMQ adapter koostöös TiSph-ga. Ühesõnaga, annab teine interact error: Operation cannot be accomplished in current state, ja ta jookseb lihtsalt kinni. Mis ilmselt siis peab tähendama, et vaatamata igasugu abinõudele kuidagi siiski satub keegi requestima enne kui reply on tagasi tulnud. Siin küll on nüüd jah võistlemas onTimer, instrumendi thread ja protseduuri thread, aga sellegipoolest ei kujuta ette, kuidas selline olukord tekkida saaks. Ja kuidas diagnoosida? Mingi logimise peaks ilmselt siis tegema, aga see vist oleks üsna verbaalne, hea, kui saaks kuidagi hiljem teda sisse lülitada. Käsud, mille peale see rakendus, viimati oli [6, 0, 0, 1] ehk siis req_set_release ja kuidagi oli get_wavelength saanud vist mingi pooliku vastuse, igatahes väitis, et array index out of range.
+
+No seal oli lock vist lihtsalt vaja õigesti rakendada.
+
+# 242211
+
+Peaks siis nüüd õigeajastuma see ver2 tähistus ära koristada ja see väljendub siis adapters, instruments, server vastavate folderite likvideerimises, vanade failide väljaselektimises ja siis ka importides ver2 likvideerimises. ok proovime seda teha.
+
+# 241126 
+
+Peaks kirja panema, et kuidas pythoni pathi on saadud täpsustada VSCod(ium)is. Vaata settings.json-i , seal on "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}${env:PYTHONPATH}"} ja sama võib ka windowsi jaoks olla. Nüüd nende kahe asja vahel oli varem semikoolon, aga nüüd vähemalt linuxis on juhtunud, et see tuli ära koristada, sest ta ilmselt kuidagi liitus selle workspaceFolderi lõppu ja siis sealt enam asju üles ei leitud. Windowsi kohta hetkel ei tea. Õieti on .config/VSCodium/User/settings.json ja siis on lokaalne .vscode/settings.json, ilmselt siis viimane võtab pretsedentsi. 
+		Windowsis näikse semikoolon veel töötavat ja seal oligi ainult selles samas foldris olevas settings.jsonis.
+
+Mis ka tuleks joonde ajada, on see, et kuidas VI käimapanekul täpsemalt saab minna mittekonnekted seisundisse, kuidas ta täpselt üritab rekonnekteeruda ja mida jälgida, et ta mittekonnekted seisundis mingit jama ei saaks tekitada mingite nuppude vajutamisel näiteks.
+
+# 241127 
+
+Ja veel nüüd ka, et Serialiga ei taha käivituda üle ZMQ meil ühendus, justkui keegi ei kutsukski ZMQadapteri connecti. Vaatame, kes seda siis kutsuma õieti peaks. VInsti __init__is on connectInstrument, mis selgitab adapteri ja siis tekitab sellega instrumendi. Edasi siis instrumendi __init__ kutsub instrumendi connecti, mis kõigepealt kutsub prototüübi connecti, mis peamiselt koosneb adapteri connectist ja siis, kui sealt tuleb ok, siis läheb edasi instrumendi enda asjadega. Nonii, aga kus siin siis nüüd probleem tekib? 
+

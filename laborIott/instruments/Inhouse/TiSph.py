@@ -8,7 +8,7 @@ requests = { 'REQ_ECHO':0,'REQ_SET_SPEED' : 1, 'REQ_GET_SPEED' : 2, 'REQ_SET_DEL
 
 class TiSph(Instrument):
 	'''
-	This ver2 class refers to V-USB connected complete TiSph instrument
+	This class refers to V-USB connected complete TiSph instrument
 	(turning + wavemeter + shutter). We might need separate classes for
 	wavemeter, V-USB turning (+ shutter) or COM port turning alone.
 
@@ -29,6 +29,8 @@ class TiSph(Instrument):
 
 	#TODO: we should rethink if, where and how thread protection should be dealt with
 	#I mean ZMQAdapter now does it anyway
+	#and besides, this wait+clear event pattern isn't fully safe anyway
+	#lock should be used
 
 	def interwrap(self, command, dummy = None):
 		#try a wrapper to thread sync here
@@ -66,13 +68,14 @@ class TiSph(Instrument):
 				#stop the motion here
 				self.interwrap([requests['REQ_STOP'], 0, 0, 1])
 				break
-			if i == 0:
+			sleep(1) #We need time to let the wavemeter settle
+			if abs(diff) > 5: #for small steps, this may be confusing
 				#check if we actually moved at least more than half of what we should have
 				if abs(self.wavelength - value) > abs(diff/2):
 					#something wrong here, let's not break the machinery
-					print("Ineffective moving detected")
+					print("Ineffective moving detected ({}->{} got {})".format(value + diff, value,self.wavelength))
 					break
-			sleep(1) #We need time to let the wavemeter settle
+			
 		self.interwrap([requests['REQ_SET_RELEASE'], 0, 0, 1])
 		self.moving.clear()
 

@@ -257,22 +257,17 @@
        </property>
        <item>
         <property name="text">
-         <string>ASCII XY</string>
+         <string>ASCII</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>ASCII X</string>
+         <string>float</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>float x</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>double x</string>
+         <string>double</string>
         </property>
        </item>
       </widget>
@@ -381,6 +376,22 @@
        </property>
        <property name="text">
         <string>POS</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="useXYFormat">
+       <property name="geometry">
+        <rect>
+         <x>650</x>
+         <y>120</y>
+         <width>101</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Include X</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>
@@ -597,6 +608,45 @@
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QCheckBox" name="srcShutChk">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>40</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>SRC shutter</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="spcShutChk">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>60</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>SPC shutter</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="attnShutChk">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>80</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ATTN shutter</string>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -607,7 +657,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -1,6 +1,6 @@
-from laborIott.instruments.ver2.Andor.andor import IDus
+from laborIott.instruments.Andor.andor import IDus
 from laborIott.VInst.SpectroVI import Spectro_VI
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
+from laborIott.adapters.SDKAdapter import SDKAdapter
 from PyQt5 import QtWidgets, QtGui
 import os, sys
 

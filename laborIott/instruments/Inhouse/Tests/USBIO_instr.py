@@ -1,5 +1,5 @@
 from laborIott.instruments.Inhouse.USBIO import USBIO
-from laborIott.adapters.ver2.USBAdapter import USBAdapter
+from laborIott.adapters.USBAdapter import USBAdapter
 from time import sleep
 
 usbio = USBIO(USBAdapter(0xcacc, 0x0004))

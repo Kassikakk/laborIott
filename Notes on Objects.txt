@@ -3,7 +3,7 @@
 	-Connect should also try to reinstate all the initial parameters as well as those that are separately kept in the instrument (something to keep in mind generally). There is a concern what happens to parameters stored in the VInst, maybe a flag variable that reconnection has occurred would be necessary, but generally such redundant storage is probably better reduced.
 	-The idea of disconnect function is to return the device to a state from which a new connect would be possible. This may concern both the adapter and the instrument. Though for some adapters (notably USBAdapter and also SDKAdapter) such disconnection appears to be tricky if not impossible.
 	
-	-Dealing with self.connected mainly in instrument? Probably. If not connected, let's return some edible value (adapter returns None so be careful with assuming there is a list. Though, to think about it, could we give a default value that wouldn't break the calling program. But this should pass the ZMQ scheme).
+	-Dealing with self.connected mainly in instrument? Probably. If not connected, let's return some edible value (adapter returns None so be careful with assuming there is a list. Though, to think about it, could we give a default value that wouldn't break the calling program. But this should pass the ZMQ scheme). Anyway, properties or anything else that may be called shouldn't go crazy if self.connected == False. This should be checked specifically.
 	-properties should be designed to return (quasi)immediately. Any longer asynchronous processes should be handled by higher levels, e.g. VI.
 	-ini file is at (userpath)/Inst/(oot oot...)
 -Adapter

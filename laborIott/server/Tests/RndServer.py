@@ -1,5 +1,5 @@
-from laborIott.server.ver2.ZMQServer import ZMQServer
-from laborIott.adapters.ver2.RNDAdapter import RNDAdapter
+from laborIott.server.ZMQServer import ZMQServer
+from laborIott.adapters.RNDAdapter import RNDAdapter
 import os
 
 

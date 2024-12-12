@@ -1,4 +1,4 @@
-from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.visual import Visual
 from PyQt5 import QtCore, QtWidgets
 

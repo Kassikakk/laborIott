@@ -87,12 +87,12 @@ class Powerm_VI(VInst):
 		self.instrum.scale = 'Auto' 
 
 		
-	def setCollect(self, value, clearOnStart = False):
+	def setCollect(self, state, clearOnStart = False):
 		
-		if(value and clearOnStart):
+		if(state and clearOnStart):
 			self.ydata = []
-		self.startButt.setText("Pause" if value else "Cont")
-		self.collecting = value
+		self.startButt.setText("Pause" if state else "Cont")
+		self.collecting = state
 
 
 	def resetSeries(self):

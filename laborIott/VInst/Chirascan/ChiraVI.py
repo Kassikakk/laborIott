@@ -5,9 +5,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from laborIott.VInst.SourceVI import Source_VI
 
-from laborIott.adapters.ver2.SDKAdapter import SDKAdapter
+from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.instruments.ver2.Chirascan.Chirascan import ChiraScan
+from laborIott.instruments.Chirascan.Chirascan import ChiraScan
 import os
 
 
@@ -76,6 +76,10 @@ class Chira_VI(Source_VI):
 			return #probably a messagebox should do here
 		self.instrum.bandwidth = newBW
 		self.bwEdit.setText("{:.1f}".format(self.instrum.bandwidth))
+
+	def setShutter(self,state):
+			#sets the shutter state according to self.shutButt
+			self.instrum.shutter = 'open' if state else 'closed'
 		
 
 

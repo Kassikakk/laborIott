@@ -3,7 +3,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from threading import Event
 from laborIott.VInst.VInst import VInst
-from laborIott.adapters.ver2.USBAdapter import USBAdapter
+from laborIott.adapters.USBAdapter import USBAdapter
 from laborIott.instruments.Inhouse.USBIO import USBIO
 from time import sleep
 import os

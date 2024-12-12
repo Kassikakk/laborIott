@@ -1,6 +1,6 @@
 from laborIott.instruments.Inhouse.TiSph import TiSph
-from laborIott.adapters.ver2.USBAdapter import USBAdapter
-from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
+from laborIott.adapters.USBAdapter import USBAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from time import sleep
 
 ad = USBAdapter(0xcacc, 0x0002)

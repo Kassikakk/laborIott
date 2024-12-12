@@ -8,7 +8,7 @@ from zipfile import ZipFile
 import struct
 
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.adapters.ver2.ZMQAdapter import ZMQAdapter
+from laborIott.adapters.ZMQAdapter import ZMQAdapter
 
 import os
 def localPath(filename):
@@ -59,7 +59,7 @@ class Visual(QtWidgets.QMainWindow):
 		if self.useXYFormat is not None:
 			self.dsbl += [self.useXYFormat]
 		#account for the possibility of no x-data (but we should have y)
-		self.xdata = None
+		self.xdata = []
 		self.ydata = []
 
 		#should we use an event here?
@@ -75,7 +75,7 @@ class Visual(QtWidgets.QMainWindow):
 			if par is None:
 				parstr = '()'
 			else:
-				parstr = '(*par)' if type(par) == 'list' else '(par)'
+				parstr = '(*par)' if type(par) == list else '(par)'
 			exec('self.' + commstr + parstr)
 
 
@@ -114,7 +114,7 @@ class Visual(QtWidgets.QMainWindow):
 
 
 	def onGetLoc(self):
-		if(self.saveToZip.isChecked()):
+		if(self.saveToZip is not None and self.saveToZip.isChecked()):
 			loc = QtWidgets.QFileDialog.getSaveFileName(self, "Save location:", self.saveLoc,"*.zip")[0]
 		else:
 			loc = QtWidgets.QFileDialog.getExistingDirectory(self, "Save location:", self.saveLoc,
@@ -133,11 +133,11 @@ class Visual(QtWidgets.QMainWindow):
 		# also if we have any data
 		if len(name) == 0:
 			return
-
+		
 		#Let's use X data if it's there (in equal amount to Y data) and not explicitly excluded
-		useX = self.xdata is not None
+		useX = len(self.xdata) > 0
 		useX &= (self.useXYFormat is None or self.useXYFormat.isChecked())
-
+		#print("Save by {} ylen {} usex {}".format(os.path.join(self.saveLoc, name), len(self.ydata), useX))
 		if useX and (len(self.xdata) != len(self.ydata)):
 			return
 		

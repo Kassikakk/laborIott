@@ -1,86 +1,118 @@
 import pickle
 import zmq
-from laborIott.adapter import Adapter
-import logging
+from laborIott.adapters.adapter import Adapter
+from threading import Event, Lock
 
-#set up logging if needed
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-ch.setLevel(logging.INFO)
-log.addHandler(ch)
-
-
+comm = {'connect': 0, 'interact': 1, 'disconnect': 2, 'echo': 3}
 
 class ZMQAdapter(Adapter):
 	'''
 	Class to communicate with a remote TCP Server
 	via pickled zmq port
-	implementing read, write, values
 	topic needs to contain both instrument (actual adapter) and operation data
 	i'm afraid server needs to be running first
 	there needs to be some id identifying which instrument the data is being sent to
+
+	Isegi võiks küsida, et kas ei peaks portide connectimise ühendama üldise connect-disconnect süsteemiga?
+	Selle mõttega, et äkki ka sellele oleks vaja teha reconnectimist?
+	Võib-olla on see vajalik mõte. 
 	
 	'''
-	def __init__(self, id, address, inport, outport = None, **kwargs):
+	def __init__(self, address, port = 5555):
 		super().__init__()
-		if outport is None:
-			outport = inport
-		self.id = id
 
-		# inward
-		self.insock, self.poller = zmq.Context().socket(zmq.SUB), zmq.Poller()
-		self.insock.connect("tcp://%s:%d" % (address, inport))
-		self.insock.setsockopt(zmq.SUBSCRIBE, b'')
-		self.poller.register(self.insock, zmq.POLLIN)
-		self.timeout = 200 # milliseconds for single poll
-		self.globtimeout = 5000 #global timeout to wait for response
-		
-		#count the messages and add this as an ID to match the return
-		self.counter = 0
-		
-		#outward 
-		self.outsock = zmq.Context().socket(zmq.PUB)
-		self.outsock.bind("tcp://*:%d" % outport)
+		self.server = "tcp://%s:%d" % (address, port)
+		self.timeout = 500 # milliseconds for single poll
+		self.repeat = 10 #reconnections before giving up
+		self.context = zmq.Context()
+		self.socket = None #set in the connect
+		#We don't want to cross sendings from different threads possibly
+		self.lock = Lock()
 
+		
+
+		
+
+	def __del__(self):
+		#self.disconnect()
+		#Vot ma ei tea, siin tundub, et zmq kuidagi disconnectib ise juba ja siis enam ei tööta see
+		pass
+		
+	def connect(self, **kwargs):
+		"""
+		The connect function is first called by the instrument's 
+		__init__ function and should return a boolean value whether the 
+		instrument is ready to use
+		To fascilitate reconnecting, all the relevant data should generally be
+		written into class variables
+		"""
+		#First establish the zmq connection
+		
+		accepted = False
 		# establish connection, deal with "slow start" effect
-		self.repeat = 2 #low number to speed up starting
-		while self.exchange("",".echo") is None:
-			log.info("Attempting connection {}".format(self.counter))
-			#we could cut here according to self.counter value if no one comes online
+		
+		while not accepted:
+			self.sock  = self.context.socket(zmq.REQ)
+			self.sock.connect(self.server)
+			#print(self.server) #can check if 
+			accepted = (self.send_recv(comm['echo'], []) is not None)
+			#log.info("Attempting connection {}".format(self.counter))
+			print("echo ok" if accepted else "no echo" )
+		
+		ret = self.send_recv(comm['connect'], [])
+		#The problem is that if that returns None, this basically means timeout or crossed messages
+		# so you still don't know if the device connected or not
+		if ret is None:
+			return False
+		else:
+			print("connect ok")
+		
+		return ret
+		
+	def interact(self, command, **kwargs): #exchange?
+		"""
+		performs (generally) a two-way interaction and should return a list of results
+		interpreting the list is up to the instrument
+		"""
+		ret = self.send_recv(comm['interact'], command)
+		return ret
+			
+	def disconnect(self, **kwargs):
+		"""
+		Should bring the connection to a state from which either shutdown or reconnection is possible
+		"""
 
-		#set a longer global timeout
-		self.repeat = int(self.globtimeout / self.timeout) #global timeout / single shot timeout
+		#Send the disconnect message and get the result
+		ret = self.send_recv(comm['disconnect'], [])
+		#The problem is not that bad here, 		
+		self.sock.close()
+		return True
 
 
-	def write(self, command):
-		topic = self.id + ".write"
-		log.debug(topic + " : " + command)
-		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
+	def send_recv(self, command, args):
 
-	def exchange(self, command, comm_id):
-		# common routine for two-way communication
-		topic = self.id + comm_id + ".{}".format(self.counter)
-		self.counter += 1
-		log.debug(topic + " : " + command)
-		self.outsock.send_serialized(command, serialize=lambda rec: (topic.encode(), pickle.dumps(rec)))
-		# wait for reply here
-		for i in range(self.repeat):
-			if self.poller.poll(self.timeout):
-				topic1, record = self.insock.recv_serialized(
-						deserialize=lambda msg: (msg[0].decode(), pickle.loads(msg[1])))
-				if (topic1 == topic):
-					log.debug(record)
-					return record
-				else:
-					log.info("Mistopicd: " + topic1 + " in rsp to " + topic)
-		log.info("Timeout: " + topic)
-		return None
+		request = [command, args]
+		counter = 0
+		while True:
+			#print("Sending ",request,self.clear_to_send.is_set())
+			with self.lock:
+				self.sock.send_pyobj(request)
+				if (self.sock.poll(self.timeout) & zmq.POLLIN) != 0:
+					#reply = socket.recv_serialized(deserialize=pickle.loads)
+					reply = self.sock.recv_pyobj()
+					#print("	Recving ",request, reply)
+					#print(reply)
+					break
 
-	def read(self):
-		return self.exchange("",".read")
+			counter += 1
+			print("going for reconn ", counter)
+			
+			self.sock.setsockopt(zmq.LINGER, 0)
+			self.sock.close()
+			if counter >= self.repeat:
+				reply = None
+				break
+			self.sock = self.context.socket(zmq.REQ)
+			self.sock.connect(self.server)
 
-	def values(self,command):
-		return self.exchange(command, ".values")
+		return reply

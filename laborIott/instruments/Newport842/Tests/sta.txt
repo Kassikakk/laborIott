@@ -1,6 +1,0 @@
-Head Type: Photodiode	Head Version: 4001	Head Serial Number: 11778 	918D-SL-OD3	Calibration Sensitivity: 0.000000 V/W	Default WaveLength: 0 nm	Active Sensitivity: -0.000311 V/W	Active WaveLength: 450 nm	Scale Min Power : 9	Scale Max Power: 26	Scale Min Energy : N/A	Scale Max Energy: N/A	Current Scale: 17	Energy Mode: Off	Anticipation: Off	Trig Level: 2.0%	Zero Offset: 0.000000	Multiplier #1: 1.000000	Offset #1: 0.000000	Multiplier #2: 1.000000	Offset #2: 0.000000	Currently Logging data:  No	Analog Output:  Off	Resolution: -0.0000001367	Currently Calculating Stats:  No	High Resolution Display:  Off	Min Wavelength index: 400	Max Wavelength index: 1100	Upper Bound: 0.000000	Lower Bound: 0.000000	Reference Value: 0.000000	P/F Status: N/A	Threshold: Off
-
-Attenuator: On
-
-AutoScale: Off
-

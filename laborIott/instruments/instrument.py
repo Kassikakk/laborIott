@@ -31,8 +31,11 @@ class Instrument(object):
 		if self.connected:
 			try:
 				#print(command)
-				return self.adapter.interact(command)
+				ret = self.adapter.interact(command)
+				return ret if ret is not None else dummy
 				#we may have to use some method to check if the adapter's response is a normal one
+				#ok let's try like this. May the adapter return None if anything is out of order
+				#Then here we return dummy.
 				
 			except Exception as e:
 				#there is a problem with the device, disconnect
