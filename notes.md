@@ -417,3 +417,7 @@ Mis ka tuleks joonde ajada, on see, et kuidas VI käimapanekul täpsemalt saab m
 
 Ja veel nüüd ka, et Serialiga ei taha käivituda üle ZMQ meil ühendus, justkui keegi ei kutsukski ZMQadapteri connecti. Vaatame, kes seda siis kutsuma õieti peaks. VInsti __init__is on connectInstrument, mis selgitab adapteri ja siis tekitab sellega instrumendi. Edasi siis instrumendi __init__ kutsub instrumendi connecti, mis kõigepealt kutsub prototüübi connecti, mis peamiselt koosneb adapteri connectist ja siis, kui sealt tuleb ok, siis läheb edasi instrumendi enda asjadega. Nonii, aga kus siin siis nüüd probleem tekib? 
 
+# 250103
+
+Mõtlen praegu positsioneerimise klassimist, VInst mõttes. Üks on see, et kas panna 1D asjad nagu servod jne. ka samasse kilda, seal kohati nagu on see funktsionaalsus, aga kohati on ka lihtsalt nagu lülitamine, ilmselt nagu on vist plaanis JY ümberlülitamisega teha. Seal oleks mingi lihtsustatud asi äkki sobivam?
+Nojah, aga see äkki on isegi instrumendina shutteri tüüpi asjana esitatud? Positsiooni näitamine, salvestamine-taaslugemine ja muutmine oleks nüüd küll üldised asjad, erikoistena tuleks ilmselt arvesse speed, center, res.enc. (MCL seni ainult), shutter (OD kettal). Ruudul (topelt?) klõpsamisega saaks kuni 2D asju otse ajada, siis rattaga saab sammutada ja sammu muuta. Võib-olla Go Back võiks ka olla, et mingit eelmist kohta mäletaks? Noh rattaga muutes muidugi see kaotab mõtte, tea kas seal saaks ta ka muutmata jätta.
