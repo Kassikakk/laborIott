@@ -1,5 +1,5 @@
 
-from laborIott.instrument import Instrument
+from laborIott.instruments.instrument import Instrument
 
 class MCL_MicroStage(Instrument):
 
@@ -24,7 +24,7 @@ class MCL_MicroStage(Instrument):
 			byref(c_double),byref(c_double),byref(c_double), %d)" % self.handle, [0, 0.02, 9.525e-05, 4.0, 4.0, 0.0, 0.01905])
 		#[0, 0.02, 9.525e-05, 4.0, 4.0, 0.0, 0.01905]
 		self.encres, self.stepSize, self.maxSpeed, speed2, speed3, self.minSpeed = ret[1:]
-		self._speed = self.maxSpeed #bring it to the max
+		self.speed = self.maxSpeed #bring it to the max
 		return True
 	
 
@@ -48,9 +48,9 @@ class MCL_MicroStage(Instrument):
 	def pos(self):
 		#make sure we're not moving first
 		if (self.ismoving):
-			return [None,None]
+			return [0,0]
 		ret = self.interact("MCL_MDReadEncoders(byref(c_double), byref(c_double),byref(c_double),\
-			byref(c_double), %d)" % self.handle)
+			byref(c_double), %d)" % self.handle,[0,0])
 		return ret[1:3]
 
 	@pos.setter
@@ -66,7 +66,7 @@ class MCL_MicroStage(Instrument):
 
 	@property
 	def ismoving(self):
-		ret = self.interact("MCL_MicroDriveMoveStatus(byref(c_int), %d)" % self.handle, [0])
+		ret = self.interact("MCL_MicroDriveMoveStatus(byref(c_int), %d)" % self.handle, [0,0])
 		return ret[1]
 	
 	@ismoving.setter
@@ -82,13 +82,13 @@ class MCL_MicroStage(Instrument):
 	def delta(self, val):
 		#val is expected to be len 2 list or tuple
 		#if one axis is omitted, None can be sent
-		if val[0] is None:
+		if val[0] is None or (abs(val[0]) < self.stepSize):
 			if val[1] is not None:
-				self.interact("MCL_MDMoveR(1, c_double(%f), c_double(%f), 0, %d)" % (self.speed, val[1], self.handle))
+				self.interact("MCL_MDMoveR(2, c_double(%f), c_double(%f), 0, %d)" % (self.speed, val[1], self.handle))
 			else:
 				return
-		elif val[1] is None:
-			self.interact("MCL_MDMoveR(2, c_double(%f), c_double(%f), 0, %d)" % (self.speed, val[0], self.handle))
+		elif val[1] is None or (abs(val[1]) < self.stepSize):
+			self.interact("MCL_MDMoveR(1, c_double(%f), c_double(%f), 0, %d)" % (self.speed, val[0], self.handle))
 		else:
 			#print(self.speed, val[0], self.speed, val[1])
 			self.interact("MCL_MDMoveThreeAxesR(1, c_double(%f), c_double(%f), 0, \
