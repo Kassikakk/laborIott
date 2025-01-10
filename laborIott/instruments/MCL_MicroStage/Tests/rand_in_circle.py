@@ -3,10 +3,10 @@ from laborIott.instruments.MCL_MicroStage.MicroStage import MCL_MicroStage
 from math import pi, cos, sin
 from random import uniform
 
-stage = MCL_MicroStage(SDKAdapter("MicroDrive"), False)
-x0 = 0
-y0 = 0
-R = 3
+stage = MCL_MicroStage(SDKAdapter("MicroDrive", False))
+x0 = -0.1
+y0 = 7
+R = 2.7
 
 while(True):
 	#get the r value
