@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>642</height>
+    <height>676</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -404,13 +404,13 @@
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
         <horstretch>0</horstretch>
-        <verstretch>131</verstretch>
+        <verstretch>140</verstretch>
        </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>
         <width>530</width>
-        <height>130</height>
+        <height>140</height>
        </size>
       </property>
       <property name="title">
@@ -611,8 +611,8 @@
       <widget class="QCheckBox" name="srcShutChk">
        <property name="geometry">
         <rect>
-         <x>570</x>
-         <y>40</y>
+         <x>170</x>
+         <y>120</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -624,8 +624,8 @@
       <widget class="QCheckBox" name="spcShutChk">
        <property name="geometry">
         <rect>
-         <x>570</x>
-         <y>60</y>
+         <x>270</x>
+         <y>120</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -637,8 +637,8 @@
       <widget class="QCheckBox" name="attnShutChk">
        <property name="geometry">
         <rect>
-         <x>570</x>
-         <y>80</y>
+         <x>380</x>
+         <y>120</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -646,6 +646,61 @@
        <property name="text">
         <string>ATTN shutter</string>
        </property>
+      </widget>
+      <widget class="QCheckBox" name="takeRefChk">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>10</y>
+         <width>201</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Take ref from a different position</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="extraMoveBox">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>40</y>
+         <width>120</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Extra move</string>
+       </property>
+       <widget class="QRadioButton" name="extraMoveNone">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>20</y>
+          <width>91</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>None</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="extraMoveFile">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>40</y>
+          <width>91</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>From file</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -657,7 +712,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

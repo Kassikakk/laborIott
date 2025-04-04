@@ -69,6 +69,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.locButt.clicked.connect(self.onGetLoc)
 		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
 		self.powerRefFile.clicked.connect(self.getPowerData) #TODO: this needs a better approach
+		#self.extraMoveFile.clicked.connect(self.getExtraMoveData) #TODO: this needs a better approach
+		#self.takeRefChk.clicked.connect(self.checkRefData)
 
 	def onStart(self):
 		if self.scanning.is_set():
@@ -92,7 +94,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			wparms['attnShut'] = self.attnShutChk.isChecked() and self.attnr is not None
 			wparms['spcShut'] = self.spcShutChk.isChecked() and self.spectrom is not None
 			wparms['srcShut'] = self.srcShutChk.isChecked() and self.exsrc is not None
-
+			wparms['takeRef'] = self.takeRefChk.isChecked() and self.positnr is not None
+			wparms['extraMove'] = (not self.extraMoveNone.isChecked()) and self.positnr is not None
 			if wparms['usePwr'] and not wparms['useSpc']:
 				try:
 					wparms['pwrTime'] = float(self.pwrTimeEdit.text())
@@ -187,7 +190,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			#refpos, sigpos - relevant position values; takeref - switch, self.positnr
 			for i,pos in enumerate([refpos, sigpos]):
 				#do refpos first, then sigpos can be used to level-check
-				if wparms['takeref']: #kas on vaja võtta ka ref?
+				if wparms['takeRef']: #kas on vaja võtta ka ref?
 					self.positnr.VIcommand.emit({'goto':pos})#what if position already?
 					while self.positnr.goingtoPos.is_Set():
 						if not self.scanning.is_Set():
