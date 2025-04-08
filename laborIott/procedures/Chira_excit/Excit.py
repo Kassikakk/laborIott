@@ -59,6 +59,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.plotx = [[0, 1]]
 		self.ploty = [[0, 0]]
 		self.extPwrData = None  # external powerdata
+		self.extraMoveData = None  # extra move data
 		self.dsbl += [self.startEdit, self.stepEdit, self.stopEdit, self.spcChk, self.pwrChk, self.sxminEdit,
 					 self.sxmaxEdit, self.pwrRadioBox]
 		self.setEnable(True)
@@ -94,8 +95,20 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			wparms['attnShut'] = self.attnShutChk.isChecked() and self.attnr is not None
 			wparms['spcShut'] = self.spcShutChk.isChecked() and self.spectrom is not None
 			wparms['srcShut'] = self.srcShutChk.isChecked() and self.exsrc is not None
-			wparms['takeRef'] = self.takeRefChk.isChecked() and self.positnr is not None
+			if self.takeRefChk.isChecked() and self.positnr is not None:
+				if self.positnr.sigref[0] is not None and self.positnr.sigref[1] is not None:
+					wparms['takeRef'] = True
+					#kumbapidi on need?
+					wparms['refpos'] = self.positnr.sigref[0]
+					wparms['sigpos'] = self.positnr.sigref[1]
+				else:
+					QtWidgets.QMessageBox.information(self, "NB!", "Check reference positions")
+					return
+
 			wparms['extraMove'] = (not self.extraMoveNone.isChecked()) and self.positnr is not None
+			if wparms['extraMove']:
+				#we should have a list with extraMove data
+				wparms['extraMoveData'] = self.extraMoveData
 			if wparms['usePwr'] and not wparms['useSpc']:
 				try:
 					wparms['pwrTime'] = float(self.pwrTimeEdit.text())
@@ -173,6 +186,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 
 		curwl = wparms['startwl']
 		ind = 0
+		xmoveind = 0 #for extraMoveData
 		while np.sign(wparms['stepwl']) * curwl <= np.sign(wparms['stepwl']) * wparms['stopwl']:  # enable negative step
 
 			if self.exsrc is not None:
@@ -185,125 +199,129 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				#print("WL reached", curwl)
 				#looks like it also works if we're already there
 
-			'''
+			
 			#if we are taking reference spectra or pow value from a different position (location, cuvette angle)
 			#refpos, sigpos - relevant position values; takeref - switch, self.positnr
-			for i,pos in enumerate([refpos, sigpos]):
+			for i,pos in enumerate([wparms['refpos'], wparms['sigpos']]):
 				#do refpos first, then sigpos can be used to level-check
-				if wparms['takeRef']: #kas on vaja võtta ka ref?
+				if not wparms['takeRef'] and i == 0:
+					continue
+				#let's do the positioning here
+				extraMoveNeeded = wparms['extraMove'] and (i == 1) #only do extraMove for sigpos
+				if extraMoveNeeded:
+					pos = [pos[i] + wparms['extraMoveData'][xmoveind][i] for i in range(len(pos))]
+					xmoveind += 1
+					if xmoveind >= len(wparms['extraMoveData']):
+						xmoveind = 0
+				if wparms['takeRef'] or extraMoveNeeded: #kas on vaja võtta ka ref?
 					self.positnr.VIcommand.emit({'goto':pos})#what if position already?
 					while self.positnr.goingtoPos.is_Set():
 						if not self.scanning.is_Set():
 							return
-				else:
-					if i == 0: #muidu ainult signal point (ja ei mingit käsku liigutamiseks)
-						continue
-				#indent the rest, too
+				
 
-				'''
+				#open the ODshutter here (and other shutters if needed)
+				#we also should have wparms['keepShutterOpen'] if the wl change is quick
+				if wparms['attnShut']:
+					self.attnr.VIcommand.emit({'setShutter':1})
+				
+				if wparms['spcShut']:
+					self.spectrom.VIcommand.emit({'setShutter':1})
 
-			#open the ODshutter here (and other shutters if needed)
-			#we also should have wparms['keepShutterOpen'] if the wl change is quick
-			if wparms['attnShut']:
-				self.attnr.VIcommand.emit({'setShutter':1})
-			
-			if wparms['spcShut']:
-				self.spectrom.VIcommand.emit({'setShutter':1})
-
-			if wparms['srcShut']:
-				self.exsrc.VIcommand.emit({'setShutter':1})
+				if wparms['srcShut']:
+					self.exsrc.VIcommand.emit({'setShutter':1})
 
 
-			if wparms['usePwr']:
-				# adjust powermeter wl
-				self.powerm.VIcommand.emit({'setPwrWL':curwl})
-				# start powermeter series + reset previous
-				self.powerm.VIcommand.emit({'setCollect':[True, True]})
-
-
-
-			# wait a while
-			if self.spectro2 is not None:
-				self.spectro2.VIcommand.emit({'run':None})
-
-			if wparms['useSpc']:  # Spectrometer determines the time
-				# idus shutter open?
-				self.spectrom.VIcommand.emit({'run':None})
-				# wait for data arrival
-				while self.spectrom.dataQ.empty():
-					if not self.scanning.is_set():
-						return
-				# idus shutter close?
-				xData, spcData = self.spectrom.dataQ.get(False)
-			else:
-				spcData = None
-				startTime = time()
-				while (time() < startTime + wparms['pwrTime']):
-					if not self.scanning.is_set():
-						return
-
-			if self.spectro2 is not None:
-				while self.spectro2.dataQ.empty(): #also check that spectro2 has finished
-					if not self.scanning.is_set():
-						return
-
-			if wparms['usePwr']:
-				# stop powermeter series, wait for data
-				self.powerm.VIcommand.emit({'setCollect':[False, False]})
-				self.powerm.VIcommand.emit({'getData':True}) # mean and dev only 
-				while self.powerm.dataQ.empty():
-					if not self.scanning.is_set():
-						return
-				pwrData = self.powerm.dataQ.get(False)  # list
-				#print("Powerdata received")
-				# order powerdata saving as needed (construct name)
-				#also take into account ref or sig, if needed
-				self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
-			else:
-				pwrData = None
-
-			#close shutters here
-			if wparms['attnShut']:
-				self.attnr.VIcommand.emit({'setShutter':0})
-			
-			if wparms['spcShut']:
-				self.spectrom.VIcommand.emit({'setShutter':0})
-
-			if wparms['srcShut']:
-				self.exsrc.VIcommand.emit({'setShutter':0})
-
-			if wparms['useSpc']:  # save the spectral data
-				#also take into account ref or sig, if needed
 				if wparms['usePwr']:
-					spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
+					# adjust powermeter wl
+					self.powerm.VIcommand.emit({'setPwrWL':curwl})
+					# start powermeter series + reset previous
+					self.powerm.VIcommand.emit({'setCollect':[True, True]})
+
+
+
+				# wait a while
+				if self.spectro2 is not None:
+					self.spectro2.VIcommand.emit({'run':None})
+
+				if wparms['useSpc']:  # Spectrometer determines the time
+					# idus shutter open?
+					self.spectrom.VIcommand.emit({'run':None})
+					# wait for data arrival
+					while self.spectrom.dataQ.empty():
+						if not self.scanning.is_set():
+							return
+					# idus shutter close?
+					xData, spcData = self.spectrom.dataQ.get(False)
 				else:
-					spcfilename = "{:}nm.txt".format(curwl)
-				self.spectrom.VIcommand.emit({'saveData':spcfilename})
-			
-			if self.spectro2 is not None:
-				self.spectro2.VIcommand.emit({'saveData':spcfilename})
+					spcData = None
+					startTime = time()
+					while (time() < startTime + wparms['pwrTime']):
+						if not self.scanning.is_set():
+							return
 
-			# calculate and emit (or Queue) results to main thread
-			self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
-			#now the OD correction should happen here
+				if self.spectro2 is not None:
+					while self.spectro2.dataQ.empty(): #also check that spectro2 has finished
+						if not self.scanning.is_set():
+							return
 
-			#I would like to do something like:
-			#but only if we are on a signal measurement!
-			while self.scandataQ.empty():
-				if not self.scanning.is_set():
-						return
-			newOD = self.scandataQ.get(False) 
-			#print("NewOD=",newOD)
-			if newOD is not None:
-				#adjust the OD
-				self.attnr.VIcommand.emit({'setOD':newOD})
-				while not self.attnr.ODreached.is_set(): #wait for the disk to turn
+				if wparms['usePwr']:
+					# stop powermeter series, wait for data
+					self.powerm.VIcommand.emit({'setCollect':[False, False]})
+					self.powerm.VIcommand.emit({'getData':True}) # mean and dev only 
+					while self.powerm.dataQ.empty():
+						if not self.scanning.is_set():
+							return
+					pwrData = self.powerm.dataQ.get(False)  # list
+					#print("Powerdata received")
+					# order powerdata saving as needed (construct name)
+					#also take into account ref or sig, if needed
+					self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
+				else:
+					pwrData = None
+
+				#close shutters here
+				if wparms['attnShut']:
+					self.attnr.VIcommand.emit({'setShutter':0})
+				
+				if wparms['spcShut']:
+					self.spectrom.VIcommand.emit({'setShutter':0})
+
+				if wparms['srcShut']:
+					self.exsrc.VIcommand.emit({'setShutter':0})
+
+				if wparms['useSpc']:  # save the spectral data
+					#also take into account ref or sig, if needed
+					if wparms['usePwr']:
+						spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
+					else:
+						spcfilename = "{:}nm.txt".format(curwl)
+					self.spectrom.VIcommand.emit({'saveData':spcfilename})
+				
+				if self.spectro2 is not None:
+					self.spectro2.VIcommand.emit({'saveData':spcfilename})
+
+				# calculate and emit (or Queue) results to main thread
+				self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
+				#now the OD correction should happen here
+
+				#I would like to do something like:
+				#but only if we are on a signal measurement!
+				while self.scandataQ.empty():
 					if not self.scanning.is_set():
-						return
-			else:
-				#move on
-				curwl += wparms['stepwl']
-				ind += 1
+							return
+				newOD = self.scandataQ.get(False) 
+				#print("NewOD=",newOD)
+				if newOD is not None:
+					#adjust the OD
+					self.attnr.VIcommand.emit({'setOD':newOD})
+					while not self.attnr.ODreached.is_set(): #wait for the disk to turn
+						if not self.scanning.is_set():
+							return
+				else:
+					#move on
+					curwl += wparms['stepwl']
+					ind += 1
 
 		self.VIcommand.emit({'cleanScan':None})
 

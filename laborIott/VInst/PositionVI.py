@@ -1,6 +1,7 @@
 import sys, os
 from threading import Event
 from PyQt5 import QtCore, QtWidgets
+import pandas as pd
 
 from .VInst import VInst
 
@@ -19,6 +20,7 @@ class Position_VI(VInst):
 		super().__init__(localPath('Position.ui'),refname, instrument, adapter)
 		self.dim = dim #dimensionality
 		self.pos = [None]*dim #position
+		self.sigref = [None,None] #signal and reference positions used in some scenarios
 		self.posReached = Event()  
 		self.posReached.set()
 		self.dsbl += [self.gotoButt, self.goDeltaButt, self.setSpeedButt, self.xEdit, self.yEdit, self.zEdit, self.speedEdit]
@@ -127,6 +129,8 @@ class Position_VI(VInst):
 
 	def addToList(self, refName, pos):
 		# read/generate refname, record position and put them on a list
+		#make sure there is no : in the refname
+		refName = refName.replace(':','_')
 		nameNotSet = True
 		if len(refName) == 0:
 			refName = "pos"
@@ -142,6 +146,12 @@ class Position_VI(VInst):
 					refName = refName1
 					break
 		self.posDict[refName] = pos
+		#use the special names sig and ref for the signal and reference positions
+		if refName == "sig":
+			self.sigref[0] = pos
+		elif refName == "ref":
+			self.sigref[1] = pos
+
 		formtext = ("{}: " + "{:.4f}, "*self.dim)[:-2]
 		self.posList.addItem(QtWidgets.QListWidgetItem(formtext.format(refName, *pos)))
 
