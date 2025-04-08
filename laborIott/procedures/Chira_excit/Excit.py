@@ -70,7 +70,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.locButt.clicked.connect(self.onGetLoc)
 		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
 		self.powerRefFile.clicked.connect(self.getPowerData) #TODO: this needs a better approach
-		#self.extraMoveFile.clicked.connect(self.getExtraMoveData) #TODO: this needs a better approach
+		self.extraMoveFile.clicked.connect(self.getExtraMoveData) #TODO: this needs a better approach
 		#self.takeRefChk.clicked.connect(self.checkRefData)
 
 	def onStart(self):
@@ -463,6 +463,22 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		return pwr
 
 	def getPowerData(self):
+		# read external power data file into self.extPwrData
+		if self.powerRefFile.isChecked():
+			allok = True
+			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Power data file')[0]
+			# try:
+			data = pd.read_csv(fname, sep='\t', header=None)
+			if len(data.columns) == 2:
+				self.extPwrData = data
+			else:
+				allok = False
+			# except:
+			#	allok = False
+			if not allok:
+				self.powerRefNone.setChecked(True)
+
+	def setExtraMoveData(self):
 		# read external power data file into self.extPwrData
 		if self.powerRefFile.isChecked():
 			allok = True
