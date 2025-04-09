@@ -71,7 +71,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
 		self.powerRefFile.clicked.connect(self.getPowerData) #TODO: this needs a better approach
 		self.extraMoveFile.clicked.connect(self.getExtraMoveData) #TODO: this needs a better approach
-		#self.takeRefChk.clicked.connect(self.checkRefData)
+		self.takeRefChk.clicked.connect(self.checkRefData)
 
 	def onStart(self):
 		if self.scanning.is_set():
@@ -479,20 +479,34 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				self.powerRefNone.setChecked(True)
 
 	def setExtraMoveData(self):
-		# read external power data file into self.extPwrData
-		if self.powerRefFile.isChecked():
+		# read external extra move data file into self.extraMoveData
+		if self.positnr is None:
+			self.extraMoveNone.setChecked(True)
+			return
+		if self.extraMoveFile.isChecked():
 			allok = True
-			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Power data file')[0]
+			fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Move data file')[0]
 			# try:
 			data = pd.read_csv(fname, sep='\t', header=None)
-			if len(data.columns) == 2:
-				self.extPwrData = data
+			if len(data.columns) == self.positnr.dim:
+				self.extraMoveData = data
 			else:
 				allok = False
 			# except:
 			#	allok = False
 			if not allok:
-				self.powerRefNone.setChecked(True)
+				self.extraMoveNone.setChecked(True)
+
+	def checkRefData(self):
+		if self.positnr is None:
+			self.takeRefChk.setChecked(False)
+			return
+		# check if we have reference positions set
+		if self.takeRefChk.isChecked():
+			if self.positnr.sigref[0] is None or self.positnr.sigref[1] is None:
+				self.takeRefChk.setChecked(False)
+				QtWidgets.QMessageBox.information(self, "NB!", "Check reference positions")
+				return
 
 	def closeEvent(self, event):
 		# close subwins and see that no threads are running
