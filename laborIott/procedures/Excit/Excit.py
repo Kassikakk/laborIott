@@ -209,14 +209,16 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				#let's do the positioning here
 				extraMoveNeeded = wparms['extraMove'] and (i == 1) #only do extraMove for sigpos
 				if extraMoveNeeded:
+					#print(pos,wparms['extraMoveData'][xmoveind])
 					pos = [pos[i] + wparms['extraMoveData'][xmoveind][i] for i in range(len(pos))]
+					#print(pos)
 					xmoveind += 1
 					if xmoveind >= len(wparms['extraMoveData']):
 						xmoveind = 0
 				if wparms['takeRef'] or extraMoveNeeded: #kas on vaja võtta ka ref?
-					self.positnr.VIcommand.emit({'goto':pos})#what if position already?
-					while self.positnr.goingtoPos.is_Set():
-						if not self.scanning.is_Set():
+					self.positnr.VIcommand.emit({'gotoPos':[pos, False]})#what if position already?
+					while not self.positnr.posReached.is_set():
+						if not self.scanning.is_set():
 							return
 				
 
@@ -471,6 +473,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			data = pd.read_csv(fname, sep='\t', header=None)
 			if len(data.columns) == 2:
 				self.extPwrData = data
+				
 			else:
 				allok = False
 			# except:
@@ -478,7 +481,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if not allok:
 				self.powerRefNone.setChecked(True)
 
-	def setExtraMoveData(self):
+	def getExtraMoveData(self):
 		# read external extra move data file into self.extraMoveData
 		if self.positnr is None:
 			self.extraMoveNone.setChecked(True)
@@ -489,7 +492,10 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			# try:
 			data = pd.read_csv(fname, sep='\t', header=None)
 			if len(data.columns) == self.positnr.dim:
-				self.extraMoveData = data
+				self.extraMoveData = []
+				for i in range(len(data)):
+					addendum = [data[k][i] for k in range(self.positnr.dim)]
+					self.extraMoveData += [addendum]
 			else:
 				allok = False
 			# except:
