@@ -60,6 +60,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 		self.ploty = [[0, 0]]
 		self.extPwrData = None  # external powerdata
 		self.extraMoveData = None  # extra move data
+		self.refSum = None  # reference sum
+		self.refPower = None  # reference power
 		self.dsbl += [self.startEdit, self.stepEdit, self.stopEdit, self.spcChk, self.pwrChk, self.sxminEdit,
 					 self.sxmaxEdit, self.pwrRadioBox]
 		self.setEnable(True)
@@ -95,12 +97,16 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			wparms['attnShut'] = self.attnShutChk.isChecked() and self.attnr is not None
 			wparms['spcShut'] = self.spcShutChk.isChecked() and self.spectrom is not None
 			wparms['srcShut'] = self.srcShutChk.isChecked() and self.exsrc is not None
+			wparms['refpos'] = None
+			wparms['sigpos'] = None
+			wparms['takeRef'] = False
 			if self.takeRefChk.isChecked() and self.positnr is not None:
 				if self.positnr.sigref[0] is not None and self.positnr.sigref[1] is not None:
 					wparms['takeRef'] = True
 					#kumbapidi on need?
-					wparms['refpos'] = self.positnr.sigref[0]
-					wparms['sigpos'] = self.positnr.sigref[1]
+					wparms['refpos'] = self.positnr.sigref[1]
+					wparms['sigpos'] = self.positnr.sigref[0]
+					#TODO: sigpos needs to be initialized for extraMove, too
 				else:
 					QtWidgets.QMessageBox.information(self, "NB!", "Check reference positions")
 					return
@@ -165,6 +171,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			self.startButt.setText("Stop")
 			self.xdata = []
 			self.ydata = []
+			self.refSum = None  
+			self.refPower = None 
 			self.setExternalMode.emit(True) 
 			self.startTime = time()
 			self.scanning.set()
@@ -203,13 +211,13 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			#if we are taking reference spectra or pow value from a different position (location, cuvette angle)
 			#refpos, sigpos - relevant position values; takeref - switch, self.positnr
 			for i,pos in enumerate([wparms['refpos'], wparms['sigpos']]):
+				isRef = (i == 0)
 				#do refpos first, then sigpos can be used to level-check
-				if not wparms['takeRef'] and i == 0:
+				if not wparms['takeRef'] and isRef:
 					continue
 				#let's do the positioning here
-				extraMoveNeeded = wparms['extraMove'] and (i == 1) #only do extraMove for sigpos
+				extraMoveNeeded = wparms['extraMove'] and not isRef #only do extraMove for sigpos
 				if extraMoveNeeded:
-					#print(pos,wparms['extraMoveData'][xmoveind])
 					pos = [pos[i] + wparms['extraMoveData'][xmoveind][i] for i in range(len(pos))]
 					#print(pos)
 					xmoveind += 1
@@ -217,7 +225,10 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 						xmoveind = 0
 				if wparms['takeRef'] or extraMoveNeeded: #kas on vaja võtta ka ref?
 					self.positnr.VIcommand.emit({'gotoPos':[pos, False]})#what if position already?
-					while not self.positnr.posReached.is_set():
+					while self.positnr.posReached.is_set(): #first wait for the motion to start
+						if not self.scanning.is_set():
+							return
+					while not self.positnr.posReached.is_set(): #then wait it to stop.
 						if not self.scanning.is_set():
 							return
 				
@@ -274,11 +285,11 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 					while self.powerm.dataQ.empty():
 						if not self.scanning.is_set():
 							return
-					pwrData = self.powerm.dataQ.get(False)  # list
+					pwrData = self.powerm.dataQ.get(False)  # list of [mean, dev]
 					#print("Powerdata received")
 					# order powerdata saving as needed (construct name)
 					#also take into account ref or sig, if needed
-					self.powerm.VIcommand.emit({'saveData':"{:}nm.txt".format(curwl)})
+					self.powerm.VIcommand.emit({'saveData':"{:}nm{}.txt".format(curwl,"_ref" if isRef else "")})
 				else:
 					pwrData = None
 
@@ -295,35 +306,36 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				if wparms['useSpc']:  # save the spectral data
 					#also take into account ref or sig, if needed
 					if wparms['usePwr']:
-						spcfilename = "{:}uW{:.4}var{:.3}.txt".format(curwl, pwrData[0], pwrData[1])
+						spcfilename = "{:}uW{:.4}var{:.3}{}.txt".format(curwl, pwrData[0], pwrData[1],"_ref" if isRef else "")
 					else:
-						spcfilename = "{:}nm.txt".format(curwl)
+						spcfilename = "{:}nm{}.txt".format(curwl,"_ref" if isRef else "")
 					self.spectrom.VIcommand.emit({'saveData':spcfilename})
 				
 				if self.spectro2 is not None:
 					self.spectro2.VIcommand.emit({'saveData':spcfilename})
 
 				# calculate and emit (or Queue) results to main thread
-				self.VIcommand.emit({'update':(ind,) + (spcData,) + (pwrData,)})
+				self.VIcommand.emit({'update':[(ind,) + (spcData,) + (pwrData,),isRef]})
 				#now the OD correction should happen here
 
-				#I would like to do something like:
-				#but only if we are on a signal measurement!
-				while self.scandataQ.empty():
-					if not self.scanning.is_set():
-							return
-				newOD = self.scandataQ.get(False) 
-				#print("NewOD=",newOD)
-				if newOD is not None:
-					#adjust the OD
-					self.attnr.VIcommand.emit({'setOD':newOD})
-					while not self.attnr.ODreached.is_set(): #wait for the disk to turn
+				#for signal measurement we need to check the level and adjust the OD if needed
+				#also advance the index and wavelength
+				if not isRef:
+					while self.scandataQ.empty():
 						if not self.scanning.is_set():
-							return
-				else:
-					#move on
-					curwl += wparms['stepwl']
-					ind += 1
+								return
+					newOD = self.scandataQ.get(False) 
+					#print("NewOD=",newOD)
+					if newOD is not None:
+						#adjust the OD
+						self.attnr.VIcommand.emit({'setOD':newOD})
+						while not self.attnr.ODreached.is_set(): #wait for the disk to turn
+							if not self.scanning.is_set():
+								return
+					else:
+						#move on
+						curwl += wparms['stepwl']
+						ind += 1
 
 		self.VIcommand.emit({'cleanScan':None})
 
@@ -340,10 +352,12 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			#go back to parent folder
 			self.setSaveLoc(os.path.dirname(self.saveLoc))
 
-	def update(self, data):
+	def update(self, data, isRef = False):
 		# supposedly called while scanning only
-		#TODO: we need to add ref data handling here in case of ref measuring
 		index, spcData, pwrData = data
+		# index is the current index in the scan
+		# spcData is the spectral data (or None)
+		# pwrData is [mean, dev] or None
 		newOD = None #may be needed for level checking
 
 		if spcData is not None:
@@ -352,6 +366,19 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			power = self.getPwr(1.0 if pwrData is None else pwrData[0], self.plotx[0][index])
 			# see what's power & calc excit
 			# put into plot
+			if isRef:
+				# we need to record spsum and power for reference
+				self.refSum = spsum
+				self.refPower = power
+				#we can probably just return here
+				return
+			#the following is for signal measurement
+			if self.refSum is not None:
+				# we need to subtract reference from signal
+				spsum -= self.refSum
+			if self.refPower is not None:
+				#we can just use the reference power
+				power = self.refPower
 			excit = spsum / power
 			self.ploty[0][index] = excit
 			self.xdata += [self.plotx[0][index]]
@@ -368,7 +395,17 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				newOD = self.getODCorr(ctrlval)
 	
 		elif pwrData is not None:
-			self.ploty[0][index] = pwrData[0]
+			if isRef:
+				# we need to record power for reference
+				self.refPower = pwrData[0]
+				return
+			power = pwrData[0]
+			if self.refPower is not None:
+				#we can calculate e.g. absorbance
+				power = log10(self.refPower/power)
+			self.ploty[0][index] = power
+			self.xdata += [self.plotx[0][index]]
+			self.ydata += [power]
 			#Here also add ydata
 
 		self.scandataQ.put(newOD)
