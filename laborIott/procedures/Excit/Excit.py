@@ -115,6 +115,11 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if wparms['extraMove']:
 				#we should have a list with extraMove data
 				wparms['extraMoveData'] = self.extraMoveData
+				#use the sig position if available, otherwise use the current position
+				if self.positnr.sigref[0] is not None:
+					wparms['sigpos'] = self.positnr.sigref[0]
+				else:
+					wparms['sigpos'] = self.positnr.pos
 			if wparms['usePwr'] and not wparms['useSpc']:
 				try:
 					wparms['pwrTime'] = float(self.pwrTimeEdit.text())
