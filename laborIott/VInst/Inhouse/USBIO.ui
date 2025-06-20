@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>328</width>
-    <height>165</height>
+    <width>200</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>20</y>
+      <y>30</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -36,8 +36,8 @@
    <widget class="QPushButton" name="shutButt">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>60</y>
+      <x>30</x>
+      <y>100</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -52,8 +52,8 @@
    <widget class="QLineEdit" name="ODEdit">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>60</y>
+      <x>30</x>
+      <y>70</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -65,8 +65,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>60</y>
+      <x>110</x>
+      <y>70</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -81,7 +81,7 @@
    <widget class="QPushButton" name="connButt">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>165</x>
       <y>0</y>
       <width>31</width>
       <height>31</height>
@@ -98,7 +98,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>30</y>
+      <y>40</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -119,7 +119,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>328</width>
+     <width>200</width>
      <height>21</height>
     </rect>
    </property>

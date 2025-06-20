@@ -45,6 +45,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			exec('self.{} = '.format(instr_name) + astr)
 			if astr != 'None':
 				exec('self.{}.show()'.format(instr_name))
+				if len(module) >= 4:
+					exec('self.{}.move({},{})'.format(instr_name, module[2], module[3]))
 				exec('self.setExternalMode.connect(self.{}.setExternal)'.format(instr_name))
 				exec('self.show_{}Butt.clicked.connect(self.{}.show)'.format(instr_name, instr_name))
 			else:
