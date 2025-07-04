@@ -478,7 +478,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			if not allok:
 				self.powerRefNone.setChecked(True)
 
-	def setExtraMoveData(self):
+	def getExtraMoveData(self):
 		# read external extra move data file into self.extraMoveData
 		if self.positnr is None:
 			self.extraMoveNone.setChecked(True)
