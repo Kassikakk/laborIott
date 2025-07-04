@@ -6,6 +6,7 @@ import userpaths
 import configparser as cp
 from zipfile import ZipFile
 import struct
+import time
 
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
 from laborIott.adapters.ZMQAdapter import ZMQAdapter
@@ -44,10 +45,15 @@ class Visual(QtWidgets.QMainWindow):
 			self.dsbl += [self.locButt]
 		self.locLabel = self.findChild(QtWidgets.QLabel,'locLabel')
 		self.saveButt = self.findChild(QtWidgets.QPushButton, 'saveButt')
+		
 		self.nameEdit = self.findChild(QtWidgets.QLineEdit, 'nameEdit')
 		if self.saveButt is not None and self.nameEdit is not None:
 			self.saveButt.clicked.connect(lambda: self.saveData(self.nameEdit.text()))
 			self.dsbl += [self.saveButt, self.nameEdit]
+		self.saveStatusButt = self.findChild(QtWidgets.QPushButton, 'saveStatusButt')
+		if self.saveStatusButt is not None:
+			self.saveStatusButt.clicked.connect(self.saveStatus) #TODO: add a dialog for status name
+			self.dsbl += [self.saveStatusButt]
 		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
 		if self.formatCombo is not None:
 			self.dsbl += [self.formatCombo]
@@ -61,6 +67,7 @@ class Visual(QtWidgets.QMainWindow):
 		#account for the possibility of no x-data (but we should have y)
 		self.xdata = []
 		self.ydata = []
+		self.statusDict = {}
 
 		#should we use an event here?
 		self.external = False
@@ -177,6 +184,39 @@ class Visual(QtWidgets.QMainWindow):
 			else:
 				with open(os.path.join(self.saveLoc, name), 'wb') as f:
 					f.write(b)
+
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		#should be called by the child class, which should also set self.statusDict
+		#self.statusDict should be a dict with sections as keys and dicts as values
+		#the inner dicts should have field names as keys and values as values
+		self.statusDict['General']= {'Time': time.strftime("%Y-%m-%d %H:%M:%S")}
+		return self.statusDict
+
+
+	def saveStatus(self, name = "status.ini"):
+		#saves the status of the instrument, if it has one
+		
+		#tegelikult vist ükskõik, mis seal on, siin lisame veel ühe dict ja salvestame selle
+		if not name.endswith('.ini'):
+			name += '.ini'
+		self.getStatus()  #make sure we have the statusDict set
+
+		with open(os.path.join(self.saveLoc, name),"w") as file:
+			config_object = cp.ConfigParser()
+			#self.statusDict={'iDus': {'Exposition': 0.5, 'Accumulate': 10, 'Shutter':'closed'},
+			#'Shamrock': {'Center': 800.302, 'Grating': '300 /mm', 'Slit': '100'}}
+			sections=self.statusDict.keys()
+			for section in sections:
+				config_object.add_section(section)
+				#we can use the section name as a key
+				
+				inner_dict=self.statusDict[section]
+				fields=inner_dict.keys()
+				for field in fields:
+					value=inner_dict[field]
+					config_object.set(section, field, str(value))
+			config_object.write(file)
 
 
 

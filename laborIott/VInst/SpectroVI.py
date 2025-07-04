@@ -282,7 +282,12 @@ class Spectro_VI(VInst):
 				self.graphicsView.setYRange(min(self.ydata), max(self.ydata))
 			#toggle btw autoscale and min-max of the graph
 
-
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Spectrometer']= {'Exposure': self.instrum.expTime,
+										 'Accumulations': self.instrum.noAccum, 'Acqmode': self.instrum.acqmode}
+		return self.statusDict
 
 	
 	def setExternal(self, state):

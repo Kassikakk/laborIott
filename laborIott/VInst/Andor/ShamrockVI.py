@@ -106,6 +106,18 @@ class IDusShamrock_VI(iDus_VI):
 		#well not sure if anything else is needed
 		#maybe something related to the camera change?
 
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Spectrometer']['Type'] = 'Shamrock SR-303i'
+		self.statusDict['Spectrometer']['Grating'] = self.shrock.gratingdict[self.shrock.grating]
+		self.statusDict['Spectrometer']['Center WL'] = self.shrock.centerpos
+		self.statusDict['Spectrometer']['Range'] = "{:.1f}..{:.1f}".format(self.xdata[0], self.xdata[-1])
+		self.statusDict['Spectrometer']['Slit'] = self.shrock.slit
+		self.statusDict['Spectrometer']['Flipper'] = self.shrock.flipper
+		
+		return self.statusDict
+
 	#now also the shutter thing needs to be overridden
 	def setShutter(self, state):
 		#redirect shutter operation to Shamrock
