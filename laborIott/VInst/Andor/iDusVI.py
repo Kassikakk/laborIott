@@ -40,7 +40,9 @@ class iDus_VI(Spectro_VI):
 		#returns the status of the instrument, if it has one
 		super().getStatus()
 		self.statusDict['Spectrometer']['Camera'] = 'iDus 420'
-		self.statusDict['Spectrometer']['Temperature'] = self.instrum.temperature[0] if self.instrum.temperature else 'N/A'
+		temp = self.instrum.temperature
+		self.statusDict['Spectrometer']['Temperature'] = "{}°C / {}".format(temp[1], temp[0]) if temp[1] else "N/A"
+		self.statusDict['Spectrometer']['Setpoint'] = int(self.tempEdit.text())
 		return self.statusDict
 
 	def setShutter(self,state):

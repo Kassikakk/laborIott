@@ -286,7 +286,7 @@ class Spectro_VI(VInst):
 		#returns the status of the instrument, if it has one
 		super().getStatus()
 		self.statusDict['Spectrometer']= {'Exposure': self.instrum.expTime,
-										 'Accumulations': self.instrum.noAccum, 'Acqmode': self.instrum.acqmode}
+										 'Accumulations': self.instrum.noAccum}
 		return self.statusDict
 
 	

@@ -110,7 +110,7 @@ class IDusShamrock_VI(iDus_VI):
 		#returns the status of the instrument, if it has one
 		super().getStatus()
 		self.statusDict['Spectrometer']['Type'] = 'Shamrock SR-303i'
-		self.statusDict['Spectrometer']['Grating'] = self.shrock.gratingdict[self.shrock.grating]
+		self.statusDict['Spectrometer']['Grating'] = self.shamDlg.gratingCombo.currentText()
 		self.statusDict['Spectrometer']['Center WL'] = self.shrock.centerpos
 		self.statusDict['Spectrometer']['Range'] = "{:.1f}..{:.1f}".format(self.xdata[0], self.xdata[-1])
 		self.statusDict['Spectrometer']['Slit'] = self.shrock.slit

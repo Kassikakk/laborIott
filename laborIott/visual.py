@@ -52,7 +52,7 @@ class Visual(QtWidgets.QMainWindow):
 			self.dsbl += [self.saveButt, self.nameEdit]
 		self.saveStatusButt = self.findChild(QtWidgets.QPushButton, 'saveStatusButt')
 		if self.saveStatusButt is not None:
-			self.saveStatusButt.clicked.connect(self.saveStatus) #TODO: add a dialog for status name
+			self.saveStatusButt.clicked.connect(lambda: self.saveStatus("status.ini")) #TODO: add a dialog for status name
 			self.dsbl += [self.saveStatusButt]
 		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
 		if self.formatCombo is not None:
@@ -198,7 +198,7 @@ class Visual(QtWidgets.QMainWindow):
 		#saves the status of the instrument, if it has one
 		
 		#tegelikult vist ükskõik, mis seal on, siin lisame veel ühe dict ja salvestame selle
-		if not name.endswith('.ini'):
+		if not (name.endswith('.ini')):
 			name += '.ini'
 		self.getStatus()  #make sure we have the statusDict set
 
