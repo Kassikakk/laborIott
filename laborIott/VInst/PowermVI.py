@@ -113,3 +113,16 @@ class Powerm_VI(VInst):
 		self.collecting = False
 		self.resetSeries()
 		super().setExternal(state)
+
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Powermeter']= {'Current reading':"{:.2f} uW".format(self.instrum.power*1e6), 
+								  'Wavelength': "{:.1f}".format(self.instrum.wl),
+								  'Attenuator': self.instrum.attenuator,
+								  'Scale': "{},{}".format(self.instrum.scale[0], 'Auto' if self.instrum.scale[1] else 'Fixed'),
+								  'Number of readings': len(self.ydata),
+								  'Mean': "{:.2f}".format(np.mean(self.ydata)) if len(self.ydata) else '0',	
+								  'Stdev': "{:.2f}".format(np.var(self.ydata)) if len(self.ydata) else '0'}
+		#scale should somehow be added, but it is not clear how to do it
+		return self.statusDict

@@ -102,4 +102,9 @@ class Newport842(Instrument):
 		#print("*ssa {}\n".format(value), ret)
 		#if ret == "ACK\r\n":
 		#	pass
-		
+
+	@property
+	def headtype(self):
+		#returns the type of the head, e.g. '818P'
+		sta = self.interact(["*sta\n", True],[""])[0]
+		return self.parsestats(sta,("Head Serial Number", "\r"))

@@ -82,7 +82,13 @@ class TiSph_VI(Source_VI):
 	def releaseMotor(self):
 		#force release motor (done automatically during normal ops)
 		self.instrum.status = 'release'
-		
+
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Source']['Type'] = 'Ti-Sph laser'
+		self.statusDict['Source']['Speed'] = self.instrum.speed
+		return self.statusDict
 
 
 

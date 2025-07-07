@@ -69,7 +69,11 @@ class USBIO_VI(VInst):
 		self.instrum.setpin(0,int(openit))
 		#self.tisph.shutter =  'open' if openit else 'closed'
 
-	
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['USBIO']= {'OD': "{:.2f}".format(self.instrum.OD)}
+		return self.statusDict
 		
 
 

@@ -52,7 +52,7 @@ class Visual(QtWidgets.QMainWindow):
 			self.dsbl += [self.saveButt, self.nameEdit]
 		self.saveStatusButt = self.findChild(QtWidgets.QPushButton, 'saveStatusButt')
 		if self.saveStatusButt is not None:
-			self.saveStatusButt.clicked.connect(lambda: self.saveStatus("status.ini")) #TODO: add a dialog for status name
+			self.saveStatusButt.clicked.connect(self.onGetStatusLoc)
 			self.dsbl += [self.saveStatusButt]
 		self.formatCombo = self.findChild(QtWidgets.QComboBox, 'formatCombo')
 		if self.formatCombo is not None:
@@ -115,9 +115,6 @@ class Visual(QtWidgets.QMainWindow):
 		#We need to change saveLoc here to be a zip file if "save to zip" is used, else a folder
 		#We do so by calling onGetLoc; however we also need to revert if selecting fails
 		self.onGetLoc()
-
-
-
 
 
 	def onGetLoc(self):
@@ -185,12 +182,23 @@ class Visual(QtWidgets.QMainWindow):
 				with open(os.path.join(self.saveLoc, name), 'wb') as f:
 					f.write(b)
 
+	def onGetStatusLoc(self):
+		#returns a location for status file, which is a .ini file
+		#we can use the saveLoc, but we can also use a different 
+		default_loc = os.path.join(self.saveLoc, 'status' + time.strftime("%Y%m%d_%H%M%S") + '.ini')
+		loc = QtWidgets.QFileDialog.getSaveFileName(self, "Status location:", default_loc,"*.ini")[0]
+		if loc:
+			self.saveStatus(loc)
+			return loc
+		else:
+			return None
+
 	def getStatus(self):
 		#returns the status of the instrument, if it has one
 		#should be called by the child class, which should also set self.statusDict
 		#self.statusDict should be a dict with sections as keys and dicts as values
 		#the inner dicts should have field names as keys and values as values
-		self.statusDict['General']= {'Time': time.strftime("%Y-%m-%d %H:%M:%S")}
+		
 		return self.statusDict
 
 
@@ -200,12 +208,12 @@ class Visual(QtWidgets.QMainWindow):
 		#tegelikult vist ükskõik, mis seal on, siin lisame veel ühe dict ja salvestame selle
 		if not (name.endswith('.ini')):
 			name += '.ini'
+		#add a general section here to ensure it is done once
+		self.statusDict = {'General': {'Time': time.strftime("%Y-%m-%d %H:%M:%S")}}
 		self.getStatus()  #make sure we have the statusDict set
-
+		
 		with open(os.path.join(self.saveLoc, name),"w") as file:
 			config_object = cp.ConfigParser()
-			#self.statusDict={'iDus': {'Exposition': 0.5, 'Accumulate': 10, 'Shutter':'closed'},
-			#'Shamrock': {'Center': 800.302, 'Grating': '300 /mm', 'Slit': '100'}}
 			sections=self.statusDict.keys()
 			for section in sections:
 				config_object.add_section(section)

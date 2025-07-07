@@ -30,6 +30,12 @@ class Newport842_VI(Powerm_VI):
 		self.setWindowIcon(QtGui.QIcon(localPath('Newport.ico')))
 		self.setWindowTitle("Newport 842")
 
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Powermeter']['Type'] = 'Newport 842'
+		self.statusDict['Powermeter']['Head type'] = self.instrum.headtype
+		return self.statusDict
 
 
 

@@ -172,6 +172,15 @@ class Position_VI(VInst):
 			except:
 				print("Hmmm..can't open this")
 
+	def getStatus(self):
+		super().getStatus()
+		#returns the status of the instrument, if it has one
+		self.statusDict['Position'] = {'Current position': self.instrum.pos, 
+			'Reference position': self.sigref[1] if self.sigref[1] else None,
+			'Signal position': self.sigref[0] if self.sigref[0] else None,
+		}
+
+
 	def eventFilter(self, o, e):
 		if self.external:
 			return super().eventFilter(o, e)

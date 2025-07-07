@@ -51,6 +51,7 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				exec('self.show_{}Butt.clicked.connect(self.{}.show)'.format(instr_name, instr_name))
 			else:
 				exec('self.show_{}Butt.setEnabled(False)'.format(instr_name))
+				#self.instr_list.remove(instr_name)  # remove from the list if not found
 		#we should now have self.source, self.spectrom and so on
 
 
@@ -567,6 +568,49 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 			exec('if self.{} is not None: self.{}.close()'.format(instr_name,instr_name))
 		event.accept()
 
+	def getStatus(self):
+		super().getStatus()
+		#we need to combine the statusDicts of all instruments
+		for instr_name in self.instr_list:
+			exec('if self.{} is not None: self.statusDict.update(self.{}.getStatus())'.format(instr_name,instr_name))
+		#add some extra info
+		self.statusDict['Excitation'] = {}
+		try:
+			self.statusDict['Excitation']['Range'] = '{:.2f} - {:.2f} nm'.format(float(self.startEdit.text()), float(self.stopEdit.text())),
+		except ValueError:
+			self.statusDict['Excitation']['Range'] = 'Not set'
+		try:	
+			self.statusDict['Excitation']['Step'] = '{:.2f} nm'.format(float(self.stepEdit.text()))
+		except ValueError:
+			self.statusDict['Excitation']['Step'] = 'Not set'
+		self.statusDict['Excitation']['Spectrometer used'] =  self.spcChk.isChecked()
+		self.statusDict['Excitation']['Powermeter used'] = self.pwrChk.isChecked()
+		
+		if self.pwrChk.isChecked() and not self.spcChk.isChecked():
+			self.statusDict['Excitation']['Power collection time'] = self.pwrTimeEdit.text()
+		try:
+			self.statusDict['Excitation']['Integration range'] = '{:.2f} - {:.2f} nm'.format(float(self.sxminEdit.text()), float(self.sxmaxEdit.text()))
+		except ValueError:
+			self.statusDict['Excitation']['Integration range'] = 'Not set'
+		self.statusDict['Excitation']['Power reference'] = 'Current' if self.powerRefCur.isChecked() else 'File' if self.powerRefFile.isChecked() else 'None'
+		self.statusDict['Excitation']['Level check'] = self.levelCheck.isChecked()
+		if self.levelCheck.isChecked():
+			try:
+				self.statusDict['Excitation']['Level check X'] = float(self.lvlXEdit.text())
+				self.statusDict['Excitation']['Level check min'] = float(self.lvlMinEdit.text())
+				self.statusDict['Excitation']['Level check max'] = float(self.lvlMaxEdit.text())
+			except ValueError:
+				self.statusDict['Excitation']['Level check X'] = 'Not set'
+				self.statusDict['Excitation']['Level check min'] = 'Not set'
+				self.statusDict['Excitation']['Level check max'] = 'Not set'
+	
+		self.statusDict['Excitation']['Ref from diff pos'] = self.takeRefChk.isChecked()
+		self.statusDict['Excitation']['Extra move'] = 'None' if self.extraMoveNone.isChecked() else 'From file'
+		self.statusDict['Excitation']['Attenuator shutter switched'] = self.attnShutChk.isChecked()
+		self.statusDict['Excitation']['Source shutter switched'] = self.srcShutChk.isChecked()
+		self.statusDict['Excitation']['Spectrometer shutter switched'] = self.spcShutChk.isChecked()
+		return self.statusDict
+	
 
 
 

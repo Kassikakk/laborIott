@@ -81,6 +81,14 @@ class Chira_VI(Source_VI):
 			#sets the shutter state according to self.shutButt
 			self.instrum.shutter = 'open' if state else 'closed'
 		
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Source']['Type'] = 'Chirascan'
+		self.statusDict['Source']['Bandwidth'] = self.instrum.bandwidth
+		self.statusDict['Source']['Monochr. temp'] = "{:.2f} °C".format(self.instrum.monotemp)
+		self.statusDict['Source']['Cuvette temp'] = "{:.2f} °C".format(self.instrum.cuvettetemp)	
+		return self.statusDict	
 
 
 

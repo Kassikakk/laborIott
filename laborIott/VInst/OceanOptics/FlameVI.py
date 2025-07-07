@@ -44,6 +44,17 @@ class Flame_VI(Spectro_VI):
 			self.xdata = self.instrum.wavelengths
 			self.setElDark()
 			#TODO: What else is needed here?
+
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Spectrometer']['Type'] = 'Flame spectrometer' #could we get a model name?
+		#self.statusDict['Spectrometer']['Grating'] = "<grating name>" #TODO: get grating name
+		self.statusDict['Spectrometer']['Range'] = "{:.1f}..{:.1f}".format(self.xdata[0], self.xdata[-1])
+		#self.statusDict['Spectrometer']['Slit'] = "{:.1f}".format(self.instrum.slit) #TODO: get slit value
+		self.statusDict['Spectrometer']['El.dark corr'] = 'on' if self.elDarkChk.isChecked() else 'off'
+		
+		return self.statusDict
 		
 
 

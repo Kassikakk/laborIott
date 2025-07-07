@@ -28,6 +28,12 @@ class MCL_VI(Position_VI):
 		self.instrum.pos = [(poss[0][0] + poss[2][0])/2,(poss[1][1] + poss[3][1])/2]
 		self.posReached.clear()
 
+	def getStatus(self):
+		super().getStatus()
+		self.statusDict['Position']['Type'] = 'MCL MicroStage'
+		self.statusDict['Position']['Speed']=self.instrum.speed
+		return self.statusDict
+
 
 if __name__ == '__main__':
 	if not QtWidgets.QApplication.instance():

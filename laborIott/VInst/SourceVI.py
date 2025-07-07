@@ -78,6 +78,12 @@ class Source_VI(VInst):
 		self.instrum.wavelength = newWL
 		self.WLreached.clear()
 
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Source']= {'Current WL': "{:.2f}".format(self.instrum.wavelength)}
+		return self.statusDict
+
 	def setShutter(self, state):
 		#sets the shutter state according to self.shutButt if applicable
 		pass
