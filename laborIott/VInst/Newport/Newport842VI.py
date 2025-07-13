@@ -18,7 +18,7 @@ class Newport842_VI(Powerm_VI):
 	def __init__(self):
 		#we might want to get the serial port data from the ini file here
 		#NB about the timeout
-		super().__init__('Nwp842', Newport842,SerialAdapter("/dev/ttyUSB0",baudrate=115200, timeout = 0.1))
+		super().__init__('Nwp842', Newport842,SerialAdapter("/dev/ttyUSB0",baudrate=115200, timeout = 1.0, writeTimeout = 0.3))
 		#It appears that Newport 842 can do about 4 measurements per second, so if polled at 0.2 sec intervals,
 		#about every 4th query will timeout, or, if timeout value is increased, timer cycles will be skipped
 

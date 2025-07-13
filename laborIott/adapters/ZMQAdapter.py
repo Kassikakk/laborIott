@@ -94,14 +94,14 @@ class ZMQAdapter(Adapter):
 		request = [command, args]
 		counter = 0
 		while True:
-			#print("Sending ",request,self.clear_to_send.is_set())
+			
 			with self.lock:
+				#print("Sending ",request)
 				self.sock.send_pyobj(request)
 				if (self.sock.poll(self.timeout) & zmq.POLLIN) != 0:
 					#reply = socket.recv_serialized(deserialize=pickle.loads)
 					reply = self.sock.recv_pyobj()
 					#print("	Recving ",request, reply)
-					#print(reply)
 					break
 
 			counter += 1

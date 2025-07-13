@@ -9,7 +9,7 @@ def localPath(filename):
 
 class iDus_VI(Spectro_VI):
 
-	def __init__(self, refname = "iDus", instrument = IDus, adapter = SDKAdapter("atmcd32d_legacy",False)):
+	def __init__(self, refname = "iDus", instrument = IDus, adapter = SDKAdapter("atmcd{}d_legacy".format(64 if sys.maxsize > 2**32 else 32),False)):
 		super().__init__(refname, instrument, adapter)
 		self.setWindowIcon(QtGui.QIcon(localPath('Andor.ico')))
 		self.setWindowTitle("iDus camera")

@@ -1,5 +1,5 @@
 import ctypes as ct
-dll = ct.cdll.LoadLibrary("../Inst/MicroDrive")
+dll = ct.cdll.LoadLibrary("MicroDrive")
 e1 = ct.c_double()
 e2 = ct.c_double()
 e3 = ct.c_double()
