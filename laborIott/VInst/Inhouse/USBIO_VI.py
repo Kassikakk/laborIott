@@ -33,7 +33,7 @@ class USBIO_VI(VInst):
 		#konnektid
 		self.ODButt.clicked.connect(lambda: self.setOD(self.ODEdit.text()))
 		self.shutButt.clicked.connect(lambda: self.setShutter(self.shutButt.isChecked()))
-		self.duty1Butt.clicked.connect(lambda: self.setDuty1(self.duty1Edit.text()))
+		self.flipperButt.clicked.connect(lambda: self.setFlipper(self.flipperButt.isChecked()))
 		self.instrum.freq1 = 300
 		self.setOD(0.05)
 		
@@ -76,15 +76,10 @@ class USBIO_VI(VInst):
 		self.statusDict['USBIO']= {'OD': "{:.2f}".format(self.instrum.OD)}
 		return self.statusDict
 		
-	def setDuty1(self, duty):
-		#sets the duty cycle for PWM1
-		try:
-			duty = int(duty)
-		except ValueError:
-			return
-		self.instrum.duty1 = duty
-		self.duty1Edit.setText(str(self.instrum.duty1))
-
+	def setFlipper(self, toFiber):
+		self.instrum.flipper = 'Fiber' if toFiber else 'Mono'
+		self.flipperButt.setText(self.instrum.flipper)
+		
 
 
 

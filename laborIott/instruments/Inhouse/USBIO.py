@@ -29,6 +29,8 @@ class USBIO(Instrument):
 		self.ODlimits = (min(d['OD']), max(d['OD']))
 		self.duty2OD = interp1d(d['duty'], d['OD']) 
 		self.OD2duty = interp1d(d['OD'], d['duty'])
+		self.flipdata = {'Mono':6000, 'Fiber':3000} #positions for flip mirror servo
+		self.flippos = 'Mono' #current position
 
 
 
@@ -94,6 +96,21 @@ class USBIO(Instrument):
 		#do the calcs
 		if  value >= self.ODlimits[0] and value <= self.ODlimits[1]:
 			self.duty0 = int(self.OD2duty(value))
+
+	@property
+	def flipper(self):
+		return self.flippos
+	@flipper.setter
+	def flipper(self, pos):	
+		if pos in self.flipdata:
+			
+			self.duty1 = self.flipdata[pos]
+			sleep(0.5) #let's wait a bit
+			
+			self.flippos = pos
+			#maybe wait a bit here?
+		else:
+			print("Unknown flip position {}".format(pos))
 		
 
 	@property
