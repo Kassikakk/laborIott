@@ -1,9 +1,0 @@
-{
-    "terminal.integrated.env.windows": {
-        "PYTHONPATH": "${workspaceFolder};${env:PYTHONPATH}"
-    },
-	"terminal.integrated.env.linux": {
-        "PYTHONPATH": "${workspaceFolder}${env:PYTHONPATH}"
-    },
-    "editor.insertSpaces": false
-}
