@@ -65,7 +65,7 @@ class Powerm_VI(VInst):
 				#update mean and stdev vals
 				self.NLabel.setText("{}".format(len(self.ydata)))
 				self.meanLabel.setText("{}".format(np.mean(self.ydata))) #mida siia?
-				self.stdevLabel.setText('%s' % float('%.2g' % np.var(self.ydata)))
+				self.stdevLabel.setText('%s' % float('%.2g' % np.std(self.ydata)))
 		self.acquiring = False
 
 	def setPwrWL(self, value):

@@ -313,7 +313,7 @@ Traceback (most recent call last):
     return _check(_lib.usb_control_msg(
   File "C:\Program Files (x86)\Python\lib\site-packages\usb\backend\libusb0.py", line 447, in _check
     raise USBError(errmsg, ret)
-usb.core.USBError: [Errno None] b'libusb0-dll:err [control_msg] sending control message failed, win error: A device attached to the system is not functioning.\r\n\n'
+usb.core.USBError: [Errno None] b'libusb0-dll:err [control_msg] sending control message failed, win error: A device attached to the system is not  ing.\r\n\n'
 
 
 ## 240827
@@ -443,3 +443,11 @@ Ikkagi on suur segadus serial pordiga suhtlemisel. Üle võrgu ka, aga ei saagi 
 Vot selle *sta-ga ongi mingi probleem. Siin tuleb iga kord mingi natuke erineva pikkusega vastus ja mingitel tingimustel võib ka olla, et list on mitmeliikmeline. Kas võib olla nii, et kui tuleb pikem string, siis readlines loeb kuni timeoudini ja siis ülejäänu jääbki lugemata ja loetakse siis kas mingite järgmiste päringutega või ei loeta üldse. Üldiselt ta vist nii ongi, õigemini readlines jaotab seda sisendit kohati nii timeoudi kui reavahetuste järgi, mistõttu on tulemus halvasti prognoositav. Tegelikult sealt peaks tulema vist 3-liikmeline list, selles mõttes, et seal on 3 reavahetust. Lõpus on Attenuator ja Autoscale eraldi. Ei teagi siis, et mis siin kõige universaalsem lahendus on, kui meil on vaja lugeda teadmata arv ridasid ja arvestada ka veel võimalike timeoutidega? Muidu saaks ju vaadata, et kas '\n' on lõpus ja kui ei ole, siis proovida edasi lugeda, aga äkki on vaja edasi lugeda ka siis, kui rida on täis?
 
 Nüüd sai seal midagi tehtud, readline() baasil.
+
+# 251008
+
+Selline stsenaarium näiteks: Newport842 on üle serveri, kui pole sisse lülitatud, siis konnektib, aga kohe errordab, et ei leia seal teatud parameetreid. Expected oleks, et läheb väljalülitatud seisu.
+
+# 251029 
+
+Need libusb errorid, kus on 'not functioning', tunduvad olevat siiski põhiliselt ühendusjuhtmega seotud, mis ilmselt ikka liiga pikk vms. Lisaks oli veel selline asi, et wavemeetri 800 paistis VI peal 900-na, no see ilmselt wavemeetri ühendusest ja seda veidi sügades asi ka lahenes.

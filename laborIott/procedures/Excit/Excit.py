@@ -389,7 +389,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				power = self.refPower
 			excit = spsum / power
 			self.ploty[0][index] = excit
-			self.xdata += [self.plotx[0][index]]
+			#self.xdata += [self.plotx[0][index]]
+			self.xdata += [self.exsrc.instrum.wavelength] #see if this is better
 			self.ydata += [excit]
 
 			#do level check if needed
@@ -412,7 +413,8 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				#we can calculate e.g. absorbance
 				power = log10(self.refPower/power)
 			self.ploty[0][index] = power
-			self.xdata += [self.plotx[0][index]]
+			#self.xdata += [self.plotx[0][index]]
+			self.xdata += [self.exsrc.instrum.wavelength]
 			self.ydata += [power]
 			#Here also add ydata
 
