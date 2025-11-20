@@ -18,16 +18,18 @@ class ChiraScan(Instrument):
 		'''
 		Kuidagi peaks vist mingit paralleelarvestust pidama positioni ja bandwidthi üle?
 		'''
-		super().__init__(adapter, "Chirascan", **kwargs)
+		
 		#parse calibration file
 		d=read_csv(localPath("MonoCal.conf"), skiprows=7, skipfooter=1, engine='python', header = None)
 		#problem is here it tends to interpret program's directory as current
 		self.f1 = interp1d(d.loc[:,0], d.loc[:,1]) #use int(self.f1(wl)) to get number of steps
 		self.f2 = interp1d(d.loc[:,0], d.loc[:,3]) #use int(self.f2(wl)*bw) to get number of steps for stepper 2
 		#do some initialization
+		
 		self.wl = 1000.0
 		self.bw = 1.0
 		self.shut = 'closed'
+		super().__init__(adapter, "Chirascan", **kwargs)
 		
 
 	def connect(self):
