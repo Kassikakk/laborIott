@@ -1,7 +1,7 @@
 from laborIott.VInst.Andor.iDusVI import iDus_VI
 from laborIott.adapters.SDKAdapter import SDKAdapter
 #from laborIott.adapters.ZMQAdapter import ZMQAdapter
-from laborIott.instruments.Andor.Inst.kymera import IDusKymera
+from laborIott.instruments.Andor.kymera import IDusKymera
 from PyQt5 import QtWidgets
 from laborIott.VInst.Andor.KymeraDlg import Ui_KymeraDialog #pyuic5 generated dialog
 import os, sys
@@ -89,6 +89,17 @@ class AndorKymera_VI(iDus_VI):
 		#also change wavelength scale
 		self.xdata = self.instrum.wavelengths
 		
+	def getStatus(self):
+		#returns the status of the instrument, if it has one
+		super().getStatus()
+		self.statusDict['Spectrometer']['Type'] = 'Kymera 193i'
+		self.statusDict['Spectrometer']['Grating'] = self.kymDlg.gratingCombo.currentText()
+		self.statusDict['Spectrometer']['Center WL'] = self.instrum.centerpos
+		self.statusDict['Spectrometer']['Range'] = "{:.1f}..{:.1f}".format(self.xdata[0], self.xdata[-1])
+		self.statusDict['Spectrometer']['Filter'] = self.kymDlg.filterCombo.currentText()
+		self.statusDict['Spectrometer']['Focus steps'] = self.instrum.focus
+		
+		return self.statusDict
 		
 		
 		

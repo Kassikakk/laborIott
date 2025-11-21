@@ -18,13 +18,15 @@ class IDusKymera(IDus):
 		
 		instr = "I2CBurstWrite(c_char(88),c_long(%d),c_char_p(b'%s\\r'))" % (len(comstr)+1,comstr)
 		#print(instr)
-		self.write(instr)
+		self.interact(instr)
 		#now we need to read the answer until OK\r
 		chkstr = b"OK\r"
 		ri = 0 #running index
 		output = b''
 		for i in range(500):
-			ret = self.values("I2CBurstRead(c_char(88),c_long(2),byref(c_char * 2))")
+			ret = self.interact("I2CBurstRead(c_char(88),c_long(2),byref(c_char * 2))")
+			if ret is None:
+				break
 			output+=ret[1][1]
 			if (ret[1][1][0] == chkstr[ri]):
 				ri += 1
