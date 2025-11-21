@@ -15,7 +15,7 @@ In this case we are dealing with the I2C connected spectrometer, so basically
 there is just 1 instrument, the camera
 '''
 
-class AndorKymera_VI(iDus_VI):
+class Kymera_VI(iDus_VI):
 	
 	def __init__(self):
 		super().__init__("Kymera",IDusKymera,SDKAdapter("atmcd32d_legacy",False))
