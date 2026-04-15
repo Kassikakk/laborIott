@@ -112,6 +112,6 @@ if __name__ == '__main__':
 		app = QtWidgets.QApplication(sys.argv)
 	else:
 		app = QtWidgets.QApplication.instance()
-	window = AndorKymera_VI() #refname may be added here
+	window = Kymera_VI() #refname may be added here
 	window.show()
 	sys.exit(app.exec_())
