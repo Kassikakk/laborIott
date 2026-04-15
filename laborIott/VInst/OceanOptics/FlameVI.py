@@ -23,7 +23,7 @@ class Flame_VI(Spectro_VI):
 	'''
 
 	def __init__(self, refname="Flame"):
-		super().__init__(refname, Flame,SDKAdapter("OmniDriver32",False))
+		super().__init__(refname, Flame,SDKAdapter("OmniDriver64",False))
 		self.setWindowIcon(QtGui.QIcon(localPath('Flame.png')))
 		self.setWindowTitle("Flame spectrometer")
 		self.coolButt.setVisible(False)
