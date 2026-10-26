@@ -1,9 +1,0 @@
-pyqtgraph
-pyqt5
-numpy 
-pandas
-zmq
-userpaths
-pyusb (NB! mitte usb)
-pyserial (NB! mitte serial!)
-scipy

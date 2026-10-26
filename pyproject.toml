@@ -1,0 +1,35 @@
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "laborIott"
+version = "2.0.0"
+description = "Laboratory equipment management and IoT system"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "PyQt5",
+    "pyqtgraph",
+    "numpy",
+    "pandas",
+    "pyzmq",
+    "userpaths",
+    "pyusb",
+    "pyserial",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "build",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["laborIott*"]
+namespaces = true
