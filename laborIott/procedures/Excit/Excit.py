@@ -167,7 +167,9 @@ class ExcitProc(VProc): #(pole nimes veel kindel)
 				
 
 
-
+			#(optionally) save status at the start of the scan
+			if self.statusOnStartChk.isChecked():
+				self.onGetStatusLoc() #this should go to the base folder
 			self.plotx[0] = np.array([wparms['startwl'] + i * wparms['stepwl'] for i in range(wparms['nopoints'])])
 			#self.plotx[0] = np.arange(wparms['startwl'],wparms['stopwl'],wparms['stepwl']) #is the same?
 			self.ploty[0] = np.zeros(wparms['nopoints'])
